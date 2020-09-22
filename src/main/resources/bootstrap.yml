@@ -68,7 +68,7 @@ spring:
     name: @project.artifactId@-@env@
   cloud:
     consul:
-      host: consul
+      host: 172.17.0.1
       port: 8500
       discovery:
         prefer-ip-address: true
