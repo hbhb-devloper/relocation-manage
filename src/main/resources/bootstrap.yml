@@ -68,14 +68,14 @@ spring:
     name: @project.artifactId@-@env@
   cloud:
     consul:
-      host: ${host.ip}
+      host: consul
       port: 8500
       discovery:
-#        prefer-ip-address: true
+        prefer-ip-address: true
         instance-id: ${spring.application.name}-${host.map-port}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
         # 线上使用使用docker0的ip地址172.17.0.1
-        health-check-url: http://${host.ip}:${host.map-port}/actuator/health
+        health-check-url: http://172.17.0.1:${host.map-port}/actuator/health
         # 暴露的ip地址为宿主机地址，供宿主机外部调用方寻址用
         hostname: ${host.ip}
         port: ${host.map-port}
