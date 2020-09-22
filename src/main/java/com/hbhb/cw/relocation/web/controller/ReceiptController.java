@@ -1,8 +1,8 @@
 package com.hbhb.cw.relocation.web.controller;
 
-import com.hbhb.springboot.web.view.Page;
 import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
+import com.hbhb.springboot.web.view.Page;
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,9 +30,9 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Api(tags = "传输迁改-收据管理")
 @RestController
-@RequestMapping("/relocation/receipt")
+@RequestMapping("/receipt")
 @Slf4j
-public class RelocationReceiptController {
+public class ReceiptController {
 
     @ApiOperation("迁改收据查询台账列表")
     @GetMapping("/list")

@@ -1,6 +1,6 @@
 package com.hbhb.cw.relocation.web.controller;
 
-import com.hbhb.cw.relocation.service.RelocationInvoiceService;
+import com.hbhb.cw.relocation.service.InvoiceService;
 import com.hbhb.cw.relocation.web.vo.InvoiceReqVO;
 import com.hbhb.cw.relocation.web.vo.InvoiceResVO;
 import com.hbhb.springboot.web.view.Page;
@@ -32,12 +32,12 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Api(tags = "传输迁改-发票管理")
 @RestController
-@RequestMapping("/relocation/invoice")
+@RequestMapping("/invoice")
 @Slf4j
-public class RelocationInvoiceController {
+public class InvoiceController {
 
     @Resource
-    private RelocationInvoiceService relocationInvoiceService;
+    private InvoiceService invoiceService;
 
     @ApiOperation("迁改发票查询台账列表")
     @GetMapping("/list")
@@ -47,7 +47,7 @@ public class RelocationInvoiceController {
             @Param("接收参数实体") InvoiceReqVO cond) {
         pageNum = pageNum == null ? 1 : pageNum;
         pageSize = pageSize == null ? 20 : pageSize;
-        return null;
+        return invoiceService.getInvoiceList(pageNum, pageSize, cond);
     }
 
     @ApiOperation(value = "新增迁改发票")
