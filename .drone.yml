@@ -25,7 +25,7 @@ steps:
       password:
         from_secret: docker_pwd
       mirror: https://wm9kcxms.mirror.aliyuncs.com
-      repo: registry-vpc.cn-hangzhou.aliyuncs.com/hbhb/relocation-manage@${DRONE_BRANCH}
+      repo: registry-vpc.cn-hangzhou.aliyuncs.com/hbhb/relocation-manage-${DRONE_BRANCH}
       registry: registry-vpc.cn-hangzhou.aliyuncs.com
       tags: latest
       dockerfile: ./Dockerfile
@@ -44,10 +44,10 @@ steps:
       script_stop: false
       script:
         - cd ~
-        - docker-compose stop relocation-manage@${DRONE_BRANCH}
-        - docker-compose rm -f relocation-manage@${DRONE_BRANCH}
-        - docker rmi registry.cn-hangzhou.aliyuncs.com/hbhb/relocation-manage@${DRONE_BRANCH}
-        - docker-compose up -d relocation-manage@${DRONE_BRANCH}
+        - docker-compose stop relocation-manage-${DRONE_BRANCH}
+        - docker-compose rm -f relocation-manage-${DRONE_BRANCH}
+        - docker rmi registry.cn-hangzhou.aliyuncs.com/hbhb/relocation-manage-${DRONE_BRANCH}
+        - docker-compose up -d relocation-manage-${DRONE_BRANCH}
 
   # 钉钉通知
   - name: dingtalk
