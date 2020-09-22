@@ -42,8 +42,9 @@ management:
 ################### 本地开发配置 ###################
 ---
 spring:
+  profiles: default
   application:
-    name: @project.artifactId@
+    name: @project.artifactId@-@env@
   cloud:
     consul:
       host: ${host.ip}
@@ -58,13 +59,13 @@ spring:
         prefix: config/@project.artifactId@
         default-context: @env@
         profile-separator: ' '
-  profiles: default
 
 ################### 线上配置 ###################
 ---
 spring:
+  profiles: dev, test, prd
   application:
-    name: @project.artifactId@
+    name: @project.artifactId@-@env@
   cloud:
     consul:
       host: consul
@@ -82,4 +83,3 @@ spring:
         prefix: config/@project.artifactId@
         default-context: @env@
         profile-separator: ' '
-  profiles: dev, test, prd
