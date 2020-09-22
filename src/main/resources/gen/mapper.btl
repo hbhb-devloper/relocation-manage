@@ -1,0 +1,11 @@
+package ${package};
+
+import org.beetl.sql.core.mapper.BaseMapper;
+import com.hbhb.cw.relocation.model.${entityClass};
+
+/**
+ * @since ${date(),"yyyy-MM-dd"}
+ */
+public interface ${className} extends BaseMapper<${entityClass}> {
+	
+}
