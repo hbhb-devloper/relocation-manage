@@ -4,7 +4,6 @@ import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
 import com.hbhb.springboot.web.view.Page;
 
-import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,7 +38,7 @@ public class ReceiptController {
     public Page<ReceiptResVO> getReceiptList(
             @ApiParam(value = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
             @ApiParam(value = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
-            @Param("接收参数实体") ReceiptReqVO cond) {
+            @ApiParam("接收参数实体") ReceiptReqVO cond) {
 
         return null;
     }

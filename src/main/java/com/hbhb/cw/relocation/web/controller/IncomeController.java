@@ -4,7 +4,6 @@ import com.hbhb.cw.relocation.web.vo.IncomeReqVO;
 import com.hbhb.cw.relocation.web.vo.IncomeResVO;
 import com.hbhb.springboot.web.view.Page;
 
-import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,7 +35,7 @@ public class IncomeController {
     public Page<IncomeResVO> getIncomeList(
             @ApiParam(value = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
             @ApiParam(value = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
-            @Param("接收参数实体") IncomeReqVO cond) {
+            @ApiParam("接收参数实体") IncomeReqVO cond) {
 
         return null;
     }

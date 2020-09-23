@@ -5,7 +5,6 @@ import com.hbhb.cw.relocation.web.vo.InvoiceReqVO;
 import com.hbhb.cw.relocation.web.vo.InvoiceResVO;
 import com.hbhb.springboot.web.view.Page;
 
-import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,7 +43,7 @@ public class InvoiceController {
     public Page<InvoiceResVO> getInvoiceList(
             @ApiParam(value = "页码，默认为1") @RequestParam(required = false) Long pageNum,
             @ApiParam(value = "每页数量，默认为10") @RequestParam(required = false) Long pageSize,
-            @Param("接收参数实体") InvoiceReqVO cond) {
+            @ApiParam("接收参数实体") InvoiceReqVO cond) {
         pageNum = pageNum == null ? 1 : pageNum;
         pageSize = pageSize == null ? 20 : pageSize;
         return invoiceService.getInvoiceList(pageNum, pageSize, cond);
