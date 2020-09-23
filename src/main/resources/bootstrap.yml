@@ -72,7 +72,7 @@ spring:
   profiles: dev
   cloud:
     consul:
-      host: consul
+      host: ${host.docker0-ip}
       discovery:
         instance-id: ${spring.application.name}-${host.dev-map-port}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
@@ -87,7 +87,7 @@ spring:
   profiles: test
   cloud:
     consul:
-      host: consul
+      host: ${host.docker0-ip}
       discovery:
         instance-id: ${spring.application.name}-${host.test-map-port}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
@@ -102,7 +102,7 @@ spring:
   profiles: prd
   cloud:
     consul:
-      host: consul
+      host: ${host.docker0-ip}
       discovery:
         instance-id: ${spring.application.name}-${host.prd-map-port}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
