@@ -73,7 +73,6 @@ spring:
     consul:
       host: consul
       discovery:
-        prefer-ip-address: true
         instance-id: ${spring.application.name}-${host.dev-map-port}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
         health-check-url: http://${host.docker0-ip}:${host.dev-map-port}/actuator/health
