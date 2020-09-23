@@ -13,7 +13,7 @@ spring:
     consul:
       config:
         format: yaml
-        prefix: config/@project.artifactId@
+        prefix: config/${spring.application.name}
         default-context: @env@
         profile-separator: ' '
 
