@@ -44,12 +44,11 @@ management:
 # 宿主机相关配置
 host:
   # 开发/测试环境服务器ip
-  proxy:
-    ip: 47.96.83.55
-    dev-port: 10010
-    test-port: 10011
+  proxy-ip: 47.96.83.55
   # 正式环境服务器ip（使用docker0的ip）
   docker0-ip: 172.17.0.1
+  dev-port: 10010
+  test-port: 10011
   prd-port: 10010
 
 ################### 本地环境配置 ###################
