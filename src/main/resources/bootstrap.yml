@@ -43,14 +43,14 @@ management:
 
 # 宿主机相关配置
 host:
-  # 服务提供方暴露的ip地址，供调用方寻址用（开发测试环境使用frp代理ip，正式环境使用docker0）
-  proxy-ip: 47.96.83.55
-  # docker0的ip地址
+  # 开发/测试环境服务器ip
+  proxy:
+    ip: 47.96.83.55
+    dev-port: 10010
+    test-port: 10011
+  # 正式环境服务器ip（使用docker0的ip）
   docker0-ip: 172.17.0.1
-  # 开发、测试、正式环境映射的端口
-  dev-map-port: 10010
-  test-map-port: 10011
-  prd-map-port: 10012
+  prd-port: 10010
 
 ################### 本地环境配置 ###################
 ---
@@ -72,14 +72,13 @@ spring:
   profiles: dev
   cloud:
     consul:
-      host: ${host.docker0-ip}
+      host: consul.yeexun.com.cn
       discovery:
-        instance-id: ${spring.application.name}-${host.dev-map-port}-${spring.cloud.client.ip-address}
+        instance-id: ${spring.application.name}-${host.dev-port}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
-        health-check-url: http://${host.docker0-ip}:${host.dev-map-port}/actuator/health
-        # 开发、测试环境使用frp代理ip
+        health-check-url: http://${host.proxy-ip}:${host.dev-port}/actuator/health
         hostname: ${host.proxy-ip}
-        port: ${host.dev-map-port}
+        port: ${host.dev-port}
 
 ################### 测试环境配置 ###################
 ---
@@ -87,14 +86,14 @@ spring:
   profiles: test
   cloud:
     consul:
-      host: ${host.docker0-ip}
+      host: consul.yeexun.com.cn
       discovery:
-        instance-id: ${spring.application.name}-${host.test-map-port}-${spring.cloud.client.ip-address}
+        instance-id: ${spring.application.name}-${host.test-port}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
-        health-check-url: http://${host.docker0-ip}:${host.test-map-port}/actuator/health
+        health-check-url: http://${host.proxy-ip}:${host.test-port}/actuator/health
         # 开发、测试环境使用frp代理ip
         hostname: ${host.proxy-ip}
-        port: ${host.test-map-port}
+        port: ${host.test-port}
 
 ################### 正式环境配置 ###################
 ---
@@ -104,9 +103,9 @@ spring:
     consul:
       host: ${host.docker0-ip}
       discovery:
-        instance-id: ${spring.application.name}-${host.prd-map-port}-${spring.cloud.client.ip-address}
+        instance-id: ${spring.application.name}-${host.prd-port}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
-        health-check-url: http://${host.docker0-ip}:${host.prd-map-port}/actuator/health
+        health-check-url: http://${host.docker0-ip}:${host.prd-port}/actuator/health
         # 正式环境使用docker0
         hostname: ${host.docker0-ip}
-        port: ${host.prd-map-port}
+        port: ${host.prd-port}
