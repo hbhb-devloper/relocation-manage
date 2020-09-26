@@ -1,5 +1,7 @@
 //package com.hbhb.cw.relocation.mapper;
 //
+//import com.hbhb.beetl.gen.MapperCodeGen;
+//
 //import org.beetl.sql.core.ClasspathLoader;
 //import org.beetl.sql.core.ConnectionSourceHelper;
 //import org.beetl.sql.core.Interceptor;
