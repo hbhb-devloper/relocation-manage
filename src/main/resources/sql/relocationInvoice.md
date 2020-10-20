@@ -30,23 +30,23 @@ selectListByCondition
         left join unit u on ri.unit_id = u.id
         left join unit u1 on u1.id = ri.district
         -- @where(){
-            -- @if(!isEmpty(amountFrom)){
-                and ri.amount >= #{amountFrom}
-            -- @}
-            -- @if(!isEmpty(amountTo)){
-                and ri.amount <= #{amountTo}
-            -- @}
-            -- @if(!isEmpty(invoiceTimeFrom)){
-                and ri.invoice_time >= #{invoiceTimeFrom}
-            -- @}
-            -- @if(!isEmpty(invoiceTimeTo)){
-                and ri.invoice_time <= #{invoiceTimeTo}
-            -- @}
-            -- @if(unitId == 429){
+            -- @if(cond.unitId == 429){
                 and ri.district in (SELECT id FROM unit WHERE parent_id = 429)
             -- @}
-            -- @if(unitId != 11 && unitId != 429){
-                and ri.district = #{unitId}
+            -- @if(cond.unitId != 11 && cond.unitId != 429){
+                and ri.district = #{cond.unitId}
+            -- @}
+            -- @if(isNotEmpty(cond.amountFrom)){
+                and ri.amount >= #{cond.amountFrom}
+            -- @}
+            -- @if(isNotEmpty(cond.amountTo)){
+                and ri.amount <= #{cond.amountTo}
+            -- @}
+            -- @if(isNotEmpty(cond.invoiceTimeFrom)){
+                and ri.invoice_time >= #{cond.invoiceTimeFrom}
+            -- @}
+            -- @if(isNotEmpty(cond.invoiceTimeTo)){
+                and ri.invoice_time <= #{cond.invoiceTimeTo}
             -- @}
         -- @}
     -- @pageIgnoreTag(){
