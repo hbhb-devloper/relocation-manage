@@ -1,7 +1,7 @@
 package com.hbhb.cw.relocation.mapper;
 
-import org.beetl.sql.core.mapper.BaseMapper;
 import com.hbhb.cw.relocation.model.RelocationReceipt;
+import org.beetl.sql.mapper.BaseMapper;
 
 /**
  * @author dxk

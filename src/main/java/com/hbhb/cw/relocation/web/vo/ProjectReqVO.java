@@ -1,8 +1,7 @@
 package com.hbhb.cw.relocation.web.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
-
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,21 +16,21 @@ import lombok.NoArgsConstructor;
 public class ProjectReqVO implements Serializable {
     private static final long serialVersionUID = 1660341686428378078L;
 
-    @ApiModelProperty("合同编号")
+    @Schema(description = "合同编号")
     private String contractNum;
 
-    @ApiModelProperty("区域（单位id）")
+    @Schema(description = "区域（单位id）")
     private Integer unitId;
 
-    @ApiModelProperty("项目编号")
+    @Schema(description = "项目编号")
     private String projectNum;
 
-    @ApiModelProperty("补偿状态")
+    @Schema(description = "补偿状态")
     private Integer compensationSate;
 
-    @ApiModelProperty("未全额回款合同历时")
+    @Schema(description = "未全额回款合同历时")
     private String contractDuration;
 
-    @ApiModelProperty("工程名称")
+    @Schema(description = "工程名称")
     private String projectName;
 }

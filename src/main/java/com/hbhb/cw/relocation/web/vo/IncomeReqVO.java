@@ -1,9 +1,7 @@
 package com.hbhb.cw.relocation.web.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
-import java.util.Date;
-
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,18 +16,18 @@ import lombok.NoArgsConstructor;
 public class IncomeReqVO implements Serializable {
     private static final long serialVersionUID = -1608188188520678836L;
 
-    @ApiModelProperty("合同编号")
+    @Schema(description = "合同编号")
     private String contractNum;
-    @ApiModelProperty("起始时间（最小）")
+    @Schema(description = "起始时间（最小）")
     private String startTimeFrom;
-    @ApiModelProperty("起始时间（最大）")
+    @Schema(description = "起始时间（最大）")
     private String startTimeTo;
-    @ApiModelProperty("合同截止时间（最小）")
+    @Schema(description = "合同截止时间（最小）")
     private String contractDeadlineFrom;
-    @ApiModelProperty("合同截止时间（最大）")
+    @Schema(description = "合同截止时间（最大）")
     private String contractDeadlineTo;
-    @ApiModelProperty("经办单位(单位id)")
+    @Schema(description = "经办单位(单位id)")
     private Integer unitId;
-    @ApiModelProperty("合同名称")
+    @Schema(description = "合同名称")
     private String contractName;
 }

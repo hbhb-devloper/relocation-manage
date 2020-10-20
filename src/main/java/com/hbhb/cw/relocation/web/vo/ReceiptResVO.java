@@ -1,10 +1,9 @@
 package com.hbhb.cw.relocation.web.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,24 +19,24 @@ public class ReceiptResVO implements Serializable {
     private static final long serialVersionUID = 9140346694492866779L;
 
     private Long id;
-    @ApiModelProperty("类别")
+    @Schema(description = "类别")
     private String category;
-    @ApiModelProperty("地区(单位)")
+    @Schema(description = "地区(单位)")
     private String unit;
-    @ApiModelProperty("赔补金额")
+    @Schema(description = "赔补金额")
     private BigDecimal compensationAmount;
-    @ApiModelProperty("已到账金额")
+    @Schema(description = "已到账金额")
     private BigDecimal paymentAmount;
-    @ApiModelProperty("赔补合同名")
+    @Schema(description = "赔补合同名")
     private String contractName;
-    @ApiModelProperty("合同编号")
+    @Schema(description = "合同编号")
     private String contractNum;
-    @ApiModelProperty("赔补金额到账情况说明")
+    @Schema(description = "赔补金额到账情况说明")
     private String paymentDesc;
-    @ApiModelProperty("开收据金额")
+    @Schema(description = "开收据金额")
     private BigDecimal receiptAmount;
-    @ApiModelProperty("开收据时间")
+    @Schema(description = "开收据时间")
     private Date receiptTime;
-    @ApiModelProperty("备注格式")
+    @Schema(description = "备注格式")
     private String remake;
 }

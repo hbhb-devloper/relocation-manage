@@ -1,9 +1,8 @@
 package com.hbhb.cw.relocation.web.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.math.BigDecimal;
-
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,21 +14,23 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema
 public class InvoiceReqVO implements Serializable {
+
     private static final long serialVersionUID = 4590998101269572056L;
 
-    @ApiModelProperty("区域（单位id）")
+    @Schema(description = "区域（单位id）")
     private Integer unitId;
 
-    @ApiModelProperty("开票日期（开始）")
+    @Schema(description = "开票日期（开始）")
     private String invoiceTimeFrom;
 
-    @ApiModelProperty("开票日期（结束）")
+    @Schema(description = "开票日期（结束）")
     private String invoiceTimeTo;
 
-    @ApiModelProperty("金额（最小）")
+    @Schema(description = "金额（最小）")
     private BigDecimal amountFrom;
 
-    @ApiModelProperty("金额（最大）")
+    @Schema(description = "金额（最大）")
     private BigDecimal amountTo;
 }

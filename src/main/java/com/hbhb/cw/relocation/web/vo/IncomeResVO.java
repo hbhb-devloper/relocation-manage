@@ -1,13 +1,13 @@
 package com.hbhb.cw.relocation.web.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.beetl.sql.annotation.entity.AutoID;
 
 /**
  * @author xiaokang
@@ -17,53 +17,55 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class IncomeResVO implements Serializable {
+
     private static final long serialVersionUID = -1384092271081433149L;
 
+    @AutoID
     private Long id;
-    @ApiModelProperty("类别")
+    @Schema(description = "类别")
     private String category;
-    @ApiModelProperty("经办单位(单位id)")
+    @Schema(description = "经办单位(单位id)")
     private String unit;
-    @ApiModelProperty("供应商")
+    @Schema(description = "供应商")
     private String supplier;
-    @ApiModelProperty("合同编号")
+    @Schema(description = "合同编号")
     private String contractNum;
-    @ApiModelProperty("合同名称")
+    @Schema(description = "合同名称")
     private String contractName;
-    @ApiModelProperty("起始时间")
+    @Schema(description = "起始时间")
     private Date startTime;
-    @ApiModelProperty("合同截止时间")
+    @Schema(description = "合同截止时间")
     private Date contractDeadline;
-    @ApiModelProperty("合同金额")
+    @Schema(description = "合同金额")
     private BigDecimal contractAmount;
-    @ApiModelProperty("开票日期")
+    @Schema(description = "开票日期")
     private Date invoiceTime;
-    @ApiModelProperty("发票号码")
+    @Schema(description = "发票号码")
     private String invoiceNum;
-    @ApiModelProperty("发票类型")
+    @Schema(description = "发票类型")
     private String invoiceType;
-    @ApiModelProperty("价款")
+    @Schema(description = "价款")
     private BigDecimal amount;
-    @ApiModelProperty("税额")
+    @Schema(description = "税额")
     private BigDecimal tax;
-    @ApiModelProperty("价格合计")
+    @Schema(description = "价格合计")
     private BigDecimal taxIncludeAmount;
-    @ApiModelProperty("工程名")
+    @Schema(description = "工程名")
     private String constructionName;
-    @ApiModelProperty("收款情况")
+    @Schema(description = "收款情况")
     private String isReceived;
-    @ApiModelProperty("账龄")
+    @Schema(description = "账龄")
     private Integer aging;
-    @ApiModelProperty("应收")
+    @Schema(description = "应收")
     private BigDecimal receivable;
-    @ApiModelProperty("已收")
+    @Schema(description = "已收")
     private BigDecimal received;
-    @ApiModelProperty("未收")
+    @Schema(description = "未收")
     private BigDecimal unreceived;
-    @ApiModelProperty("款项类型")
+    @Schema(description = "款项类型")
     private Integer paymentType;
-    @ApiModelProperty("收款单号")
+    @Schema(description = "收款单号")
     private String receiptNum;
-    @ApiModelProperty("收款人")
+    @Schema(description = "收款人")
     private String payee;
 }
