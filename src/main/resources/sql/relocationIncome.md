@@ -1,93 +1,194 @@
-sample
+getIncomeList
 ===
-* 注释
+```sql
+select 
+    -- @pageTag(){
+    ri.id,
+    category,
+    u.unit_name unit,
+    supplier,
+    contract_num contractNum,
+    contract_name contractName,
+    start_time startTime,
+    contract_deadline contractDeadline,
+    contract_amount contractAmount,
+    invoice_time invoiceTime,
+    invoice_num invoiceNum,
+    invoice_type invoiceType,
+    amount,
+    tax,
+    tax_include_amount taxIncludeAmount,
+    construction_name constructionName,
+    payment_type paymentType,
+    is_received isReceived,
+    aging,
+    receivable,
+    received,
+    unreceived
+    -- @}
+    from relocation_income ri
+    left join unit u on ri.unit_id = u.id
+    -- @where(){
+      -- @if(cond.unitId == 429){
+        and ri.unit_id in (SELECT id FROM unit WHERE parent_id = 429)
+      -- @}
+      -- @if(isNotEmpty(cond.unitId) && cond.unitId != 11 && cond.unitId != 429){
+        and ri.unit_id = #{cond.unitId}
+      -- @}
+      -- @if(isNotEmpty(cond.contractDeadlineFrom)){
+        and contract_deadline >= #{cond.contractDeadlineFrom}
+      -- @}
+      -- @if(isNotEmpty(cond.contractDeadlineTo)){
+        and contract_deadline <= #{contractDeadlineTo}
+      -- @}
+      -- @if(isNotEmpty(cond.contractName)){
+        and contract_name like concat('%', #{cond.contractName},'%')
+      -- @}
+      -- @if(isNotEmpty(cond.contractNum)){
+        and contract_num like concat('%', #{cond.contractNum},'%')
+      -- @}
+      -- @if(isNotEmpty(cond.startTimeFrom)){
+        and start_time >= #{cond.startTimeFrom}
+      -- @}
+      -- @if(isNotEmpty(cond.startTimeTo)){
+        and start_time <= #{startTimeTo}
+      -- @}
+    -- @}
+    -- @pageIgnoreTag(){
+    order by ri.invoice_time desc
+    -- @}
+```
 
-	select #use("cols")# from relocation_income  where  #use("condition")#
-
-cols
+selectDetailById
 ===
-	id,category,unit_id,supplier,contract_num,contract_name,start_time,contract_deadline,contract_amount,invoice_time,invoice_num,invoice_type,amount,tax,tax_include_amount,construction_name,payment_type,is_received,aging,receivable,received,unreceived,receipt_num,payee
+```sql
+    select amount,
+        receipt_num receiptNum,
+        pay_month payMonth,
+        payee
+    from relocation_income_detail
+    where income_id = #{id} 
+    -- @if(isNeed == 1){
+    and pay_month = #{currentMonth}
+    -- @}
+    order by pay_month desc
+```
 
-updateSample
+addIncomeDetail
 ===
-	
-	id=#id#,category=#category#,unit_id=#unitId#,supplier=#supplier#,contract_num=#contractNum#,contract_name=#contractName#,start_time=#startTime#,contract_deadline=#contractDeadline#,contract_amount=#contractAmount#,invoice_time=#invoiceTime#,invoice_num=#invoiceNum#,invoice_type=#invoiceType#,amount=#amount#,tax=#tax#,tax_include_amount=#taxIncludeAmount#,construction_name=#constructionName#,payment_type=#paymentType#,is_received=#isReceived#,aging=#aging#,receivable=#receivable#,received=#received#,unreceived=#unreceived#,receipt_num=#receiptNum#,payee=#payee#
-
-condition
+```sql
+    insert into relocation_income_detail (id, income_id, amount,
+      receipt_num, pay_month, payee,
+      create_time)
+    values (#{detail.id}, #{detail.incomeId}, #{detail.amount},
+      #{detail.receiptNum}, #{detail.payMonth}, #{detail.payee},
+      current_timestamp())
+```
+updateIncomeDetail
 ===
+```sql
+update relocation_income_detail set
+   -- @trim(){
+      -- @if(isNotEmpty(detail.amount)){
+        amount = #{detail.amount},
+      -- @}
+      -- @if(isNotEmpty(detail.receiptNum)){
+        receipt_num = #{detail.receiptNum},
+      -- @}
+      -- @if(isNotEmpty(detail.payMont)){
+        pay_month = #{detail.payMont},
+      -- @}
+      -- @if(isNotEmpty(detail.payee)){
+        payee = #{detail.payee},
+      -- @}
+    -- @}
+    where id = #{detail.id}
+```
 
-	1 = 1  
-	@if(!isEmpty(id)){
-	 and id=#id#
-	@}
-	@if(!isEmpty(category)){
-	 and category=#category#
-	@}
-	@if(!isEmpty(unitId)){
-	 and unit_id=#unitId#
-	@}
-	@if(!isEmpty(supplier)){
-	 and supplier=#supplier#
-	@}
-	@if(!isEmpty(contractNum)){
-	 and contract_num=#contractNum#
-	@}
-	@if(!isEmpty(contractName)){
-	 and contract_name=#contractName#
-	@}
-	@if(!isEmpty(startTime)){
-	 and start_time=#startTime#
-	@}
-	@if(!isEmpty(contractDeadline)){
-	 and contract_deadline=#contractDeadline#
-	@}
-	@if(!isEmpty(contractAmount)){
-	 and contract_amount=#contractAmount#
-	@}
-	@if(!isEmpty(invoiceTime)){
-	 and invoice_time=#invoiceTime#
-	@}
-	@if(!isEmpty(invoiceNum)){
-	 and invoice_num=#invoiceNum#
-	@}
-	@if(!isEmpty(invoiceType)){
-	 and invoice_type=#invoiceType#
-	@}
-	@if(!isEmpty(amount)){
-	 and amount=#amount#
-	@}
-	@if(!isEmpty(tax)){
-	 and tax=#tax#
-	@}
-	@if(!isEmpty(taxIncludeAmount)){
-	 and tax_include_amount=#taxIncludeAmount#
-	@}
-	@if(!isEmpty(constructionName)){
-	 and construction_name=#constructionName#
-	@}
-	@if(!isEmpty(paymentType)){
-	 and payment_type=#paymentType#
-	@}
-	@if(!isEmpty(isReceived)){
-	 and is_received=#isReceived#
-	@}
-	@if(!isEmpty(aging)){
-	 and aging=#aging#
-	@}
-	@if(!isEmpty(receivable)){
-	 and receivable=#receivable#
-	@}
-	@if(!isEmpty(received)){
-	 and received=#received#
-	@}
-	@if(!isEmpty(unreceived)){
-	 and unreceived=#unreceived#
-	@}
-	@if(!isEmpty(receiptNum)){
-	 and receipt_num=#receiptNum#
-	@}
-	@if(!isEmpty(payee)){
-	 and payee=#payee#
-	@}
-	
-	
+updateIsReceived
+===
+```sql
+    UPDATE relocation_income
+    SET is_received = #{i}
+    where id = #{incomeId}
+```
+
+updateIncomeUnreceived
+===
+```sql
+    UPDATE relocation_income
+    SET unreceived = (select unreceived from 
+    relocation_income where id = #{incomeId}) - #{amount}
+    where id = #{incomeId}
+```
+
+updateIncomeReceived
+===
+```sql
+    UPDATE relocation_income
+    SET received = (select received from relocation_income 
+    where id = #{incomeId}) + #{amount}
+    where id = #{incomeId}
+```
+
+selectExportList
+===
+```sql
+    select
+    category,
+    u.short_name unit,
+    supplier,
+    contract_num contractNum,
+    contract_name contractName,
+    start_time startTime,
+    contract_deadline contractDeadline,
+    contract_amount contractAmount,
+    invoice_time invoiceTime,
+    invoice_num invoiceNum,
+    invoice_type invoiceType,
+    amount,
+    tax,
+    tax_include_amount taxIncludeAmount,
+    construction_name constructionName,
+    is_received isReceived,
+    aging,
+    receivable,
+    received,
+    unreceived
+    from relocation_income ri
+    left join unit u on ri.unit_id = u.id
+    -- @where(){
+      -- @if(cond.unitId == 429){
+        and ri.unit_id in (SELECT id FROM unit WHERE parent_id = 429)
+      -- @}
+      -- @if(isNotEmpty(cond.unitId) && cond.unitId != 11 && cond.unitId != 429){
+        and ri.unit_id = #{cond.unitId}
+      -- @}
+      -- @if(isNotEmpty(cond.contractDeadlineFrom)){
+        and contract_deadline >= #{cond.contractDeadlineFrom}
+      -- @}
+      -- @if(isNotEmpty(cond.contractDeadlineTo)){
+        and contract_deadline <= #{contractDeadlineTo}
+      -- @}
+      -- @if(isNotEmpty(cond.contractName)){
+        and contract_name like concat('%', #{cond.contractName},'%')
+      -- @}
+      -- @if(isNotEmpty(cond.contractNum)){
+        and contract_num like concat('%', #{cond.contractNum},'%')
+      -- @}
+      -- @if(isNotEmpty(cond.startTimeFrom)){
+        and start_time >= #{cond.startTimeFrom}
+      -- @}
+      -- @if(isNotEmpty(cond.startTimeTo)){
+        and start_time <= #{startTimeTo}
+      -- @}
+    -- @}
+```
+
+getMonthAmount
+===
+```sql
+    select sum(amount)
+        from relocation_income_detail
+        where income_id = #{id} and pay_month = #{currentMonth}
+```

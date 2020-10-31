@@ -3,7 +3,6 @@ package com.hbhb.cw.relocation.web.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,13 +32,13 @@ public class IncomeResVO implements Serializable {
     @Schema(description = "合同名称")
     private String contractName;
     @Schema(description = "起始时间")
-    private Date startTime;
+    private String startTime;
     @Schema(description = "合同截止时间")
-    private Date contractDeadline;
+    private String contractDeadline;
     @Schema(description = "合同金额")
     private BigDecimal contractAmount;
     @Schema(description = "开票日期")
-    private Date invoiceTime;
+    private String invoiceTime;
     @Schema(description = "发票号码")
     private String invoiceNum;
     @Schema(description = "发票类型")
@@ -68,4 +67,6 @@ public class IncomeResVO implements Serializable {
     private String receiptNum;
     @Schema(description = "收款人")
     private String payee;
+    @Schema(description = "本月已收款")
+    private BigDecimal monthAmount;
 }

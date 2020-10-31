@@ -64,7 +64,7 @@ public class RelocationIncome implements Serializable {
     /**
      * 发票类型
      */
-    private Integer invoiceType;
+    private String invoiceType;
     /**
      * 价款
      */
