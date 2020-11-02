@@ -110,7 +110,7 @@ updateIsReceived
 ```sql
     UPDATE relocation_income
     SET is_received = #{i}
-    where id = #{incomeId}
+    where id = #{id}
 ```
 
 updateIncomeUnreceived
@@ -118,8 +118,8 @@ updateIncomeUnreceived
 ```sql
     UPDATE relocation_income
     SET unreceived = (select unreceived from 
-    relocation_income where id = #{incomeId}) - #{amount}
-    where id = #{incomeId}
+    relocation_income where id = #{id}) - #{amount}
+    where id = #{id}
 ```
 
 updateIncomeReceived
@@ -127,8 +127,8 @@ updateIncomeReceived
 ```sql
     UPDATE relocation_income
     SET received = (select received from relocation_income 
-    where id = #{incomeId}) + #{amount}
-    where id = #{incomeId}
+    where id = #{id}) + #{amount}
+    where id = #{id}
 ```
 
 selectExportList
@@ -191,4 +191,14 @@ getMonthAmount
     select sum(amount)
         from relocation_income_detail
         where income_id = #{id} and pay_month = #{currentMonth}
+```
+
+selectProject
+===
+```sql
+    SELECT project_id
+    FROM relocation_invoice ri,
+     relocation_income rii
+    WHERE ri.invoice_number = #{invoiceNum}
+    AND ri.invoice_number = rii.invoice_num;
 ```

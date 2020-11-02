@@ -5,8 +5,10 @@ import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
 import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
+import com.hbhb.cw.relocation.mapper.RelocationProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationIncomeDetail;
+import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.service.IncomeService;
@@ -51,6 +53,9 @@ IncomeServiceImpl implements IncomeService {
 
     @Resource
     private SysUserApiExp sysUserApiExp;
+
+    @Resource
+    private RelocationProjectMapper relocationProjectMapper;
 
 
     @Override
@@ -114,26 +119,55 @@ IncomeServiceImpl implements IncomeService {
         detail.setPayMonth(detail.getPayMonth().replace("-", ""));
         SysUserInfo user = sysUserApiExp.getUserById(userId);
         String nickName = user.getNickName();
+        BigDecimal amount = detail.getAmount();
+        Long incomeId = detail.getIncomeId();
         detail.setPayee(nickName);
         detail.setCreateTime(DateUtil.getCurrentDate());
         incomeDetailMapper.insert(detail);
+        RelocationIncome relocationIncome = relocationIncomeMapper.single(incomeId);
+        Long pid = relocationIncomeMapper
+            .selectProject(relocationIncome.getInvoiceNum());
+        Integer paymentType = relocationIncome.getPaymentType();
+        RelocationProject project = relocationProjectMapper.single(pid);
+        BigDecimal anticipatePayment = project.getAnticipatePayment();
+        BigDecimal finalPayment = project.getFinalPayment();
+        RelocationProject relocationProject = new RelocationProject();
+        if (pid != null) {
+            // 同步修改项目信息表数据
+            if (paymentType == 1) {
+                relocationProject.setAnticipatePayment(anticipatePayment.add(amount));
+                relocationProjectMapper.updateTemplateById(relocationProject);
+            } else {
+                relocationProject.setFinalPayment(finalPayment.add(amount));
+                relocationProjectMapper.updateTemplateById(relocationProject);
+            }
+        }
+        RelocationIncome single = relocationIncomeMapper.single(incomeId);
+        RelocationIncome income = new RelocationIncome();
+        income.setId(incomeId);
+        income.setUnreceived(single.getUnreceived().subtract(amount));
+        income.setReceived(single.getReceived().add(amount));
         //未收减少
-        relocationIncomeMapper.updateIncomeUnreceived(detail.getIncomeId(), detail.getAmount());
+        relocationIncomeMapper.updateTemplateById(single);
         //已收增加
-        relocationIncomeMapper.updateIncomeReceived(detail.getIncomeId(), detail.getAmount());
-        RelocationIncome relocationIncome = relocationIncomeMapper.single(detail.getIncomeId());
-        BigDecimal receivable = relocationIncome.getReceivable();
-        BigDecimal unreceived = relocationIncome.getUnreceived();
+        relocationIncomeMapper.updateTemplateById(single);
+        RelocationIncome single1 = relocationIncomeMapper.single(incomeId);
+        BigDecimal receivable = single1.getReceivable();
+        BigDecimal unreceived = single1.getUnreceived();
         relocationIncome.setReceived(receivable.subtract(unreceived));
         //已收完的情况 3
+        RelocationIncome income1 = new RelocationIncome();
+        income1.setId(incomeId);
         if (relocationIncome.getReceived().compareTo(relocationIncome.getReceivable()) == 0
             && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) == 0) {
-            relocationIncomeMapper.updateIsReceived(detail.getIncomeId(), 3);
+            income.setIsReceived(3);
+            relocationIncomeMapper.updateTemplateById(income1);
         }
         //未收完 2
         if (relocationIncome.getReceived().compareTo(relocationIncome.getReceivable()) < 0
             && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
-            relocationIncomeMapper.updateIsReceived(detail.getIncomeId(), 2);
+            income.setIsReceived(2);
+            relocationIncomeMapper.updateTemplateById(income1);
         }
     }
 

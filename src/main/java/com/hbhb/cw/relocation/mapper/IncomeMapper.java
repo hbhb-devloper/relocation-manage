@@ -35,9 +35,11 @@ public interface IncomeMapper extends BaseMapper<RelocationIncome> {
 
     BigDecimal getMonthAmount(Long id, String currentMonth);
 
-    void updateIncomeUnreceived(Long incomeId, BigDecimal amount);
+    void updateIncomeUnreceived(Long id, BigDecimal amount);
 
-    void updateIncomeReceived(Long incomeId, BigDecimal amount);
+    void updateIncomeReceived(Long id, BigDecimal amount);
 
-    void updateIsReceived(Long incomeId, int i);
+    void updateIsReceived(Long id, int i);
+
+    Long selectProject(String invoiceNum);
 }
