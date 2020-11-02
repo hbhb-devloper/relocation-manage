@@ -5,18 +5,14 @@ import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
 import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
 import com.hbhb.cw.relocation.mapper.InvoiceMapper;
-import com.hbhb.cw.relocation.mapper.RelocationProjectMapper;
+import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationInvoice;
 import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.service.InvoiceService;
-import com.hbhb.cw.relocation.web.vo.InvoiceExportResVO;
-import com.hbhb.cw.relocation.web.vo.InvoiceImportVO;
-import com.hbhb.cw.relocation.web.vo.InvoiceReqVO;
-import com.hbhb.cw.relocation.web.vo.InvoiceResVO;
-import com.hbhb.cw.relocation.web.vo.ProjectInfoVO;
+import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
 import java.math.BigDecimal;
@@ -56,7 +52,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private IncomeMapper relocationIncomeMapper;
 
     @Resource
-    private RelocationProjectMapper relocationProjectMapper;
+    private ProjectMapper ProjectMapper;
 
     @Override
     public PageResult<InvoiceResVO> getInvoiceList(Integer pageNum, Integer pageSize,
@@ -316,7 +312,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private RelocationIncome getRelocationIncome(RelocationInvoice relocationInvoice, Long pid,
         Integer atype) {
         RelocationIncome relocationIncome = new RelocationIncome();
-        RelocationProject relocationProject = relocationProjectMapper.single(pid);
+        RelocationProject relocationProject = ProjectMapper.single(pid);
         relocationIncome.setCategory(1);
         relocationIncome.setUnitId(relocationInvoice.getUnitId());
         relocationIncome.setSupplier(relocationInvoice.getBuyerName());

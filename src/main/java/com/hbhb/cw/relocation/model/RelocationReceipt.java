@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class RelocationReceipt implements Serializable {
     private static final long serialVersionUID = -2771050419944956043L;
     /**
@@ -24,7 +26,7 @@ public class RelocationReceipt implements Serializable {
     /**
      * 类别
      */
-    private Integer category;
+    private String category;
     /**
      * 地区(单位id)
      */

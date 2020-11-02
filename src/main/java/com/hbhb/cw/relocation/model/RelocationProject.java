@@ -108,7 +108,7 @@ public class RelocationProject implements Serializable {
     /**
      * 有无赔补(0-没有、1-有)
      */
-    private Integer hasCompensation;
+    private Boolean hasCompensation;
     /**
      * 被动补偿类型
      */
@@ -140,15 +140,15 @@ public class RelocationProject implements Serializable {
     /**
      * 未全额回款合同历时
      */
-    private Date contractDuration;
+    private Integer contractDuration;
     /**
      * 主动迁改或者被动
      */
-    private Integer isInitiative;
+    private Boolean isInitiative;
     /**
      * 预付款应付金额（元）
      */
-    private Long anticipatePayable;
+    private BigDecimal anticipatePayable;
     /**
      * 预付款到账金额（元）
      */

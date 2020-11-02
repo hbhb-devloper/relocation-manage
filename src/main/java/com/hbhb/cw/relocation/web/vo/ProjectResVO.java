@@ -32,16 +32,16 @@ public class ProjectResVO implements Serializable {
     private String eomsCutNum;
 
     @Schema(description = "计划实施时间")
-    private Date planStartTime;
+    private String planStartTime;
 
     @Schema(description = "计划完成时间")
-    private Date planEndTime;
+    private String planEndTime;
 
     @Schema(description = "实际结束时间")
-    private Date actualEndTime;
+    private String actualEndTime;
 
     @Schema(description = "施工单位")
-    private Integer constructionUnit;
+    private String constructionUnit;
 
     @Schema(description = "工程名称")
     private String projectName;
@@ -98,7 +98,7 @@ public class ProjectResVO implements Serializable {
     private String compensationAmount;
 
     @Schema(description = "预付款应付金额（元）")
-    private Boolean anticipatePayable;
+    private String anticipatePayable;
 
     @Schema(description = "预付款到账金额（元）")
     private String anticipatePayment;
