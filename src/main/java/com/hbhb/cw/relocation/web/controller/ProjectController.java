@@ -40,8 +40,8 @@ public class ProjectController implements RelocationProjectApi {
     private SysFileApi fileApi;
 
     @Operation(summary = "迁改管理基础信息导入")
-    @PostMapping("/import")
-    public void ProjectImport(MultipartFile file) {
+    @PostMapping(value = "/import", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public void ProjectImport(@RequestPart(required = false, value = "file") MultipartFile file) {
         long begin = System.currentTimeMillis();
         try {
             EasyExcel.read(file.getInputStream(), ProjectImportVO.class,
@@ -79,7 +79,7 @@ public class ProjectController implements RelocationProjectApi {
 
     @Operation(summary = "上传文件")
     @PostMapping(value = "/system", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public void uploadSystemFile(@RequestPart(required = false, value = "file") MultipartFile[] files) {
+    public void uploadSystemFile(@RequestPart(required = false, value = "files") MultipartFile[] files) {
         fileApi.uploadFileList(files, FileType.SYSTEM_FILE.value());
     }
 

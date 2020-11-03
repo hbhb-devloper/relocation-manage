@@ -3,7 +3,7 @@ package com.hbhb.cw.relocation.mapper;
 import com.hbhb.cw.relocation.model.RelocationReceipt;
 import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
-import org.beetl.sql.mapper.BaseMapper;
+import com.hbhb.web.beetlsql.BaseMapper;
 
 import java.util.List;
 

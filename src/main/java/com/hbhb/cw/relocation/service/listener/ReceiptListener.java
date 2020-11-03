@@ -2,6 +2,8 @@ package com.hbhb.cw.relocation.service.listener;
 
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.hbhb.cw.relocation.enums.RelocationErrorCode;
+import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.service.ReceiptService;
 import com.hbhb.cw.relocation.web.vo.ReceiptImportVO;
 import lombok.extern.slf4j.Slf4j;
@@ -65,4 +67,10 @@ public class ReceiptListener extends AnalysisEventListener {
             receiptService.addSaveRelocationReceipt(dataList);
         }
     }
+
+    @Override
+    public void onException(Exception exception, AnalysisContext context) {
+        throw   new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR);
+    }
+
 }

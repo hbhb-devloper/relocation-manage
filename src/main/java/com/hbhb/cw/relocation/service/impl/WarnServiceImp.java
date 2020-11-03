@@ -12,12 +12,15 @@ import com.hbhb.cw.relocation.web.vo.WarnExportVO;
 import com.hbhb.cw.relocation.web.vo.WarnFileVO;
 import com.hbhb.cw.relocation.web.vo.WarnReqVO;
 import com.hbhb.cw.relocation.web.vo.WarnResVO;
+import com.hbhb.cw.systemcenter.vo.SelectVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,12 +61,36 @@ public class WarnServiceImp implements WarnService {
         // 1.查询预警表所有状态为正常的预警的项目编号
         List<String> projectNumWarn = warnMapper.selectProjectNum();
         // 2.跟据项目编号查询基础表中赔补状态变更为全额回款的项目
-        List<String> projectNum = projectMapper.selectProjectNumByProjectNum(projectNumWarn);
-        // 3.跟据查寻到的已全额回款的项目编号更新预警信息
-        warnMapper.updateSateByProjectNum(projectNum);
+        if (projectNumWarn.size() != 0) {
+            List<String> projectNum = projectMapper.selectProjectNumByProjectNum(projectNumWarn);
+            // 3.跟据查寻到的已全额回款的项目编号更新预警信息
+            List<SelectVO> selectVoList = new ArrayList<>();
+            for (String project : projectNum) {
+                SelectVO selectVO = new SelectVO();
+                selectVO.setId(Long.valueOf(1));
+                selectVO.setLabel(project);
+                selectVoList.add(selectVO);
+            }
+            if(projectNum.size()!=0) {
+                warnMapper.updateSateByProjectNum(selectVoList);
+            }
+        }
         // 新增预警信息
         List<WarnResVO> WarnResVO = projectMapper.selectProjectWarn();
-        List<RelocationWarn> list = BeanConverter.copyBeanList(WarnResVO, RelocationWarn.class);
+        List<RelocationWarn> list = new ArrayList<>();
+
+        WarnResVO.forEach(item->list.add(RelocationWarn.builder()
+                .projectNum(item.getProjectNum())
+                .anticipatePayment(new BigDecimal(item.getAnticipatePayment()))
+                .constructionUnit(item.getConstructionUnit())
+                .contractDuration(item.getContractDuration())
+                .contractNum(item.getContractNum())
+                .finalPayment(new BigDecimal(item.getFinalPayment()))
+                .oppositeUnit(item.getOppositeUnit())
+                .unitId(item.getUnitId())
+                .isReceived(false)
+                .state(true)
+                .build()));
         // 每隔一个月执行一次api向预警信息表里提供一次数据
         warnMapper.insertBatch(list);
     }
