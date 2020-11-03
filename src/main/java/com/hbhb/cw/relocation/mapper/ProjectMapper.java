@@ -2,10 +2,9 @@ package com.hbhb.cw.relocation.mapper;
 
 import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.web.vo.*;
-import com.hbhb.cw.systemcenter.vo.SelectVO;
+import com.hbhb.web.beetlsql.BaseMapper;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
-import org.beetl.sql.mapper.BaseMapper;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
 import java.math.BigDecimal;
@@ -35,11 +34,9 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     List<RelocationProject> selectProject();
 
-    void updateBatchDuration(List<SelectVO> list);
-
     Map<String, BigDecimal> selectSumCompensationAmount();
 
-    List<String> selectProjectNumByProjectNum(List<String> _root);
+    List<String> selectProjectNumByProjectNum(List<String> list);
 
     List<WarnResVO> selectProjectWarn();
 

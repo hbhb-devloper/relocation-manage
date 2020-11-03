@@ -16,7 +16,6 @@ import com.hbhb.cw.systemcenter.api.UnitApi;
 import com.hbhb.cw.systemcenter.enums.AllName;
 import com.hbhb.cw.systemcenter.model.SysUser;
 import com.hbhb.cw.systemcenter.model.Unit;
-import com.hbhb.cw.systemcenter.vo.SelectVO;
 import com.hbhb.cw.systemcenter.vo.SysDictVO;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -83,7 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
             project.setPlanStartTime(DateUtil.string3DateYMD(importVO.getPlanStartTime()));
             project.setPlanEndTime(DateUtil.string3DateYMD(importVO.getPlanEndTime()));
             project.setActualEndTime(DateUtil.string3DateYMD(importVO.getActualEndTime()));
-            if (importVO.getCompensationSate() != null && !importVO.getCompensationSate().equals("")) {
+            if (!isEmpty(importVO.getCompensationSate())) {
                 project.setCompensationSate(Integer.valueOf(stateMap.get(importVO.getCompensationSate())));
             } else {
                 project.setCompensationSate(0);
@@ -103,11 +102,13 @@ public class ProjectServiceImpl implements ProjectService {
             project.setMaterialBudget(importVO.getMaterialBudget() == null ? new BigDecimal(0) : new BigDecimal(importVO.getMaterialBudget()));
             // 判断合同状态
             try {
-                int compensationSate = Integer.parseInt(stateMap.get(importVO.getCompensationSate()));
-                if (!isEmpty(importVO.getActualEndTime()) && compensationSate != 10 && compensationSate != 80) {
-                    project.setContractDuration(DateUtil.monthBetween(importVO.getActualEndTime(), DateUtil.dateToStringYmd(new Date())));
-                } else {
-                    project.setContractDuration(0);
+                if (!isEmpty(importVO.getCompensationSate())) {
+                    int compensationSate = Integer.parseInt(stateMap.get(importVO.getCompensationSate()));
+                    if (!isEmpty(importVO.getActualEndTime()) && compensationSate != 10 && compensationSate != 80) {
+                        project.setContractDuration(DateUtil.monthBetween(importVO.getActualEndTime(), DateUtil.dateToStringYmd(new Date())));
+                    } else {
+                        project.setContractDuration(0);
+                    }
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -173,16 +174,12 @@ public class ProjectServiceImpl implements ProjectService {
     public void updateContractDuration() {
         // 查出所有除全额回款、合同未签订项目
         List<RelocationProject> projectList = projectMapper.selectProject();
-        List<SelectVO> selectVOList = new ArrayList<>();
         for (RelocationProject project : projectList) {
-            SelectVO selectVO = new SelectVO();
-            selectVO.setId(project.getId());
-            selectVO.setLabel(String.valueOf(project.getContractDuration()+1));
-            selectVOList.add(selectVO);
+            project.setContractDuration(project.getContractDuration() + 1);
         }
-        if(!projectList.isEmpty()) {
+        if (!projectList.isEmpty()) {
             // 批量修改未回款合同历时
-            projectMapper.updateBatchDuration(selectVOList);
+            projectMapper.updateBatchTempById(projectList);
         }
     }
 

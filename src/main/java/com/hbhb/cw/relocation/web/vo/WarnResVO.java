@@ -16,6 +16,9 @@ public class WarnResVO implements Serializable {
     @Schema(description = "项目编号")
     private String projectNum;
 
+    @Schema(description = "市区id")
+    private Integer unitId;
+
     @Schema(description = "市区")
     private String unitName;
 
@@ -38,6 +41,6 @@ public class WarnResVO implements Serializable {
     private String finalPayment;
 
     @Schema(description = "未全额回款合同历时")
-    private String contractDuration;
+    private Integer contractDuration;
 
 }

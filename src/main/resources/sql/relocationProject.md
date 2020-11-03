@@ -151,11 +151,12 @@ selectProjectWarn
  ```sql
     select project_num        as projectNum,
            u.unit_name        as unitName,
+           u.id               as unitId,
            construction_unit  as constructionUnit,
            opposite_unit      as oppositeUnit,
            rp.contract_num    as contractNum,
            anticipate_payment as anticipatePayment,
-           ri.is_received        as isReceived,
+           ri.is_received     as isReceived,
            final_payment      as finalPayment,
            contract_duration  as contractDuration
     from relocation_project rp
@@ -218,15 +219,6 @@ updateBatch
     -- @}
  ```
 
-updateBatchDuration
-===
-   ```sql
-        -- @for(item in list){
-        	update relocation_project
-            set contract_duration = #{item.label}  #text(item.label)
-            where id = #{item.id}  #text(item.id)
-        -- @}
- ```
 selectProjectNumByProjectNum
 ===
    ```sql
@@ -234,7 +226,23 @@ selectProjectNumByProjectNum
         select project_num from relocation_project
         where compensation_sate = 80  and project_num in (
       -- @for(item in list){
-        #{item} #text(item)
+         #{item}
       -- @}
       )
  ```
+selectProjectWarn
+===
+ ```sql
+    select project_num        as projectNum,
+           u.id               as unitId,
+           u.unit_name        as unitName,
+           construction_unit  as constructionUnit,
+           opposite_unit      as oppositeUnit,
+           rp.contract_num    as contractNum,
+           anticipate_payment as anticipatePayment,
+           final_payment      as finalPayment,
+           contract_duration  as contractDuration
+    from relocation_project rp
+             left join unit u on rp.unit_id = u.id
+    where contract_duration mod 3 = 0 and compensation_sate != 80
+```   

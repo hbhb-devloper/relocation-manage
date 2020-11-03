@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,11 +24,11 @@ public class RelocationWarn {
 
     private String contractNum;
 
-    private Long anticipatePayment;
+    private BigDecimal anticipatePayment;
 
-    private Byte isReceived;
+    private Boolean isReceived;
 
-    private Long finalPayment;
+    private BigDecimal finalPayment;
 
     private Integer contractDuration;
 

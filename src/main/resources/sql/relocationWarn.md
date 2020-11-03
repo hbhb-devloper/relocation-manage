@@ -37,9 +37,9 @@ selectProjectNum
 updateSateByProjectNum
 ===
   ```sql
-      -- @for(item in list){
-            update relocation_warn
-            set state = 0        
-            where project_num = #{item}
+     update relocation_warn
+     set state = 0
+ -- @for(item in list)             
+     where project_num = #{item.label}
       -- @}
  ```

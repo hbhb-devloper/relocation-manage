@@ -2,6 +2,8 @@ package com.hbhb.cw.relocation.service.listener;
 
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.hbhb.cw.relocation.enums.RelocationErrorCode;
+import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.service.ProjectService;
 import com.hbhb.cw.relocation.web.vo.ProjectImportVO;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +23,7 @@ public class ProjectListener extends AnalysisEventListener {
     /**
      * 批处理条数，每隔多少条清理一次list ，方便内存回收
      */
-    private static final int BATCH_COUNT = 500;
+    private static final int BATCH_COUNT = 2000;
 
     /**
      * 数据行
@@ -64,5 +66,10 @@ public class ProjectListener extends AnalysisEventListener {
         if (!CollectionUtils.isEmpty(dataList)) {
             projectService.addSaveRelocationProject(dataList);
         }
+    }
+
+    @Override
+    public void onException(Exception exception, AnalysisContext context) {
+        throw   new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR);
     }
 }

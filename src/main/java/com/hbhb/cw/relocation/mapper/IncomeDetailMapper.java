@@ -1,7 +1,7 @@
 package com.hbhb.cw.relocation.mapper;
 
 import com.hbhb.cw.relocation.model.RelocationIncomeDetail;
-import org.beetl.sql.mapper.BaseMapper;
+import com.hbhb.web.beetlsql.BaseMapper;
 
 
 /**
