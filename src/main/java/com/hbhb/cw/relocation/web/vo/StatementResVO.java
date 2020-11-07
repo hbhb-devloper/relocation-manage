@@ -20,6 +20,9 @@ import java.math.BigDecimal;
 public class StatementResVO implements Serializable {
     private static final long serialVersionUID = -6822522686097721065L;
 
+    @Schema(description = "区域id")
+    private Integer unitId;
+
     @Schema(description = "区域")
     private String unitName;
 

@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.List;
 
-@Tag(name = "传输迁改-基础信息管理")
+@Tag(name = "传输迁改-业务报表统计")
 @RestController
 @RequestMapping("/statement")
 @Slf4j
@@ -44,7 +44,7 @@ public class StatementController {
     }
 
     @Operation(summary = "统计报表导出")
-    @PostMapping
+    @PostMapping("/export")
     public void export(HttpServletRequest request, HttpServletResponse response, @RequestBody StatementReqVO reqVO) {
         List<StatementExportVO> list = statementService.export(reqVO.getUnitId());
         String fileName = ExcelUtil.encodingFileName(request, "业务报表导出模板.xlsx");

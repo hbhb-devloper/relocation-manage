@@ -5,18 +5,15 @@ import com.hbhb.core.utils.ExcelUtil;
 import com.hbhb.cw.relocation.rpc.FileApiExp;
 import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.service.WarnService;
-import com.hbhb.cw.relocation.web.vo.WarnExportVO;
-import com.hbhb.cw.relocation.web.vo.WarnFileVO;
-import com.hbhb.cw.relocation.web.vo.WarnReqVO;
-import com.hbhb.cw.relocation.web.vo.WarnResVO;
+import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.relocationmange.api.RelocationWarnApi;
 import com.hbhb.cw.systemcenter.enums.FileType;
 import com.hbhb.cw.systemcenter.vo.FileDetailVO;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
-import com.hbhb.web.annotation.UserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,7 +26,7 @@ import java.util.List;
 @Tag(name = "传输迁改-预警管理")
 @RestController
 @RequestMapping("/warn")
-public class WarnController  implements RelocationWarnApi {
+public class WarnController implements RelocationWarnApi {
 
     @Resource
     private WarnService warnService;
@@ -55,16 +52,28 @@ public class WarnController  implements RelocationWarnApi {
     }
 
     @Operation(summary = "预警附件上传")
-    @PostMapping(value = "/system", headers = "content-type=multipart/form-data")
-    public void uploadSystemFile(@RequestParam(required = false, value = "file") MultipartFile file, @RequestBody WarnFileVO fileVO,
-                                 @UserId Integer userId) {
+    @PostMapping(value = "/upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public void uploadSystemFile(@RequestPart(required = false, value = "file") MultipartFile file,@RequestParam("warnId") Long warnId) {
+        WarnFileVO fileVO = new WarnFileVO();
+        Integer userId = 1;
         FileDetailVO detailVO = fileService.uploadFile(file, FileType.FUND_INVOICE_FILE.value());
         SysUserInfo user = userApi.getUserById(userId);
         fileVO.setFileId(detailVO.getId());
         fileVO.setCreateBy(user.getNickName());
         fileVO.setCreateTime(new Date());
         warnService.addWarnFile(fileVO);
+    }
 
+    @Operation(summary = "预警信息统计")
+    @GetMapping("/total")
+    public Integer getTotalInfo(@RequestParam("单位id") Integer unitId) {
+        return warnService.getWarnCount(unitId);
+    }
+
+    @Operation(summary = "预警附件查看")
+    @GetMapping("/file")
+    public List<WarnFileResVO> getWarnFile(Long warnId){
+        return warnService.getWarnFileList(warnId);
     }
 
     @Override
@@ -72,3 +81,5 @@ public class WarnController  implements RelocationWarnApi {
         warnService.addSaveWarn();
     }
 }
+
+

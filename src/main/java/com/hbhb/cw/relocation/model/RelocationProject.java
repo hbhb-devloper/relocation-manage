@@ -86,7 +86,7 @@ public class RelocationProject implements Serializable {
     /**
      * 施工单位
      */
-    private Integer constructionUnit;
+    private String constructionUnit;
     /**
      * 甲供材料费(预算:元)
      */

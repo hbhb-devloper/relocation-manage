@@ -15,6 +15,8 @@ import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
 import com.hbhb.cw.systemcenter.api.UnitApi;
 import com.hbhb.cw.systemcenter.model.Unit;
 import lombok.extern.slf4j.Slf4j;
+import org.beetl.sql.core.page.DefaultPageRequest;
+import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -45,8 +47,12 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize) {
-        List<ReceiptResVO> list = receiptMapper.selectReceiptByCond(cond);
-        return null;
+        PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
+        PageResult<ReceiptResVO> receiptRes = receiptMapper.selectReceiptListByCond(cond, request);
+        List<Unit> unitList = unitApi.getAllUnitList();
+        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        receiptRes.getList().forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
+        return receiptRes;
     }
 
     @Override

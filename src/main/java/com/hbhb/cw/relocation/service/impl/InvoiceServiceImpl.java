@@ -15,14 +15,6 @@ import com.hbhb.cw.relocation.service.InvoiceService;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
@@ -30,6 +22,15 @@ import org.beetl.sql.core.page.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author xiaokang
@@ -52,14 +53,14 @@ public class InvoiceServiceImpl implements InvoiceService {
     private IncomeMapper relocationIncomeMapper;
 
     @Resource
-    private ProjectMapper ProjectMapper;
+    private ProjectMapper projectMapper;
 
     @Override
     public PageResult<InvoiceResVO> getInvoiceList(Integer pageNum, Integer pageSize,
-        InvoiceReqVO cond, Integer userId) {
+                                                   InvoiceReqVO cond, Integer userId) {
         PageRequest<InvoiceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<InvoiceResVO> invoiceResVOPageResult = relocationInvoiceMapper
-            .selectListByCondition(cond, request);
+                .selectListByCondition(cond, request);
         List<InvoiceResVO> list = invoiceResVOPageResult.getList();
         for (InvoiceResVO invoiceResVO : list) {
             if ("1".equals(invoiceResVO.getInvoiceType())) {
@@ -102,7 +103,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         translation(invoice);
         relocationInvoiceMapper.insert(invoice);
         RelocationIncome relocationIncome = getRelocationIncome(invoice,
-            invoice.getProjectId(), invoice.getPaymentType());
+                invoice.getProjectId(), invoice.getPaymentType());
         relocationIncomeMapper.insert(relocationIncome);
     }
 
@@ -113,16 +114,16 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         List<ProjectInfoVO> projectInfo = relocationInvoiceMapper.getProjectInfo();
         Map<String, Long> projectMap = projectInfo.stream()
-            .collect(Collectors.toMap(ProjectInfoVO::getInfo, ProjectInfoVO::getId));
+                .collect(Collectors.toMap(ProjectInfoVO::getInfo, ProjectInfoVO::getId));
         // 转换单位
         List<Unit> list = unitApiExp.getAllUnitList();
         Map<String, Integer> unitMap = list.stream().collect(
-            Collectors.toMap(Unit::getUnitName, Unit::getId));
+                Collectors.toMap(Unit::getUnitName, Unit::getId));
         List<RelocationInvoice> invoiceList = new ArrayList<>();
         for (InvoiceImportVO relocationInvoiceImport : dataList) {
             if (!"财务开票".equals(relocationInvoiceImport.getBusinessType())) {
                 throw new InvoiceException(
-                    InvoiceErrorCode.RELOCATION_INVOICE_IMPORT_BUSTYPE_ERROR);
+                        InvoiceErrorCode.RELOCATION_INVOICE_IMPORT_BUSTYPE_ERROR);
             }
             String newRemake = relocationInvoiceImport.getNewRemake();
             Matcher m = Pattern.compile(Pattern.quote("；")).matcher(newRemake);
@@ -135,14 +136,14 @@ public class InvoiceServiceImpl implements InvoiceService {
             }
             RelocationInvoice relocationInvoice = new RelocationInvoice();
             relocationInvoice.setUnitId(109);
-            //relocationInvoice.setUnitId(unitMap.get(relocationInvoiceImport.getUnitId()));
+            // relocationInvoice.setUnitId(unitMap.get(relocationInvoiceImport.getUnitId()));
             relocationInvoice.setDistrict(109);
-            //relocationInvoice.setDistrict(unitMap.get(relocationInvoiceImport.getUnitId()));
+            // relocationInvoice.setDistrict(unitMap.get(relocationInvoiceImport.getUnitId()));
             relocationInvoice.setInvoiceCode(relocationInvoiceImport.getInvoiceCode());
             relocationInvoice.setInvoiceNumber(relocationInvoiceImport.getInvoiceNumber());
             String invoiceType = relocationInvoiceImport.getInvoiceType();
             if ("电子增值税普通发票".equals(invoiceType) || "增值税电子普票".equals(invoiceType)
-                || "增值税电子普通发票".equals(invoiceType) || "增值税普票".equals(invoiceType)) {
+                    || "增值税电子普通发票".equals(invoiceType) || "增值税普票".equals(invoiceType)) {
                 relocationInvoice.setInvoiceType(1);
             }
             if ("电子增值税专用发票".equals(invoiceType) || "增值税专用发票".equals(invoiceType)) {
@@ -152,16 +153,16 @@ public class InvoiceServiceImpl implements InvoiceService {
             relocationInvoice.setBuyerName(relocationInvoiceImport.getBuyerName());
             relocationInvoice.setInvoiceProject(relocationInvoiceImport.getInvoiceProject());
             relocationInvoice
-                .setInvoiceTime(relocationInvoiceImport.getInvoiceTime().split("\\.")[0]);
+                    .setInvoiceTime(relocationInvoiceImport.getInvoiceTime().split("\\.")[0]);
             relocationInvoice.setAmount(new BigDecimal(relocationInvoiceImport.getAmount()));
             relocationInvoice.setTaxRate(new BigDecimal(
-                relocationInvoiceImport.getTaxRate() == null ? "0"
-                    : relocationInvoiceImport.getTaxRate()));
+                    relocationInvoiceImport.getTaxRate() == null ? "0"
+                            : relocationInvoiceImport.getTaxRate()));
             relocationInvoice.setTaxAmount(new BigDecimal(
-                relocationInvoiceImport.getTaxAmount() == null ? "0"
-                    : relocationInvoiceImport.getTaxAmount()));
+                    relocationInvoiceImport.getTaxAmount() == null ? "0"
+                            : relocationInvoiceImport.getTaxAmount()));
             relocationInvoice
-                .setTaxIncludeAmount(new BigDecimal(relocationInvoiceImport.getTaxIncludeAmount()));
+                    .setTaxIncludeAmount(new BigDecimal(relocationInvoiceImport.getTaxIncludeAmount()));
             relocationInvoice.setRemake(relocationInvoiceImport.getRemake());
             relocationInvoice.setApplicant(relocationInvoiceImport.getApplicant());
             relocationInvoice.setIssuer(relocationInvoiceImport.getIssuer());
@@ -169,20 +170,20 @@ public class InvoiceServiceImpl implements InvoiceService {
             relocationInvoice.setState("蓝字".equals(relocationInvoiceImport.getState()) ? 1 : 0);
             // 1 是, 0 否
             relocationInvoice
-                .setIsImport("是".equals(relocationInvoiceImport.getIsImport()) ? 1 : 0);
+                    .setIsImport("是".equals(relocationInvoiceImport.getIsImport()) ? 1 : 0);
             relocationInvoice.setBusinessType(relocationInvoiceImport.getBusinessType());
             relocationInvoice.setInvoiceSite(relocationInvoiceImport.getInvoiceSite());
             relocationInvoice.setManager(relocationInvoiceImport.getManager());
             Long pid = null;
             Integer atype = null;
             if (!StringUtils.isEmpty(newRemake) && !"作废".contains(newRemake) && !"发票作废"
-                .equals(newRemake)) {
+                    .equals(newRemake)) {
                 String[] split = newRemake.split("；");
                 //合同号
                 String contractNum = split[0];
                 if (contractNum.startsWith("（")) {
                     contractNum = contractNum
-                        .substring(contractNum.indexOf("（") + 1, contractNum.lastIndexOf("）"));
+                            .substring(contractNum.indexOf("（") + 1, contractNum.lastIndexOf("）"));
                 }
                 //区县
                 String unit = split[1];
@@ -200,13 +201,13 @@ public class InvoiceServiceImpl implements InvoiceService {
                         atype = 3;
                         break;
                 }
-                //项目信息 匹配id
+                // 项目信息 匹配id
                 String pinfo = split[3];
                 String key = contractNum + unitId + pinfo;
                 pid = projectMap.get(key);
                 if (pid == null) {
                     throw new InvoiceException(
-                        InvoiceErrorCode.RELOCATION_INVOICE_EXIST_PROJECT_ERROR);
+                            InvoiceErrorCode.RELOCATION_INVOICE_EXIST_PROJECT_ERROR);
                 }
             }
             relocationInvoice.setPaymentType(atype);
@@ -218,10 +219,10 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO vo,
-        Integer userId) {
+                                                                Integer userId) {
         setConditionDetail(vo, userId);
         List<InvoiceExportResVO> exportResVOS = relocationInvoiceMapper
-            .selectExportListByCondition(vo);
+                .selectExportListByCondition(vo);
         for (int i = 0; i < exportResVOS.size(); i++) {
             exportResVOS.get(i).setNum(i + 1);
             InvoiceExportResVO invoiceExportResVO = exportResVOS.get(i);
@@ -259,6 +260,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     /**
      * 判断登录用户 添加时间查询 时分秒详情
+     *
      * @param cond
      * @param userId
      */
@@ -279,7 +281,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         // 转换单位
         List<Unit> list = unitApiExp.getAllUnitList();
         Map<String, Integer> unitMap = list.stream().collect(
-            Collectors.toMap(Unit::getUnitName, Unit::getId));
+                Collectors.toMap(Unit::getUnitName, Unit::getId));
         String remake = invoice.getRemake();
         String[] split = remake.split("；");
         //合同号
@@ -302,17 +304,17 @@ public class InvoiceServiceImpl implements InvoiceService {
                 break;
         }
         invoice.setPaymentType(atype);
-        //项目信息 匹配id
+        // 项目信息 匹配id
         String pinfo = split[3];
         Long pid = relocationInvoiceMapper
-            .selectPidByCondition(contractNum, unitId, pinfo);
+                .selectPidByCondition(contractNum, unitId, pinfo);
         invoice.setProjectId(pid);
     }
 
     private RelocationIncome getRelocationIncome(RelocationInvoice relocationInvoice, Long pid,
-        Integer atype) {
+                                                 Integer atype) {
         RelocationIncome relocationIncome = new RelocationIncome();
-        RelocationProject relocationProject = ProjectMapper.single(pid);
+        RelocationProject relocationProject = projectMapper.single(pid);
         relocationIncome.setCategory(1);
         relocationIncome.setUnitId(relocationInvoice.getUnitId());
         relocationIncome.setSupplier(relocationInvoice.getBuyerName());
@@ -322,10 +324,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         relocationIncome.setContractDeadline(relocationProject.getPlanEndTime());
         relocationIncome.setContractAmount(relocationProject.getCompensationAmount());
         relocationIncome
-            .setInvoiceTime(DateUtil.stringToDate(relocationInvoice.getInvoiceTime()));
+                .setInvoiceTime(DateUtil.stringToDate(relocationInvoice.getInvoiceTime()));
         relocationIncome.setInvoiceNum(relocationInvoice.getInvoiceNumber());
         relocationIncome.setInvoiceType(
-            relocationInvoice.getInvoiceType() == 1 ? "增值税电子普通发票" : "电子增值税专用发票");
+                relocationInvoice.getInvoiceType() == 1 ? "增值税电子普通发票" : "电子增值税专用发票");
         relocationIncome.setAmount(relocationInvoice.getAmount());
         relocationIncome.setTax(relocationInvoice.getTaxAmount());
         relocationIncome.setTaxIncludeAmount(relocationInvoice.getTaxIncludeAmount());

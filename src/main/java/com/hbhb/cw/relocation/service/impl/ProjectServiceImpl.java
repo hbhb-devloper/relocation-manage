@@ -189,7 +189,14 @@ public class ProjectServiceImpl implements ProjectService {
         PageRequest<ProjectResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<ProjectResVO> list = projectMapper.selectProjectByCond(cond, request);
         // 组装赔补状态
+        List<Unit> unitList = unitApi.getAllUnitList();
+        Map<Integer,String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId,Unit::getUnitName));
         Map<String, String> compensationSateMap = getCompensationSate();
+        list.getList().forEach(item->{item.setCompensationSate(Integer.valueOf(compensationSateMap.get(item.getCompensationSate().toString())));
+        item.setUnitName(Integer.valueOf(unitMap.get(item.getUnitId())));
+        }
+
+                );
         return list;
     }
 

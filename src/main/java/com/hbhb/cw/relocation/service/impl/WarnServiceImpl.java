@@ -7,12 +7,12 @@ import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.mapper.WarnMapper;
 import com.hbhb.cw.relocation.model.RelocationFile;
 import com.hbhb.cw.relocation.model.RelocationWarn;
+import com.hbhb.cw.relocation.rpc.FileApiExp;
+import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.service.WarnService;
-import com.hbhb.cw.relocation.web.vo.WarnExportVO;
-import com.hbhb.cw.relocation.web.vo.WarnFileVO;
-import com.hbhb.cw.relocation.web.vo.WarnReqVO;
-import com.hbhb.cw.relocation.web.vo.WarnResVO;
-import com.hbhb.cw.systemcenter.vo.SelectVO;
+import com.hbhb.cw.relocation.web.vo.*;
+import com.hbhb.cw.systemcenter.model.SysFile;
+import com.hbhb.cw.systemcenter.model.Unit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -24,10 +24,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+/**
+ * @author wangxiaogang
+ */
 @Service
 @Slf4j
-public class WarnServiceImp implements WarnService {
+public class WarnServiceImpl implements WarnService {
 
     @Resource
     private ProjectMapper projectMapper;
@@ -38,19 +42,32 @@ public class WarnServiceImp implements WarnService {
     @Resource
     private FileMapper fileMapper;
 
+    @Resource
+    private FileApiExp fileApiExp;
+
+    @Resource
+    private UnitApiExp unitApi;
+
     @Override
     public List<WarnResVO> getWarn(WarnReqVO reqVO) {
-        List<WarnResVO> WarnResVOS = warnMapper.selectProjectWarnByCond(reqVO);
+        List<Unit> unitList = unitApi.getAllUnitList();
+        Map<Integer,String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId,Unit::getUnitName));
+        List<WarnResVO> warnResVo = warnMapper.selectProjectWarnByCond(reqVO);
         Map<String, String> isReceived = new HashMap<>();
         isReceived.put("1", "是");
         isReceived.put("2", "否");
-        WarnResVOS.forEach(item -> item.setIsReceived(isReceived.get(item.getIsReceived())));
-        return WarnResVOS;
+        warnResVo.forEach(item -> {item.setIsReceived(isReceived.get(item.getIsReceived()));
+        item.setUnitName(unitMap.get(item.getUnitId()));
+        });
+        return warnResVo;
     }
 
     @Override
     public List<WarnExportVO> export(WarnReqVO reqVO) {
         List<WarnResVO> list = warnMapper.selectProjectWarnByCond(reqVO);
+        List<Unit> unitList = unitApi.getAllUnitList();
+        Map<Integer,String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId,Unit::getUnitName));
+        list.forEach(item->item.setUnitName(unitMap.get(item.getUnitId())));
         return BeanConverter.copyBeanList(list, WarnExportVO.class);
     }
 
@@ -64,22 +81,14 @@ public class WarnServiceImp implements WarnService {
         if (projectNumWarn.size() != 0) {
             List<String> projectNum = projectMapper.selectProjectNumByProjectNum(projectNumWarn);
             // 3.跟据查寻到的已全额回款的项目编号更新预警信息
-            List<SelectVO> selectVoList = new ArrayList<>();
-            for (String project : projectNum) {
-                SelectVO selectVO = new SelectVO();
-                selectVO.setId(Long.valueOf(1));
-                selectVO.setLabel(project);
-                selectVoList.add(selectVO);
-            }
-            if(projectNum.size()!=0) {
-                warnMapper.updateSateByProjectNum(selectVoList);
+            if (projectNum.size() != 0) {
+                warnMapper.updateSateByProjectNum(projectNum);
             }
         }
         // 新增预警信息
-        List<WarnResVO> WarnResVO = projectMapper.selectProjectWarn();
+        List<WarnResVO> warnResVO = projectMapper.selectProjectWarn();
         List<RelocationWarn> list = new ArrayList<>();
-
-        WarnResVO.forEach(item->list.add(RelocationWarn.builder()
+        warnResVO.forEach(item -> list.add(RelocationWarn.builder()
                 .projectNum(item.getProjectNum())
                 .anticipatePayment(new BigDecimal(item.getAnticipatePayment()))
                 .constructionUnit(item.getConstructionUnit())
@@ -100,5 +109,23 @@ public class WarnServiceImp implements WarnService {
         RelocationFile file = new RelocationFile();
         BeanUtils.copyProperties(fileVO, file);
         fileMapper.insert(file);
+    }
+
+    @Override
+    public Integer getWarnCount(Integer unitId) {
+        return warnMapper.selectWarnCountByUnitId(unitId);
+    }
+
+    @Override
+    public List<WarnFileResVO> getWarnFileList(Long warnId) {
+        List<Integer> list = fileMapper.selectFileByWarnId(warnId);
+        List<SysFile> fileList = fileApiExp.getFileList(list);
+        List<WarnFileResVO> fileVo = new ArrayList<>();
+        fileList.forEach(item -> fileVo.add(WarnFileResVO.builder()
+                .fileId(item.getId())
+                .fileName(item.getFileName())
+                .filepath(item.getFilePath())
+                .build()));
+        return fileVo;
     }
 }

@@ -4,6 +4,8 @@ import com.hbhb.cw.relocation.model.RelocationReceipt;
 import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
 import com.hbhb.web.beetlsql.BaseMapper;
+import org.beetl.sql.core.page.PageRequest;
+import org.beetl.sql.core.page.PageResult;
 
 import java.util.List;
 
@@ -14,4 +16,6 @@ import java.util.List;
 public interface ReceiptMapper extends BaseMapper<RelocationReceipt> {
 
     List<ReceiptResVO> selectReceiptByCond(ReceiptReqVO cond);
+
+    PageResult<ReceiptResVO> selectReceiptListByCond(ReceiptReqVO cond, PageRequest<ReceiptResVO> request);
 }

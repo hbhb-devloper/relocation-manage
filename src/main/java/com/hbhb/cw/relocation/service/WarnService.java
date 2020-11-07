@@ -1,12 +1,7 @@
 package com.hbhb.cw.relocation.service;
 
 
-
-import com.hbhb.cw.relocation.web.vo.WarnExportVO;
-import com.hbhb.cw.relocation.web.vo.WarnFileVO;
-import com.hbhb.cw.relocation.web.vo.WarnReqVO;
-import com.hbhb.cw.relocation.web.vo.WarnResVO;
-import com.hbhb.cw.systemcenter.vo.FileDetailVO;
+import com.hbhb.cw.relocation.web.vo.*;
 
 import java.util.List;
 
@@ -32,4 +27,16 @@ public interface WarnService {
      * @param fileVO 附件
      */
     void addWarnFile(WarnFileVO fileVO);
+
+    /**
+     * 跟据单位id统计预警数量
+     */
+    Integer getWarnCount(Integer unitId);
+
+    /**
+     * 跟据预警id获取预警附件列表
+     * @param warnId 预警id
+     * @return 附件列表
+     */
+    List<WarnFileResVO> getWarnFileList(Long warnId);
 }

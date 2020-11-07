@@ -9,8 +9,6 @@ import com.hbhb.cw.relocation.web.vo.ProjectImportVO;
 import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
 import com.hbhb.cw.relocation.web.vo.ProjectResVO;
 import com.hbhb.cw.relocationmange.api.RelocationProjectApi;
-import com.hbhb.cw.systemcenter.api.SysFileApi;
-import com.hbhb.cw.systemcenter.enums.FileType;
 import com.hbhb.cw.systemcenter.model.SysUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,12 +34,10 @@ public class ProjectController implements RelocationProjectApi {
     @Resource
     private ProjectService projectService;
 
-    @Resource
-    private SysFileApi fileApi;
 
     @Operation(summary = "迁改管理基础信息导入")
     @PostMapping(value = "/import", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public void ProjectImport(@RequestPart(required = false, value = "file") MultipartFile file) {
+    public void projectImport(@RequestPart(required = false, value = "file") MultipartFile file) {
         long begin = System.currentTimeMillis();
         try {
             EasyExcel.read(file.getInputStream(), ProjectImportVO.class,
@@ -75,12 +71,6 @@ public class ProjectController implements RelocationProjectApi {
     @DeleteMapping("/{id}")
     public void deleteProject(@PathVariable Long id, SysUser user) {
         projectService.deleteRelocationProject(id, user);
-    }
-
-    @Operation(summary = "上传文件")
-    @PostMapping(value = "/system", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public void uploadSystemFile(@RequestPart(required = false, value = "files") MultipartFile[] files) {
-        fileApi.uploadFileList(files, FileType.SYSTEM_FILE.value());
     }
 
     @Override

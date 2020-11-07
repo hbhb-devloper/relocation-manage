@@ -26,7 +26,7 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     PageResult<StatementResVO> selectProjectStatementByUnitId(Integer unitId, PageRequest<ProjectResVO> request);
 
-    List<AmountVO> selectCompensationAmount(List<String> contractNumNewList);
+    List<AmountVO> selectCompensationAmount(List<String> list);
 
     Map<String, BigDecimal> selectSumConstructionBudget(List<String> contractNumNewList);
 
@@ -40,4 +40,5 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     List<WarnResVO> selectProjectWarn();
 
+    List<StatementResVO> selectProjectStatementListByUnitId(Integer unitId);
 }
