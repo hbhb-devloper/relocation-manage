@@ -1,13 +1,13 @@
 package com.hbhb.cw.relocation.service;
 
 import com.hbhb.cw.relocation.model.RelocationInvoice;
-import com.hbhb.cw.relocation.web.vo.InvoiceReqVO;
-import com.hbhb.cw.relocation.web.vo.InvoiceResVO;
-
 import com.hbhb.cw.relocation.web.vo.InvoiceExportResVO;
 import com.hbhb.cw.relocation.web.vo.InvoiceImportVO;
-import java.util.List;
+import com.hbhb.cw.relocation.web.vo.InvoiceReqVO;
+import com.hbhb.cw.relocation.web.vo.InvoiceResVO;
 import org.beetl.sql.core.page.PageResult;
+
+import java.util.List;
 
 /**
  * @author xiaokang
@@ -55,7 +55,7 @@ public interface InvoiceService {
      *
      * @param dataList
      */
-    void addSaveRelocaxtionInvoice(List<InvoiceImportVO> dataList);
+    void addSaveRelocationInvoice(List<InvoiceImportVO> dataList);
 
     /**
      * 条件导出

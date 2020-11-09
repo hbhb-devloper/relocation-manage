@@ -3,7 +3,7 @@ getFinanceList
 ```sql
     select 
         -- @pageTag(){
-            u.unit_name unit,
+            rp.unit_id unitId,
             rp.project_type projectType,
             rp.eoms_repair_num eomsRepairNum,
             rp.project_name projectName,
@@ -21,7 +21,7 @@ getFinanceList
             rp.compensation_amount oppositeAmount,
             ri.init_amount initRecoveredAmount,
             (rp.anticipate_payment + rp.final_payment) yearRecoveredAmount,
-            rp.anticipa+te_payable advanceReceivableAmount,
+            rp.anticipate_payable advanceReceivableAmount,
             rp.anticipate_payment advanceReceivedAmount,
             if(rp.anticipate_payable = rp.anticipate_payment, 1, 0) isAllReceived,
             ifnull((select sum(amount) amount
@@ -75,13 +75,9 @@ getFinanceList
             (rp.compensation_amount - rp.anticipate_payment - rp.final_payment) unpaidCollection,
             rii.amount invoicedAmount
             from relocation_project rp
-            left join unit u on rp.unit_id = u.id
             left join relocation_invoice rii on rp.id = rii.project_id
             left join relocation_income ri on rp.contract_num like ri.contract_num
         -- @}
-        from relocation_project rp
-        left join unit u on rp.unit_id = u.id
-        left join relocation_income ri on rp.contract_num like ri.contract_num
         -- @where(){
           -- @if(cond.unitId == 429){
             and rp.unit_id in (SELECT id FROM unit WHERE parent_id = 429)

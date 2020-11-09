@@ -59,9 +59,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     public PageResult<InvoiceResVO> getInvoiceList(Integer pageNum, Integer pageSize,
                                                    InvoiceReqVO cond, Integer userId) {
         PageRequest<InvoiceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
-        PageResult<InvoiceResVO> invoiceResVOPageResult = relocationInvoiceMapper
+        PageResult<InvoiceResVO> invoiceResVo = relocationInvoiceMapper
                 .selectListByCondition(cond, request);
-        List<InvoiceResVO> list = invoiceResVOPageResult.getList();
+        List<InvoiceResVO> list = invoiceResVo.getList();
         for (InvoiceResVO invoiceResVO : list) {
             if ("1".equals(invoiceResVO.getInvoiceType())) {
                 invoiceResVO.setInvoiceType("增值税普通发票");
@@ -82,7 +82,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 invoiceResVO.setIsImport("否");
             }
         }
-        return invoiceResVOPageResult;
+        return invoiceResVo;
     }
 
     @Override
@@ -110,7 +110,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addSaveRelocaxtionInvoice(List<InvoiceImportVO> dataList) {
+    public void addSaveRelocationInvoice(List<InvoiceImportVO> dataList) {
 
         List<ProjectInfoVO> projectInfo = relocationInvoiceMapper.getProjectInfo();
         Map<String, Long> projectMap = projectInfo.stream()
@@ -136,9 +136,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             }
             RelocationInvoice relocationInvoice = new RelocationInvoice();
             relocationInvoice.setUnitId(109);
-            // relocationInvoice.setUnitId(unitMap.get(relocationInvoiceImport.getUnitId()));
             relocationInvoice.setDistrict(109);
-            // relocationInvoice.setDistrict(unitMap.get(relocationInvoiceImport.getUnitId()));
             relocationInvoice.setInvoiceCode(relocationInvoiceImport.getInvoiceCode());
             relocationInvoice.setInvoiceNumber(relocationInvoiceImport.getInvoiceNumber());
             String invoiceType = relocationInvoiceImport.getInvoiceType();
@@ -200,6 +198,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                     case "决算款":
                         atype = 3;
                         break;
+                    default:
+                        break;
                 }
                 // 项目信息 匹配id
                 String pinfo = split[3];
@@ -221,11 +221,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     public List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO vo,
                                                                 Integer userId) {
         setConditionDetail(vo, userId);
-        List<InvoiceExportResVO> exportResVOS = relocationInvoiceMapper
+        List<InvoiceExportResVO> exportResVos = relocationInvoiceMapper
                 .selectExportListByCondition(vo);
-        for (int i = 0; i < exportResVOS.size(); i++) {
-            exportResVOS.get(i).setNum(i + 1);
-            InvoiceExportResVO invoiceExportResVO = exportResVOS.get(i);
+        for (int i = 0; i < exportResVos.size(); i++) {
+            exportResVos.get(i).setNum(i + 1);
+            InvoiceExportResVO invoiceExportResVO = exportResVos.get(i);
             if ("1".equals(invoiceExportResVO.getInvoiceType())) {
                 invoiceExportResVO.setInvoiceType("增值税普通发票");
             }
@@ -245,7 +245,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 invoiceExportResVO.setIsImport("否");
             }
         }
-        return exportResVOS;
+        return exportResVos;
     }
 
 
@@ -258,12 +258,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
     }
 
-    /**
-     * 判断登录用户 添加时间查询 时分秒详情
-     *
-     * @param cond
-     * @param userId
-     */
+
     private void setConditionDetail(InvoiceReqVO cond, Integer userId) {
         SysUserInfo user = sysUserApiExp.getUserById(userId);
         if (!"admin".equals(user.getUserName())) {
@@ -301,6 +296,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 break;
             case "决算款":
                 atype = 3;
+                break;
+            default:
                 break;
         }
         invoice.setPaymentType(atype);

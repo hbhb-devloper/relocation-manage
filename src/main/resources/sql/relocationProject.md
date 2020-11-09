@@ -44,8 +44,8 @@ selectProjectByCond
     -- @}
           from relocation_project rp
     -- @where(){
-            --  @if(!isEmpty(cond.contractNum)){
-                 contract_num like concat('%', #{cond.contractNum},'%')
+            -- @if(!isEmpty(cond.contractNum)){
+                and contract_num like concat('%', #{cond.contractNum},'%')
             -- @}
             -- @if(!isEmpty(cond.unitId)){
                 and unit_id=#{cond.unitId}
@@ -62,7 +62,7 @@ selectProjectByCond
             -- @if(!isEmpty(cond.projectName)){
                 and project_name like concat('%', #{cond.projectName},'%')
             -- @}
-     -- 
+     -- @}
 ```
 
 selectProjectNum

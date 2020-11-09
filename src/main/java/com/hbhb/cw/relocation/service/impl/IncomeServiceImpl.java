@@ -1,8 +1,8 @@
 package com.hbhb.cw.relocation.service.impl;
 
 import com.hbhb.core.utils.DateUtil;
-import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
-import com.hbhb.cw.relocation.exception.InvoiceException;
+import com.hbhb.cw.relocation.enums.RelocationErrorCode;
+import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
@@ -16,6 +16,7 @@ import com.hbhb.cw.relocation.web.vo.IncomeExportVO;
 import com.hbhb.cw.relocation.web.vo.IncomeImportVO;
 import com.hbhb.cw.relocation.web.vo.IncomeReqVO;
 import com.hbhb.cw.relocation.web.vo.IncomeResVO;
+import com.hbhb.cw.systemcenter.enums.AllName;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,6 @@ import java.util.stream.Collectors;
 public class
 IncomeServiceImpl implements IncomeService {
 
-
     @Resource
     private IncomeMapper relocationIncomeMapper;
 
@@ -58,28 +58,18 @@ IncomeServiceImpl implements IncomeService {
     @Resource
     private ProjectMapper relocationProjectMapper;
 
-
     @Override
     public void judgeFileName(String fileName) {
         int i = fileName.lastIndexOf(".");
         String name = fileName.substring(i);
-        if (!(".xlsx".equals(name) || ".xls".equals(name))) {
-            throw new InvoiceException(InvoiceErrorCode.FILE_NAME_ERROR);
+        if (!(AllName.XLS.getValue().equals(name) || AllName.XLSX.getValue().equals(name))) {
+            throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
         }
     }
 
-    /**
-     * 收款分页查询
-     *
-     * @param pageNum
-     * @param pageSize
-     * @param cond
-     * @param userId
-     * @return
-     */
     @Override
     public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize,
-        IncomeReqVO cond, Integer userId) {
+                                                 IncomeReqVO cond, Integer userId) {
         setConditionDetail(cond, userId);
         PageRequest<IncomeResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<IncomeResVO> incomeList = relocationIncomeMapper.getIncomeList(cond, request);
@@ -94,7 +84,7 @@ IncomeServiceImpl implements IncomeService {
                 relocationIncomeResVO.setCategory("代建");
             }
             BigDecimal monthAmount = relocationIncomeMapper
-                .getMonthAmount(relocationIncomeResVO.getId(), DateUtil.getCurrentMonth());
+                    .getMonthAmount(relocationIncomeResVO.getId(), DateUtil.getCurrentMonth());
             relocationIncomeResVO.setMonthAmount(monthAmount);
         }
         return incomeList;
@@ -114,7 +104,7 @@ IncomeServiceImpl implements IncomeService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addIncomeDetail(RelocationIncomeDetail detail,
-        Integer userId) {
+                                Integer userId) {
         String currentMonth = DateUtil.getCurrentMonth();
         detail.setPayMonth(currentMonth);
         detail.setPayMonth(detail.getPayMonth().replace("-", ""));
@@ -127,7 +117,7 @@ IncomeServiceImpl implements IncomeService {
         incomeDetailMapper.insert(detail);
         RelocationIncome relocationIncome = relocationIncomeMapper.single(incomeId);
         Long pid = relocationIncomeMapper
-            .selectProject(relocationIncome.getInvoiceNum());
+                .selectProject(relocationIncome.getInvoiceNum());
         Integer paymentType = relocationIncome.getPaymentType();
         RelocationProject project = relocationProjectMapper.single(pid);
         BigDecimal anticipatePayment = project.getAnticipatePayment();
@@ -137,11 +127,10 @@ IncomeServiceImpl implements IncomeService {
             // 同步修改项目信息表数据
             if (paymentType == 1) {
                 relocationProject.setAnticipatePayment(anticipatePayment.add(amount));
-                relocationProjectMapper.updateTemplateById(relocationProject);
             } else {
                 relocationProject.setFinalPayment(finalPayment.add(amount));
-                relocationProjectMapper.updateTemplateById(relocationProject);
             }
+            relocationProjectMapper.updateTemplateById(relocationProject);
         }
         RelocationIncome single = relocationIncomeMapper.single(incomeId);
         RelocationIncome income = new RelocationIncome();
@@ -160,13 +149,13 @@ IncomeServiceImpl implements IncomeService {
         RelocationIncome income1 = new RelocationIncome();
         income1.setId(incomeId);
         if (relocationIncome.getReceived().compareTo(relocationIncome.getReceivable()) == 0
-            && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) == 0) {
+                && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) == 0) {
             income.setIsReceived(3);
             relocationIncomeMapper.updateTemplateById(income1);
         }
         //未收完 2
         if (relocationIncome.getReceived().compareTo(relocationIncome.getReceivable()) < 0
-            && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
+                && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
             income.setIsReceived(2);
             relocationIncomeMapper.updateTemplateById(income1);
         }
@@ -178,22 +167,22 @@ IncomeServiceImpl implements IncomeService {
         // 转换单位
         List<Unit> list = unitService.getAllUnitList();
         Map<String, Integer> unitMap = list.stream().collect(
-            Collectors.toMap(Unit::getShortName, Unit::getId));
+                Collectors.toMap(Unit::getShortName, Unit::getId));
         List<RelocationIncome> incomes = new ArrayList<>();
         for (IncomeImportVO importVO : dataList) {
             System.out.println(importVO);
             RelocationIncome relocationIncome = new RelocationIncome();
             // 1 迁改 2 搬迁 3 代建
             relocationIncome.setCategory("迁改".equals(importVO.getCategory()) ? 1
-                : "搬迁".equals(importVO.getCategory()) ? 2 : 3);
+                    : "搬迁".equals(importVO.getCategory()) ? 2 : 3);
             relocationIncome.setUnitId(
-                unitMap.get(importVO.getUnit()) == null ? 11 : unitMap.get(importVO.getUnit()));
+                    unitMap.get(importVO.getUnit()) == null ? 11 : unitMap.get(importVO.getUnit()));
             relocationIncome.setSupplier(importVO.getSupplier());
             relocationIncome.setContractNum(importVO.getContractNum());
             relocationIncome.setContractName(importVO.getContractName());
             relocationIncome.setStartTime(DateUtil.string3DateYMD(importVO.getStartTime()));
             relocationIncome
-                .setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
+                    .setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
             relocationIncome.setContractAmount(stringToBigDecimal(importVO.getContractAmount()));
             relocationIncome.setInvoiceTime(DateUtil.string3DateYMD(importVO.getInvoiceTime()));
             relocationIncome.setInvoiceNum(importVO.getInvoiceNum());
@@ -201,7 +190,7 @@ IncomeServiceImpl implements IncomeService {
             relocationIncome.setAmount(stringToBigDecimal(importVO.getAmount()));
             relocationIncome.setTax(stringToBigDecimal(importVO.getTax()));
             relocationIncome
-                .setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
+                    .setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
             relocationIncome.setConstructionName(importVO.getConstructionName());
             // 1 预付款 2 尾款  3 决算款
             relocationIncome.setPaymentType(1);
@@ -218,12 +207,12 @@ IncomeServiceImpl implements IncomeService {
 
     @Override
     public List<IncomeExportVO> selectExportListByCondition(IncomeReqVO vo,
-        Integer userId) {
+                                                            Integer userId) {
         setConditionDetail(vo, userId);
-        List<IncomeExportVO> relocationIncomeExportVOS = relocationIncomeMapper
-            .selectExportList(vo);
-        for (int i = 0; i < relocationIncomeExportVOS.size(); i++) {
-            IncomeExportVO relocationIncomeExportVO = relocationIncomeExportVOS.get(i);
+        List<IncomeExportVO> relocationIncomeExportVos = relocationIncomeMapper
+                .selectExportList(vo);
+        for (int i = 0; i < relocationIncomeExportVos.size(); i++) {
+            IncomeExportVO relocationIncomeExportVO = relocationIncomeExportVos.get(i);
             String category = relocationIncomeExportVO.getCategory();
             switch (category) {
                 case "1":
@@ -234,6 +223,9 @@ IncomeServiceImpl implements IncomeService {
                     break;
                 case "3":
                     relocationIncomeExportVO.setCategory("代建");
+                    break;
+                default:
+                    relocationIncomeExportVO.setCategory("");
                     break;
             }
             String isReceived = relocationIncomeExportVO.getIsReceived();
@@ -247,11 +239,14 @@ IncomeServiceImpl implements IncomeService {
                 case "3":
                     relocationIncomeExportVO.setIsReceived("已收完");
                     break;
+                default:
+                    relocationIncomeExportVO.setIsReceived("");
+                    break;
             }
             relocationIncomeExportVO.setNum(i + 1);
         }
 
-        return relocationIncomeExportVOS;
+        return relocationIncomeExportVos;
     }
 
     public BigDecimal stringToBigDecimal(String str) {
@@ -269,17 +264,13 @@ IncomeServiceImpl implements IncomeService {
         return new BigDecimal(str);
     }
 
-    /*
-     * 判断登录用户 添加时间查询 时分秒详情
-     *
-     * @param cond
-     * @param loginUser
-     */
+
     private void setConditionDetail(IncomeReqVO cond, Integer userId) {
         SysUserInfo user = sysUserApiExp.getUserById(userId);
         if (!"admin".equals(user.getUserName())) {
             cond.setUnitId(user.getUnitId());
         }
+
         if (!StringUtils.isEmpty(cond.getStartTimeFrom())) {
             cond.setStartTimeFrom(cond.getStartTimeFrom() + " 00:00:00");
         }

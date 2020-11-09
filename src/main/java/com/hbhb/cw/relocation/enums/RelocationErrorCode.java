@@ -2,6 +2,10 @@ package com.hbhb.cw.relocation.enums;
 
 import lombok.Getter;
 
+/**
+ * @author wangxiaogang
+ */
+
 @Getter
 public enum RelocationErrorCode {
     RELOCATION_IMPORT_DATE_ERROR("80898","relocation.import.date.error"),

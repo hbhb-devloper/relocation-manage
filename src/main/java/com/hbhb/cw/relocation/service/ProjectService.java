@@ -8,6 +8,9 @@ import org.beetl.sql.core.page.PageResult;
 
 import java.util.List;
 
+/**
+ * @author wangxiaogang
+ */
 public interface ProjectService {
     /**
      * 批量导入传输迁改信息

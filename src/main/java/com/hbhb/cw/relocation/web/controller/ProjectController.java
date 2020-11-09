@@ -39,6 +39,7 @@ public class ProjectController implements RelocationProjectApi {
     @PostMapping(value = "/import", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public void projectImport(@RequestPart(required = false, value = "file") MultipartFile file) {
         long begin = System.currentTimeMillis();
+        projectService.judgeFileName(file.getOriginalFilename());
         try {
             EasyExcel.read(file.getInputStream(), ProjectImportVO.class,
                     new ProjectListener(projectService)).sheet().doRead();

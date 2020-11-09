@@ -23,7 +23,7 @@ public class ProjectResVO implements Serializable {
     private Integer unitId;
 
     @Schema(description = "区域(单位id)")
-    private Integer unitName;
+    private String unitName;
 
     @Schema(description = "迁改项目编号")
     private String projectNum;
@@ -110,7 +110,7 @@ public class ProjectResVO implements Serializable {
     private String finalPayment;
 
     @Schema(description = "补偿状态")
-    private Integer compensationSate;
+    private String compensationSate;
 
     @Schema(description = "未全额回款合同历时")
     private String contractDuration;

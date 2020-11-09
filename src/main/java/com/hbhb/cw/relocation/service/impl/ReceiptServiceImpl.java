@@ -31,6 +31,9 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+/**
+ * @author wangxiaogang
+ */
 @Service
 @Slf4j
 public class ReceiptServiceImpl implements ReceiptService {
@@ -49,7 +52,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     public PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize) {
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<ReceiptResVO> receiptRes = receiptMapper.selectReceiptListByCond(cond, request);
-        List<Unit> unitList = unitApi.getAllUnitList();
+        List<Unit> unitList = getUnitList();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         receiptRes.getList().forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
         return receiptRes;
@@ -59,7 +62,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Transactional(rollbackFor = Exception.class)
     public synchronized void addSaveRelocationReceipt(List<ReceiptImportVO> dataList) {
         List<String> msg = new CopyOnWriteArrayList<>();
-        List<Unit> list = unitApi.getAllUnitList();
+        List<Unit> list = getUnitList();
         Map<String, Integer> unitMap = list.stream()
                 .collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
         List<RelocationReceipt> receiptList = new ArrayList<>();
@@ -134,5 +137,9 @@ public class ReceiptServiceImpl implements ReceiptService {
         // 开收据时间
         receipt.setReceiptTime(DateUtil.string2DateYMD(receiptResVO.getReceiptTime()));
         return receipt;
+    }
+
+    private List<Unit> getUnitList() {
+        return unitApi.getAllUnitList();
     }
 }

@@ -33,6 +33,9 @@ import java.util.stream.Collectors;
 
 import static com.alibaba.excel.util.StringUtils.isEmpty;
 
+/**
+ * @author wangxiaogang
+ */
 @Service
 @Slf4j
 public class ProjectServiceImpl implements ProjectService {
@@ -190,13 +193,13 @@ public class ProjectServiceImpl implements ProjectService {
         PageResult<ProjectResVO> list = projectMapper.selectProjectByCond(cond, request);
         // 组装赔补状态
         List<Unit> unitList = unitApi.getAllUnitList();
-        Map<Integer,String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId,Unit::getUnitName));
+        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         Map<String, String> compensationSateMap = getCompensationSate();
-        list.getList().forEach(item->{item.setCompensationSate(Integer.valueOf(compensationSateMap.get(item.getCompensationSate().toString())));
-        item.setUnitName(Integer.valueOf(unitMap.get(item.getUnitId())));
-        }
-
-                );
+        list.getList().forEach(item -> {
+                    item.setCompensationSate((compensationSateMap.get(item.getCompensationSate())));
+                    item.setUnitName((unitMap.get(item.getUnitId())));
+                }
+        );
         return list;
     }
 

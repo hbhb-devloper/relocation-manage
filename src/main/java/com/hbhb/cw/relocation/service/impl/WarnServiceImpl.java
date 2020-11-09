@@ -2,6 +2,7 @@ package com.hbhb.cw.relocation.service.impl;
 
 
 import com.hbhb.core.bean.BeanConverter;
+import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.mapper.FileMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.mapper.WarnMapper;
@@ -51,13 +52,12 @@ public class WarnServiceImpl implements WarnService {
     @Override
     public List<WarnResVO> getWarn(WarnReqVO reqVO) {
         List<Unit> unitList = unitApi.getAllUnitList();
-        Map<Integer,String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId,Unit::getUnitName));
+        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         List<WarnResVO> warnResVo = warnMapper.selectProjectWarnByCond(reqVO);
-        Map<String, String> isReceived = new HashMap<>();
-        isReceived.put("1", "是");
-        isReceived.put("2", "否");
-        warnResVo.forEach(item -> {item.setIsReceived(isReceived.get(item.getIsReceived()));
-        item.setUnitName(unitMap.get(item.getUnitId()));
+        Map<String, String> isReceived = getIsReceived();
+        warnResVo.forEach(item -> {
+            item.setIsReceived(isReceived.get(item.getIsReceived()));
+            item.setUnitName(unitMap.get(item.getUnitId()));
         });
         return warnResVo;
     }
@@ -66,8 +66,8 @@ public class WarnServiceImpl implements WarnService {
     public List<WarnExportVO> export(WarnReqVO reqVO) {
         List<WarnResVO> list = warnMapper.selectProjectWarnByCond(reqVO);
         List<Unit> unitList = unitApi.getAllUnitList();
-        Map<Integer,String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId,Unit::getUnitName));
-        list.forEach(item->item.setUnitName(unitMap.get(item.getUnitId())));
+        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        list.forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
         return BeanConverter.copyBeanList(list, WarnExportVO.class);
     }
 
@@ -127,5 +127,12 @@ public class WarnServiceImpl implements WarnService {
                 .filepath(item.getFilePath())
                 .build()));
         return fileVo;
+    }
+
+    private Map<String, String> getIsReceived() {
+        Map<String, String> receivedMap = new HashMap<>();
+        receivedMap.put(IsReceived.RECEIVED_CODE.value(), IsReceived.RECEIVED.value());
+        receivedMap.put(IsReceived.NOT_RECEIVED_CODE.value(), IsReceived.NOT_RECEIVED.value());
+        return receivedMap;
     }
 }

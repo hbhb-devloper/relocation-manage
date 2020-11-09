@@ -4,10 +4,11 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.hbhb.cw.relocation.service.IncomeService;
 import com.hbhb.cw.relocation.web.vo.IncomeImportVO;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author hyk
@@ -21,11 +22,6 @@ public class IncomeListener extends AnalysisEventListener {
      * 批处理条数，每隔多少条清理一次list ，方便内存回收
      */
     private static final int BATCH_COUNT = 500;
-
-    /**
-     * 表头
-     */
-//    private final List<String> headerList = new ArrayList<>();
 
     /**
      * 数据行
@@ -62,16 +58,6 @@ public class IncomeListener extends AnalysisEventListener {
         dataList.clear();
     }
 
-//    /**
-//     * 获取表头
-//     */
-//    @Override
-//    public void invokeHeadMap(Map headMap, AnalysisContext context) {
-//        if (!headMap.isEmpty()) {
-//            // 收集表头值
-//            headMap.values().forEach(value -> headerList.add((String) value));
-//        }
-//    }
 
     /**
      * 保存预算数据

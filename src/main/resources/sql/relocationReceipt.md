@@ -70,7 +70,6 @@
    select
         rp.id as id ,
         unit_id as unitId,
-        u.unit_name as unitName,
         project_name as projectName ,
         project_num as projectNum,
         project_type as projectType ,
@@ -106,7 +105,6 @@
         final_payment as finalPayment,
         cause as cause
         from relocation_project rp
-        left join unit u on rp.unit_id = u.id
         -- @where(){
         -- @if(!isEmpty(cond.contractNum)){
             and contract_num like concat('%', #{cond.contractNum},'%')

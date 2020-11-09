@@ -4,10 +4,11 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.hbhb.cw.relocation.service.InvoiceService;
 import com.hbhb.cw.relocation.web.vo.InvoiceImportVO;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author hyk
@@ -22,10 +23,6 @@ public class InvoiceListener extends AnalysisEventListener {
      */
     private static final int BATCH_COUNT = 10000;
 
-    /**
-     * 表头
-     */
-//    private final List<String> headerList = new ArrayList<>();
 
     /**
      * 数据行
@@ -38,7 +35,6 @@ public class InvoiceListener extends AnalysisEventListener {
     public InvoiceListener(InvoiceService invoiceService) {
         this.invoiceService = invoiceService;
     }
-
 
     /**
      * 每次读取一条数据时调用该方法
@@ -62,23 +58,12 @@ public class InvoiceListener extends AnalysisEventListener {
         dataList.clear();
     }
 
-//    /**
-//     * 获取表头
-//     */
-//    @Override
-//    public void invokeHeadMap(Map headMap, AnalysisContext context) {
-//        if (!headMap.isEmpty()) {
-//            // 收集表头值
-//            headMap.values().forEach(value -> headerList.add((String) value));
-//        }
-//    }
-
     /**
      * 保存预算数据
      */
     private void saveData() {
         if (!CollectionUtils.isEmpty(dataList)) {
-            invoiceService.addSaveRelocaxtionInvoice(dataList);
+            invoiceService.addSaveRelocationInvoice(dataList);
         }
     }
 }

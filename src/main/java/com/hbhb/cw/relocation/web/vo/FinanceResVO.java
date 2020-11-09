@@ -7,13 +7,14 @@ import com.alibaba.excel.annotation.write.style.ContentStyle;
 import com.alibaba.excel.annotation.write.style.HeadFontStyle;
 import com.alibaba.excel.annotation.write.style.HeadStyle;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+
+import java.io.Serializable;
 
 /**
  * @author hyk
@@ -29,6 +30,9 @@ public class FinanceResVO implements Serializable {
 
     @ExcelIgnore
     private Long id;
+
+    @ExcelIgnore
+    private Integer unitId;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "县市", index = 0)
