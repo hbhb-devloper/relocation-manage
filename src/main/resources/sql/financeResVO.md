@@ -27,57 +27,57 @@ getFinanceList
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '01')),0) janReceivable,
+            and pay_month = concat(#{cond.year}, '01')),0) janReceivable,
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '02')),0) febReceivable,
+            and pay_month = concat(#{cond.year}, '02')),0) febReceivable,
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '03')),0) marReceivable,
+            and pay_month = concat(#{cond.year}, '03')),0) marReceivable,
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '04')),0) aprReceivable,
+            and pay_month = concat(#{cond.year}, '04')),0) aprReceivable,
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '05')),0) mayReceivable,
+            and pay_month = concat(#{cond.year}, '05')),0) mayReceivable,
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '06')),0) juneReceivable,
+            and pay_month = concat(#{cond.year}, '06')),0) juneReceivable,
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '07')),0) julReceivable,
+            and pay_month = concat(#{cond.year}, '07')),0) julReceivable,
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '08')),0) augReceivable,
+            and pay_month = concat(#{cond.year}, '08')),0) augReceivable,
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '09')),0) sepReceivable,
+            and pay_month = concat(#{cond.year}, '09')),0) sepReceivable,
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '10')),0) octReceivable,
+            and pay_month = concat(#{cond.year}, '10')),0) octReceivable,
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '11')),0) novReceivable,
+            and pay_month = concat(#{cond.year}, '11')),0) novReceivable,
             ifnull((select sum(amount) amount
             from relocation_income_detail
             where income_id = ri.id
-            and pay_month = concat(#{year}, '12')),0) decReceivable,
+            and pay_month = concat(#{cond.year}, '12')),0) decReceivable,
             (rp.compensation_amount - rp.anticipate_payment - rp.final_payment) unpaidCollection,
             rii.amount invoicedAmount
+            -- @}
             from relocation_project rp
             left join relocation_invoice rii on rp.id = rii.project_id
             left join relocation_income ri on rp.contract_num like ri.contract_num
-        -- @}
         -- @where(){
           -- @if(cond.unitId == 429){
             and rp.unit_id in (SELECT id FROM unit WHERE parent_id = 429)
