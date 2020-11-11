@@ -47,7 +47,7 @@ public class StatementController {
     @PostMapping("/export")
     public void export(HttpServletRequest request, HttpServletResponse response, @RequestBody StatementReqVO reqVO) {
         List<StatementExportVO> list = statementService.export(reqVO.getUnitId());
-        String fileName = ExcelUtil.encodingFileName(request, "业务报表导出模板.xlsx");
+        String fileName = ExcelUtil.encodingFileName(request, "业务报表导出模板");
         ExcelUtil.export2WebWithTemplate(response, fileName, "网络部导出模板",
                 filePath + File.separator + "业务报表导出模板.xlsx", list);
     }

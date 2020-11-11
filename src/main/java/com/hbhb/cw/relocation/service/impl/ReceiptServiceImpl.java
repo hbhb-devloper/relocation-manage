@@ -51,7 +51,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Override
     public PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize) {
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
-        PageResult<ReceiptResVO> receiptRes = receiptMapper.selectReceiptListByCond(cond, request);
+        PageResult<ReceiptResVO> receiptRes = receiptMapper.selectReceiptByCond(cond, request);
         List<Unit> unitList = getUnitList();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         receiptRes.getList().forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
@@ -104,7 +104,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public List<ReceiptExportVO> export(ReceiptReqVO vo) {
-        List<ReceiptResVO> list = receiptMapper.selectReceiptByCond(vo);
+        List<ReceiptResVO> list = receiptMapper.selectReceiptListByCond(vo);
         return BeanConverter.copyBeanList(list, ReceiptExportVO.class);
     }
 

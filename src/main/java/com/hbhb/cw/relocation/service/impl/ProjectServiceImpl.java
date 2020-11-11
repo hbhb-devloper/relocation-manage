@@ -102,7 +102,6 @@ public class ProjectServiceImpl implements ProjectService {
             project.setFinalPayment(importVO.getFinalPayment() == null ? new BigDecimal(0) : new BigDecimal(importVO.getFinalPayment()));
             project.setMaterialBudget(importVO.getMaterialBudget() == null ? new BigDecimal(0) : new BigDecimal(importVO.getMaterialBudget()));
             project.setMaterialCost(importVO.getMaterialCost() == null ? new BigDecimal(0) : new BigDecimal(importVO.getMaterialCost()));
-            project.setMaterialBudget(importVO.getMaterialBudget() == null ? new BigDecimal(0) : new BigDecimal(importVO.getMaterialBudget()));
             // 判断合同状态
             try {
                 if (!isEmpty(importVO.getCompensationSate())) {
@@ -137,13 +136,16 @@ public class ProjectServiceImpl implements ProjectService {
         // 对比导入前后合同是否已存在 ，若未存在则不修改，若已存则修改
         List<String> contractNumNewList = new ArrayList<>();
         // 查出已存在的合同编号
+        // todo 待优化
         if (!isEmpty(contractNumList) && !isEmpty(compensationMap)) {
             for (String contractNum : contractNumList) {
-                if (!isEmpty(compensationMap.get(contractNum))) {
-                    contractNumNewList.add(contractNum);
+                for (String oldContractNum : compensationMap.keySet()) {
+                    if (oldContractNum.equals(contractNum)) {
+                        contractNumNewList.add(contractNum);
+                    }
                 }
             }
-            if (!isEmpty(contractNumNewList)) {
+            if (contractNumNewList.size() != 0) {
                 // 插入后赔补信息
                 List<AmountVO> amountVO = projectMapper.selectCompensationAmount(contractNumNewList);
                 // 需要修改合同编号施工费统计列表

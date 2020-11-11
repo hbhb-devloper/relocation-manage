@@ -102,6 +102,17 @@ public class WarnServiceImpl implements WarnService {
                 .build()));
         // 每隔一个月执行一次api向预警信息表里提供一次数据
         warnMapper.insertBatch(list);
+        // todo 向单位负责人推送邮件
+        // 1.按照单位进行统计预警统计信息
+        Map<Integer, Integer> warnMap = projectMapper.selectProjectWarnCount();
+        // 2.按照统计数据向每个单位负责人推送邮件信息
+        for (Integer unitId : warnMap.keySet()) {
+            // 该单位对应的条数
+            Integer count = warnMap.get(unitId);
+            // 向每个单位负责人推送邮件
+        }
+
+
     }
 
     @Override
