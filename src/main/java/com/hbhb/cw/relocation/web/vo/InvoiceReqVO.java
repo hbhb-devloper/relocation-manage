@@ -1,11 +1,13 @@
 package com.hbhb.cw.relocation.web.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.Serializable;
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author xiaokang
@@ -33,4 +35,8 @@ public class InvoiceReqVO implements Serializable {
 
     @Schema(description = "金额（最大）")
     private BigDecimal amountTo;
+
+    @Schema(description = "单位id集合")
+    private List<Integer> unitIds;
+
 }

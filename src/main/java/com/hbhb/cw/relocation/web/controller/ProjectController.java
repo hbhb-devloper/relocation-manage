@@ -1,6 +1,7 @@
 package com.hbhb.cw.relocation.web.controller;
 
 import com.alibaba.excel.EasyExcel;
+import com.hbhb.cw.relocation.api.RelocationProjectApi;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.service.ProjectService;
@@ -8,7 +9,6 @@ import com.hbhb.cw.relocation.service.listener.ProjectListener;
 import com.hbhb.cw.relocation.web.vo.ProjectImportVO;
 import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
 import com.hbhb.cw.relocation.web.vo.ProjectResVO;
-import com.hbhb.cw.relocationmange.api.RelocationProjectApi;
 import com.hbhb.cw.systemcenter.model.SysUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 
 /**
  * @author xiaokang
@@ -43,9 +44,9 @@ public class ProjectController implements RelocationProjectApi {
         try {
             EasyExcel.read(file.getInputStream(), ProjectImportVO.class,
                     new ProjectListener(projectService)).sheet().doRead();
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
-            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_REPETITION);
+            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR);
         }
         log.info("迁改基础信息导入成功，总共耗时：" + (System.currentTimeMillis() - begin) / 1000 + "s");
     }

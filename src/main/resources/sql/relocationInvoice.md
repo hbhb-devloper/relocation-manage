@@ -4,34 +4,32 @@ selectListByCondition
     select
         -- @pageTag(){
         ri.id,
-        u1.unit_name district,
-        u.unit_name unit,
-        ri.invoice_code invoiceCode,
-        ri.invoice_number invoiceNumber,
-        ri.invoice_site invoiceSite,
-        ri.business_type businessType,
-        ri.invoice_type invoiceType,
-        ri.buyer_tax buyerTax,
-        ri.buyer_name buyerName,
-        ri.invoice_project invoiceProject,
-        ri.invoice_time invoiceTime,
+        ri.district           districtId,
+        ri.unit_id            unitId,
+        ri.invoice_code       invoiceCode,
+        ri.invoice_number     invoiceNumber,
+        ri.invoice_site       invoiceSite,
+        ri.business_type      businessType,
+        ri.invoice_type       invoiceType,
+        ri.buyer_tax          buyerTax,
+        ri.buyer_name         buyerName,
+        ri.invoice_project    invoiceProject,
+        ri.invoice_time       invoiceTime,
         ri.amount,
-        ri.tax_rate taxRate,
-        ri.tax_amount taxAmount,
+        ri.tax_rate           taxRate,
+        ri.tax_amount         taxAmount,
         ri.tax_include_amount taxIncludeAmount,
         ri.remake,
         ri.applicant,
         ri.issuer,
         ri.state,
-        ri.is_import isImport,
+        ri.is_import          isImport,
         ri.manager
         -- @}
-        from relocation_invoice ri
-        left join unit u on ri.unit_id = u.id
-        left join unit u1 on u1.id = ri.district
+    from relocation_invoice ri
         -- @where(){
             -- @if(cond.unitId == 429){
-                and ri.district in (SELECT id FROM unit WHERE parent_id = 429)
+                and ri.district in (#{cond.unitIds})
             -- @}
             -- @if(cond.unitId != 11 && cond.unitId != 429){
                 and ri.district = #{cond.unitId}
@@ -58,30 +56,28 @@ getInvoiceDetailById
 ```sql
     select
         ri.id,
-        u1.id district,
-        u.id unitId,
-        ri.invoice_code invoiceCode,
-        ri.invoice_number invoiceNumber,
-        ri.invoice_site invoiceSite,
-        ri.business_type businessType,
-        ri.invoice_type invoiceType,
-        ri.buyer_tax buyerTax,
-        ri.buyer_name buyerName,
-        ri.invoice_project invoiceProject,
-        ri.invoice_time invoiceTime,
+        ri.district           districtId,
+        ri.unit_id            unitId,
+        ri.invoice_code       invoiceCode,
+        ri.invoice_number     invoiceNumber,
+        ri.invoice_site       invoiceSite,
+        ri.business_type      businessType,
+        ri.invoice_type       invoiceType,
+        ri.buyer_tax          buyerTax,
+        ri.buyer_name         buyerName,
+        ri.invoice_project    invoiceProject,
+        ri.invoice_time       invoiceTime,
         ri.amount,
-        ri.tax_rate taxRate,
-        ri.tax_amount taxAmount,
+        ri.tax_rate           taxRate,
+        ri.tax_amount         taxAmount,
         ri.tax_include_amount taxIncludeAmount,
         ri.remake,
         ri.applicant,
         ri.issuer,
         ri.state,
-        ri.is_import isImport,
+        ri.is_import          isImport,
         ri.manager
-        from relocation_invoice ri
-        left join unit u on ri.unit_id = u.id
-        left join unit u1 on u1.id = ri.district
+    from relocation_invoice ri
         where ri.id = #{id}
 ```
 
@@ -173,32 +169,34 @@ getProjectInfo
 selectExportListByCondition
 ===
 ```sql
-    select u1.unit_name district,
-        u.unit_name unit,
-        rp.project_name project,
-        ri.invoice_code invoiceCode,
-        ri.invoice_number invoiceNumber,
-        ri.invoice_site invoiceSite,
-        ri.business_type businessType,
-        ri.invoice_type invoiceType,
-        ri.buyer_tax buyerTax,
-        ri.buyer_name buyerName,
-        ri.invoice_time invoiceTime,
+    select
+        ri.id,
+        ri.district           districtId,
+        ri.unit_id            unitId,
+        ri.invoice_code       invoiceCode,
+        ri.invoice_number     invoiceNumber,
+        ri.invoice_site       invoiceSite,
+        ri.business_type      businessType,
+        ri.invoice_type       invoiceType,
+        ri.buyer_tax          buyerTax,
+        ri.buyer_name         buyerName,
+        ri.invoice_project    invoiceProject,
+        ri.invoice_time       invoiceTime,
         ri.amount,
-        ri.tax_rate taxRate,
-        ri.tax_amount taxAmount,
+        ri.tax_rate           taxRate,
+        ri.tax_amount         taxAmount,
         ri.tax_include_amount taxIncludeAmount,
         ri.remake,
         ri.applicant,
         ri.issuer,
         ri.state,
-        ri.is_import isImport,
-        from relocation_invoice ri
-        left join unit u on ri.unit_id = u.id
-        left join unit u1 on u1.id = ri.district
+        ri.is_import          isImport,
+        ri.manager
+    from relocation_invoice ri
         -- @where(){
           -- @if(cond.unitId == 429){
-              and ri.district in (SELECT id FROM unit WHERE parent_id = 429)
+                and ri.district in (#{cond.unitIds})
+          -- @}
           -- @}
           -- @if(cond.unitId != 11 && cond.unitId != 429){
               and ri.district = #{cond.unitId}

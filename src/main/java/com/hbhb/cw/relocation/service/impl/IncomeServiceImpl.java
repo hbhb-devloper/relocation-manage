@@ -116,8 +116,7 @@ IncomeServiceImpl implements IncomeService {
         detail.setCreateTime(DateUtil.getCurrentDate());
         incomeDetailMapper.insert(detail);
         RelocationIncome relocationIncome = relocationIncomeMapper.single(incomeId);
-        Long pid = relocationIncomeMapper
-                .selectProject(relocationIncome.getInvoiceNum());
+        Long pid = relocationIncomeMapper.selectProject(relocationIncome.getInvoiceNum());
         Integer paymentType = relocationIncome.getPaymentType();
         RelocationProject project = relocationProjectMapper.single(pid);
         BigDecimal anticipatePayment = project.getAnticipatePayment();

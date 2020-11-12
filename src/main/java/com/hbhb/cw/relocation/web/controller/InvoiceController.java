@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.PageResult;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -78,7 +79,7 @@ public class InvoiceController {
     }
 
     @Operation(summary = "迁改管理发票导入")
-    @PostMapping("/import")
+    @PostMapping(value = "/import", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public void importInvoice(MultipartFile file) {
         long begin = System.currentTimeMillis();
         String fileName = file.getOriginalFilename();

@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.PageResult;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -66,7 +67,7 @@ public class ReceiptController {
     }
 
     @Operation(summary = "迁改管理收据导入")
-    @PostMapping("/import")
+    @PostMapping(value = "/import", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public void importReceipt(MultipartFile file) {
         long begin = System.currentTimeMillis();
         try {

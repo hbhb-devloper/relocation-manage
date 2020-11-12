@@ -17,7 +17,7 @@ public interface ProjectService {
      *
      * @param importVOList 迁改信息集合
      */
-    void addSaveRelocationProject(List<ProjectImportVO> importVOList);
+    void addSaveRelocationProject(List<ProjectImportVO> importVOList) ;
 
     /**
      * 跟据条件分页查询迁改台账列表

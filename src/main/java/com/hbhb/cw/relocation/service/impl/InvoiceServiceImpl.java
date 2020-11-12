@@ -1,8 +1,9 @@
 package com.hbhb.cw.relocation.service.impl;
 
 import com.hbhb.core.utils.DateUtil;
-import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
+import com.hbhb.cw.relocation.enums.*;
 import com.hbhb.cw.relocation.exception.InvoiceException;
+import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
 import com.hbhb.cw.relocation.mapper.InvoiceMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
@@ -13,12 +14,14 @@ import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.service.InvoiceService;
 import com.hbhb.cw.relocation.web.vo.*;
+import com.hbhb.cw.systemcenter.enums.AllName;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -40,6 +43,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InvoiceServiceImpl implements InvoiceService {
 
+    @Value("${cw.unit-id.benbu}")
+    private Integer benbu;
+
     @Resource
     private InvoiceMapper relocationInvoiceMapper;
 
@@ -58,30 +64,24 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public PageResult<InvoiceResVO> getInvoiceList(Integer pageNum, Integer pageSize,
                                                    InvoiceReqVO cond, Integer userId) {
-        PageRequest<InvoiceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
-        PageResult<InvoiceResVO> invoiceResVo = relocationInvoiceMapper
-                .selectListByCondition(cond, request);
-        List<InvoiceResVO> list = invoiceResVo.getList();
-        for (InvoiceResVO invoiceResVO : list) {
-            if ("1".equals(invoiceResVO.getInvoiceType())) {
-                invoiceResVO.setInvoiceType("增值税普通发票");
-            }
-            if ("0".equals(invoiceResVO.getInvoiceType())) {
-                invoiceResVO.setInvoiceType("增值税专用发票");
-            }
-            if ("1".equals(invoiceResVO.getState())) {
-                invoiceResVO.setState("蓝字");
-            }
-            if ("0".equals(invoiceResVO.getState())) {
-                invoiceResVO.setState("红字");
-            }
-            if ("1".equals(invoiceResVO.getIsImport())) {
-                invoiceResVO.setIsImport("是");
-            }
-            if ("0".equals(invoiceResVO.getIsImport())) {
-                invoiceResVO.setIsImport("否");
+        List<Unit> unitList = unitApiExp.getAllUnitList();
+        List<Integer> unitIds = new ArrayList<>();
+        for (Unit unit : unitList) {
+            if (benbu.equals(cond.getUnitId())) {
+                unitIds.add(unit.getId());
             }
         }
+        cond.setUnitIds(unitIds);
+        PageRequest<InvoiceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
+        PageResult<InvoiceResVO> invoiceResVo = relocationInvoiceMapper.selectListByCondition(cond, request);
+        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        invoiceResVo.getList().forEach(item -> {
+            item.setInvoiceType(State.ONE.value().equals(item.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
+            item.setState(State.ONE.value().equals(item.getState()) ? InvoiceSate.BLUE_STATE.value() : InvoiceSate.RED_STATE.value());
+            item.setIsImport(State.ONE.value().equals(item.getState()) ? State.YES.value() : State.NO.value());
+            item.setUnit(unitMap.get(item.getUnitId()));
+            item.setDistrict(unitMap.get(item.getDistrictId()));
+        });
         return invoiceResVo;
     }
 
@@ -218,44 +218,20 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO vo,
-                                                                Integer userId) {
+    public List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO vo, Integer userId) {
         setConditionDetail(vo, userId);
+        List<Unit> unitList = unitApiExp.getAllUnitList();
         List<InvoiceExportResVO> exportResVos = relocationInvoiceMapper
                 .selectExportListByCondition(vo);
-        for (int i = 0; i < exportResVos.size(); i++) {
-            exportResVos.get(i).setNum(i + 1);
-            InvoiceExportResVO invoiceExportResVO = exportResVos.get(i);
-            if ("1".equals(invoiceExportResVO.getInvoiceType())) {
-                invoiceExportResVO.setInvoiceType("增值税普通发票");
-            }
-            if ("0".equals(invoiceExportResVO.getInvoiceType())) {
-                invoiceExportResVO.setInvoiceType("增值税专用发票");
-            }
-            if ("1".equals(invoiceExportResVO.getState())) {
-                invoiceExportResVO.setState("蓝字");
-            }
-            if ("0".equals(invoiceExportResVO.getState())) {
-                invoiceExportResVO.setState("红字");
-            }
-            if ("1".equals(invoiceExportResVO.getIsImport())) {
-                invoiceExportResVO.setIsImport("是");
-            }
-            if ("0".equals(invoiceExportResVO.getIsImport())) {
-                invoiceExportResVO.setIsImport("否");
-            }
-        }
+        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        exportResVos.forEach(item -> {
+            item.setInvoiceType(State.ONE.value().equals(item.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
+            item.setState(State.ONE.value().equals(item.getState()) ? InvoiceSate.BLUE_STATE.value() : InvoiceSate.RED_STATE.value());
+            item.setIsImport(State.ONE.value().equals(item.getState()) ? State.YES.value() : State.NO.value());
+            item.setUnit(unitMap.get(item.getUnitId()));
+            item.setDistrict(unitMap.get(item.getDistrictId()));
+        });
         return exportResVos;
-    }
-
-
-    @Override
-    public void judgeFileName(String fileName) {
-        int i = fileName.lastIndexOf(".");
-        String name = fileName.substring(i);
-        if (!(".xlsx".equals(name) || ".xls".equals(name))) {
-            throw new InvoiceException(InvoiceErrorCode.FILE_NAME_ERROR);
-        }
     }
 
 
@@ -324,7 +300,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .setInvoiceTime(DateUtil.stringToDate(relocationInvoice.getInvoiceTime()));
         relocationIncome.setInvoiceNum(relocationInvoice.getInvoiceNumber());
         relocationIncome.setInvoiceType(
-                relocationInvoice.getInvoiceType() == 1 ? "增值税电子普通发票" : "电子增值税专用发票");
+                relocationInvoice.getInvoiceType() == 1 ? InvoiceType.ELECTRONIC_PLAIN_INVOICE.value() : InvoiceType.ELECTRONIC_SPECIAL_INVOICE.value());
         relocationIncome.setAmount(relocationInvoice.getAmount());
         relocationIncome.setTax(relocationInvoice.getTaxAmount());
         relocationIncome.setTaxIncludeAmount(relocationInvoice.getTaxIncludeAmount());
@@ -336,5 +312,14 @@ public class InvoiceServiceImpl implements InvoiceService {
         relocationIncome.setReceived(new BigDecimal(0));
         relocationIncome.setUnreceived(relocationInvoice.getTaxIncludeAmount());
         return relocationIncome;
+    }
+
+    @Override
+    public void judgeFileName(String fileName) {
+        int i = fileName.lastIndexOf(".");
+        String name = fileName.substring(i);
+        if (!(AllName.XLS.getValue().equals(name) || AllName.XLSX.getValue().equals(name))) {
+            throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
+        }
     }
 }
