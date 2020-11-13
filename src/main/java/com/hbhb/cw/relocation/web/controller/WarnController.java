@@ -80,6 +80,11 @@ public class WarnController implements RelocationWarnApi {
     public void addWarn() {
         warnService.addSaveWarn();
     }
+
+    @Override
+    public int getWarnCount(Integer userId) {
+        return warnService.getWarnCount(userId);
+    }
 }
 
 

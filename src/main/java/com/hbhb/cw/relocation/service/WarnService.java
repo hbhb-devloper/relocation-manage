@@ -29,9 +29,9 @@ public interface WarnService {
     void addWarnFile(WarnFileVO fileVO);
 
     /**
-     * 跟据单位id统计预警数量
+     * 跟据用户id统计预警数量
      */
-    Integer getWarnCount(Integer unitId);
+    Integer getWarnCount(Integer userId);
 
     /**
      * 跟据预警id获取预警附件列表

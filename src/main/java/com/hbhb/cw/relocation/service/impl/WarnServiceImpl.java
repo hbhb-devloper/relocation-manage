@@ -9,11 +9,13 @@ import com.hbhb.cw.relocation.mapper.WarnMapper;
 import com.hbhb.cw.relocation.model.RelocationFile;
 import com.hbhb.cw.relocation.model.RelocationWarn;
 import com.hbhb.cw.relocation.rpc.FileApiExp;
+import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.service.WarnService;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.model.SysFile;
 import com.hbhb.cw.systemcenter.model.Unit;
+import com.hbhb.cw.systemcenter.vo.SysUserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,9 @@ public class WarnServiceImpl implements WarnService {
 
     @Resource
     private UnitApiExp unitApi;
+
+    @Resource
+    private SysUserApiExp userApi;
 
     @Override
     public List<WarnResVO> getWarn(WarnReqVO reqVO) {
@@ -123,8 +128,11 @@ public class WarnServiceImpl implements WarnService {
     }
 
     @Override
-    public Integer getWarnCount(Integer unitId) {
-        return warnMapper.selectWarnCountByUnitId(unitId);
+    public Integer getWarnCount(Integer userId) {
+        SysUserInfo user = userApi.getUserById(userId);
+        // todo 判断是否为预警监督人
+        Integer unitId = user.getUnitId();
+        return warnMapper.selectWarnCountByUnitId(userId);
     }
 
     @Override
