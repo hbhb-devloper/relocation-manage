@@ -1,5 +1,5 @@
 server:
-  port: 8885
+  port: 8888
   # 启用压缩（从终端到该实例）
   compression:
     enabled: true
@@ -52,7 +52,7 @@ port:
   default: 10058
   dev: 10010
   test: 10011
-  prd: 10018
+  prd: 10005
 
 # 指定服务提供方实例地址（为空则不指定）
 feign-url:
