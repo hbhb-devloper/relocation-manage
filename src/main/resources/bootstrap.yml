@@ -52,7 +52,7 @@ port:
   default: 10058
   dev: 10010
   test: 10011
-  prd: 10005
+  prd: 10018
 
 # 指定服务提供方实例地址（为空则不指定）
 feign-url:
