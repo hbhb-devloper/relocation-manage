@@ -1,12 +1,11 @@
 package com.hbhb.cw.relocation.web.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 /**
  * @author xiaokang
@@ -21,12 +20,14 @@ public class ReceiptResVO implements Serializable {
     private Long id;
     @Schema(description = "类别")
     private String category;
-    @Schema(description = "地区(单位)")
-    private String unit;
+    @Schema(description = "地区(单位)id")
+    private Integer unitId;
+    @Schema(description = "地区(单位)id")
+    private String unitName;
     @Schema(description = "赔补金额")
-    private BigDecimal compensationAmount;
+    private String compensationAmount;
     @Schema(description = "已到账金额")
-    private BigDecimal paymentAmount;
+    private String paymentAmount;
     @Schema(description = "赔补合同名")
     private String contractName;
     @Schema(description = "合同编号")
@@ -34,9 +35,9 @@ public class ReceiptResVO implements Serializable {
     @Schema(description = "赔补金额到账情况说明")
     private String paymentDesc;
     @Schema(description = "开收据金额")
-    private BigDecimal receiptAmount;
+    private String receiptAmount;
     @Schema(description = "开收据时间")
-    private Date receiptTime;
+    private String receiptTime;
     @Schema(description = "备注格式")
     private String remake;
 }

@@ -1,12 +1,13 @@
 package com.hbhb.cw.relocation.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author dxk
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class RelocationProject implements Serializable {
     private static final long serialVersionUID = -4636882084219646443L;
     /**
@@ -84,7 +86,7 @@ public class RelocationProject implements Serializable {
     /**
      * 施工单位
      */
-    private Integer constructionUnit;
+    private String constructionUnit;
     /**
      * 甲供材料费(预算:元)
      */
@@ -108,7 +110,7 @@ public class RelocationProject implements Serializable {
     /**
      * 有无赔补(0-没有、1-有)
      */
-    private Integer hasCompensation;
+    private Boolean hasCompensation;
     /**
      * 被动补偿类型
      */
@@ -140,15 +142,15 @@ public class RelocationProject implements Serializable {
     /**
      * 未全额回款合同历时
      */
-    private Date contractDuration;
+    private Integer contractDuration;
     /**
      * 主动迁改或者被动
      */
-    private Integer isInitiative;
+    private Boolean isInitiative;
     /**
      * 预付款应付金额（元）
      */
-    private Long anticipatePayable;
+    private BigDecimal anticipatePayable;
     /**
      * 预付款到账金额（元）
      */

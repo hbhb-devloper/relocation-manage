@@ -13,4 +13,16 @@
         <version>1.1</version>
     </parent>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.hbhb</groupId>
+            <artifactId>system-center-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hbhb</groupId>
+            <artifactId>relocation-manage-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
 </project>

@@ -1,8 +1,5 @@
 server:
-  port: 8888
-  # 启用压缩（从终端到该实例）
-  compression:
-    enabled: true
+  port: 8885
 
 spring:
   profiles:
@@ -49,10 +46,18 @@ host:
   proxy: 47.96.83.55
 
 port:
-  default: 10057
+  default: 10058
   dev: 10010
   test: 10011
   prd: 10005
+
+# 指定服务提供方实例地址（为空则不指定）
+feign-url: 192.168.1.31:8887
+#feign-url: 192.168.1.42:8887
+
+# 服务提供方实例名称
+provider:
+  system-center: system-center-@env@
 
 ################### 本地环境配置 ###################
 ---
@@ -62,11 +67,11 @@ spring:
     consul:
       host: consul.yeexun.com.cn
       discovery:
-        prefer-ip-address: true
         instance-id: ${spring.application.name}-${server.port}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
-        # 本地调试使用frp代理ip
         health-check-url: http://${host.docker0}:${port.default}/actuator/health
+        hostname: ${host.docker0}
+        port: ${port.default}
 
 ################### 开发环境配置 ###################
 ---
@@ -79,7 +84,6 @@ spring:
         instance-id: ${spring.application.name}-${port.dev}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
         health-check-url: http://${host.proxy}:${port.dev}/actuator/health
-        # 开发环境使用代理ip
         hostname: ${host.proxy}
         port: ${port.dev}
 
@@ -94,7 +98,6 @@ spring:
         instance-id: ${spring.application.name}-${port.test}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
         health-check-url: http://${host.proxy}:${port.test}/actuator/health
-        # 测试环境使用代理ip
         hostname: ${host.proxy}
         port: ${port.test}
 
@@ -109,6 +112,5 @@ spring:
         instance-id: ${spring.application.name}-${port.prd}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
         health-check-url: http://${host.proxy}:${port.prd}/actuator/health
-        # 正式环境使用docker0
         hostname: ${host.proxy}
         port: ${port.prd}

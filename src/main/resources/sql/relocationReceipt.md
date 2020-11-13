@@ -1,54 +1,64 @@
-sample
+  
+selectReceiptListByCond
 ===
-* 注释
+ ```sql
+      select 
+            rr.id               as id ,
+             category            as category,
+             unit_id             as unitId,
+             compensation_amount as compensationAmount,
+             payment_amount      as paymentAmount,
+             contract_name       as contractName,
+             contract_num        as contractNum,
+             payment_desc        as paymentDesc,
+             receipt_amount      as receiptAmount,
+             receipt_time        as receiptTime,
+             remake              as remake
+      from relocation_receipt rr
+     -- @where(){
+       -- @if(!isEmpty(cond.unitId)){
+            and rr.unit_id = #{cond.unitId}
+       -- @}
+       -- @if(!isEmpty(cond.invoiceTimeFrom)){
+        and rr.receipt_time between #{cond.invoiceTimeFrom}
+        and #{cond.invoiceTimeTo}
+       -- @} 
+      -- @if(!isEmpty(cond.amountFrom)){
+        and rr.compensation_amount between #{cond.amountFrom}
+        and #{cond.amountTo}
+      -- @} 
+     -- @} 
+```
 
-	select #use("cols")# from relocation_receipt  where  #use("condition")#
-
-cols
+selectReceiptByCond
 ===
-	id,category,unit_id,compensation_amount,payment_amount,contract_name,contract_num,payment_desc,receipt_amount,receipt_time,remake
-
-updateSample
-===
-	
-	id=#id#,category=#category#,unit_id=#unitId#,compensation_amount=#compensationAmount#,payment_amount=#paymentAmount#,contract_name=#contractName#,contract_num=#contractNum#,payment_desc=#paymentDesc#,receipt_amount=#receiptAmount#,receipt_time=#receiptTime#,remake=#remake#
-
-condition
-===
-
-	1 = 1  
-	@if(!isEmpty(id)){
-	 and id=#id#
-	@}
-	@if(!isEmpty(category)){
-	 and category=#category#
-	@}
-	@if(!isEmpty(unitId)){
-	 and unit_id=#unitId#
-	@}
-	@if(!isEmpty(compensationAmount)){
-	 and compensation_amount=#compensationAmount#
-	@}
-	@if(!isEmpty(paymentAmount)){
-	 and payment_amount=#paymentAmount#
-	@}
-	@if(!isEmpty(contractName)){
-	 and contract_name=#contractName#
-	@}
-	@if(!isEmpty(contractNum)){
-	 and contract_num=#contractNum#
-	@}
-	@if(!isEmpty(paymentDesc)){
-	 and payment_desc=#paymentDesc#
-	@}
-	@if(!isEmpty(receiptAmount)){
-	 and receipt_amount=#receiptAmount#
-	@}
-	@if(!isEmpty(receiptTime)){
-	 and receipt_time=#receiptTime#
-	@}
-	@if(!isEmpty(remake)){
-	 and remake=#remake#
-	@}
-	
-	
+ ```sql
+      select 
+ -- @pageTag(){
+            rr.id               as id ,
+             category            as category,
+             unit_id             as unitId,
+             compensation_amount as compensationAmount,
+             payment_amount      as paymentAmount,
+             contract_name       as contractName,
+             contract_num        as contractNum,
+             payment_desc        as paymentDesc,
+             receipt_amount      as receiptAmount,
+             receipt_time        as receiptTime,
+             remake              as remake
+    -- @}
+      from relocation_receipt rr
+     -- @where(){
+       -- @if(!isEmpty(cond.unitId)){
+            and rr.unit_id = #{cond.unitId}
+       -- @}
+       -- @if(!isEmpty(cond.invoiceTimeFrom)){
+        and rr.receipt_time between #{cond.invoiceTimeFrom}
+        and #{cond.invoiceTimeTo}
+      -- @} 
+      -- @if(!isEmpty(cond.amountFrom)){
+        and rr.compensation_amount between #{cond.amountFrom}
+        and #{cond.amountTo}
+      -- @} 
+     -- @} 
+```

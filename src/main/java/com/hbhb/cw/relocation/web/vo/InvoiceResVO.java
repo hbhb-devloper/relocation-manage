@@ -1,13 +1,14 @@
 package com.hbhb.cw.relocation.web.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.beetl.sql.annotation.entity.AutoID;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * @author xiaokang
@@ -24,6 +25,10 @@ public class InvoiceResVO implements Serializable {
     private Long id;
     @Schema(description = "区域")
     private String district;
+    @Schema(description = "区域id")
+    private Integer districtId;
+    @Schema(description = "县市id")
+    private Integer unitId;
     @Schema(description = "县市")
     private String unit;
     @Schema(description = "发票代码")
