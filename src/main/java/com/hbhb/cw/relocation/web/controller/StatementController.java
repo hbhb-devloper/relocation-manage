@@ -2,6 +2,7 @@ package com.hbhb.cw.relocation.web.controller;
 
 
 import com.hbhb.core.utils.ExcelUtil;
+import com.hbhb.cw.relocation.rpc.FileApiExp;
 import com.hbhb.cw.relocation.service.StatementService;
 import com.hbhb.cw.relocation.web.vo.StatementExportVO;
 import com.hbhb.cw.relocation.web.vo.StatementReqVO;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.PageResult;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -26,8 +26,8 @@ import java.util.List;
 @Slf4j
 public class StatementController {
 
-    @Value("${file.upload.template}")
-    private String filePath;
+    @Resource
+    private FileApiExp fileApi;
 
     @Resource
     private StatementService statementService;
@@ -49,6 +49,6 @@ public class StatementController {
         List<StatementExportVO> list = statementService.export(reqVO.getUnitId());
         String fileName = ExcelUtil.encodingFileName(request, "业务报表导出模板");
         ExcelUtil.export2WebWithTemplate(response, fileName, "网络部导出模板",
-                filePath + File.separator + "业务报表导出模板.xlsx", list);
+                fileApi.getFileTemplatePath() + File.separator + "业务报表导出模板.xlsx", list);
     }
 }

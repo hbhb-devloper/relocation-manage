@@ -4,6 +4,7 @@ package com.hbhb.cw.relocation.web.controller;
 import com.hbhb.core.utils.ExcelUtil;
 import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
 import com.hbhb.cw.relocation.exception.InvoiceException;
+import com.hbhb.cw.relocation.rpc.FileApiExp;
 import com.hbhb.cw.relocation.service.FinanceService;
 import com.hbhb.cw.relocation.web.vo.FinanceReqVO;
 import com.hbhb.cw.relocation.web.vo.FinanceResVO;
@@ -13,7 +14,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.PageResult;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -33,8 +33,8 @@ import java.util.List;
 @Slf4j
 public class FinanceController {
 
-    @Value("${file.upload.template}")
-    private String filePath;
+    @Resource
+    private FileApiExp fileApi;
 
     @Resource
     private FinanceService financeService;
@@ -65,7 +65,7 @@ public class FinanceController {
         List<FinanceResVO> list = financeService.selectExportListByCondition(cond, userId);
         String fileName = ExcelUtil.encodingFileName(request, "涉财报表导出模板");
         ExcelUtil.export2WebWithTemplate(response, fileName, "财务导出报表",
-                filePath + File.separator + "涉财报表导出模板.xlsx", list);
+                fileApi.getFileTemplatePath() + File.separator + "涉财报表导出模板.xlsx", list);
 
     }
 }
