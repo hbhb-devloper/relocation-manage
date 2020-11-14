@@ -1,5 +1,5 @@
 server:
-  port: 8888
+  port: 8885
   # 启用压缩（从终端到该实例）
   compression:
     enabled: true
@@ -49,7 +49,7 @@ host:
   proxy: 47.96.83.55
 
 port:
-  default: 10058
+  default: 10071
   dev: 10010
   test: 10011
   prd: 10005
@@ -61,6 +61,7 @@ feign-url:
 # 服务提供方实例名称
 provider:
   system-center: system-center-@env@
+  cw-backend: cw-backend-dev
 
 ################### 本地环境配置 ###################
 ---

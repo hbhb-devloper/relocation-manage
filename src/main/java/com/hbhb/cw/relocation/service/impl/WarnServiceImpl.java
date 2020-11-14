@@ -2,20 +2,19 @@ package com.hbhb.cw.relocation.service.impl;
 
 
 import com.hbhb.core.bean.BeanConverter;
+import com.hbhb.cw.messagehub.vo.MailVO;
 import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.mapper.FileMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.mapper.WarnMapper;
 import com.hbhb.cw.relocation.model.RelocationFile;
 import com.hbhb.cw.relocation.model.RelocationWarn;
-import com.hbhb.cw.relocation.rpc.FileApiExp;
-import com.hbhb.cw.relocation.rpc.SysUserApiExp;
-import com.hbhb.cw.relocation.rpc.UnitApiExp;
+import com.hbhb.cw.relocation.rpc.*;
 import com.hbhb.cw.relocation.service.WarnService;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.model.SysFile;
 import com.hbhb.cw.systemcenter.model.Unit;
-import com.hbhb.cw.systemcenter.vo.SysUserInfo;
+import com.hbhb.cw.systemcenter.vo.SysUserVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -53,6 +52,13 @@ public class WarnServiceImpl implements WarnService {
 
     @Resource
     private SysUserApiExp userApi;
+
+    @Resource
+    private FlowApiExp flowApi;
+
+    @Resource
+    private MailApiExp mailApi;
+
 
     @Override
     public List<WarnResVO> getWarn(WarnReqVO reqVO) {
@@ -111,10 +117,22 @@ public class WarnServiceImpl implements WarnService {
         // 1.按照单位进行统计预警统计信息
         Map<Integer, Integer> warnMap = projectMapper.selectProjectWarnCount();
         // 2.按照统计数据向每个单位负责人推送邮件信息
+        List<Integer> userIdList = flowApi.getFlowRoleUserList("迁改预警负责人");
+        List<SysUserVO> userList = userApi.getUserList(userIdList);
         for (Integer unitId : warnMap.keySet()) {
             // 该单位对应的条数
             Integer count = warnMap.get(unitId);
             // 向每个单位负责人推送邮件
+            for (SysUserVO userVO : userList) {
+                if (unitId.equals(userVO.getUnitId())) {
+                    mailApi.postMail(MailVO.builder()
+                            .content(count.toString())
+                            //  邮箱
+                            .receiver("1515689038@qq.com")
+                            .title(userVO.getNickName())
+                            .build());
+                }
+            }
         }
 
 
@@ -128,11 +146,8 @@ public class WarnServiceImpl implements WarnService {
     }
 
     @Override
-    public Integer getWarnCount(Integer userId) {
-        SysUserInfo user = userApi.getUserById(userId);
-        // todo 判断是否为预警监督人
-        Integer unitId = user.getUnitId();
-        return warnMapper.selectWarnCountByUnitId(userId);
+    public Integer getWarnCount(Integer unitId) {
+        return warnMapper.selectWarnCountByUnitId(unitId);
     }
 
     @Override

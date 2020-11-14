@@ -82,8 +82,8 @@ public class WarnController implements RelocationWarnApi {
     }
 
     @Override
-    public int getWarnCount(Integer userId) {
-        return warnService.getWarnCount(userId);
+    public int getWarnCount(Integer unitId) {
+        return warnService.getWarnCount(unitId);
     }
 }
 
