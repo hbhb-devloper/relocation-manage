@@ -31,7 +31,7 @@ public interface WarnService {
     /**
      * 跟据用户id统计预警数量
      */
-    Integer getWarnCount(Integer userId);
+    int getWarnCount(Integer userId);
 
     /**
      * 跟据预警id获取预警附件列表

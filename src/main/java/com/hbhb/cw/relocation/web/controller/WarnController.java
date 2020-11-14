@@ -53,7 +53,7 @@ public class WarnController implements RelocationWarnApi {
 
     @Operation(summary = "预警附件上传")
     @PostMapping(value = "/upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public void uploadSystemFile(@RequestPart(required = false, value = "file") MultipartFile file,@RequestParam("warnId") Long warnId) {
+    public void uploadSystemFile(@RequestPart(required = false, value = "file") MultipartFile file, @RequestParam("warnId") Long warnId) {
         WarnFileVO fileVO = new WarnFileVO();
         Integer userId = 1;
         FileDetailVO detailVO = fileService.uploadFile(file, FileType.FUND_INVOICE_FILE.value());
@@ -72,7 +72,7 @@ public class WarnController implements RelocationWarnApi {
 
     @Operation(summary = "预警附件查看")
     @GetMapping("/file")
-    public List<WarnFileResVO> getWarnFile(Long warnId){
+    public List<WarnFileResVO> getWarnFile(Long warnId) {
         return warnService.getWarnFileList(warnId);
     }
 
@@ -82,8 +82,9 @@ public class WarnController implements RelocationWarnApi {
     }
 
     @Override
-    public Integer getWarnCount(Integer unitId) {
+    public int getWarnCount(Integer unitId) {
         return warnService.getWarnCount(unitId);
+
     }
 }
 

@@ -146,7 +146,7 @@ public class WarnServiceImpl implements WarnService {
     }
 
     @Override
-    public Integer getWarnCount(Integer unitId) {
+    public int getWarnCount(Integer unitId) {
         return warnMapper.selectWarnCountByUnitId(unitId);
     }
 
