@@ -66,6 +66,7 @@ public class FinanceController {
         String fileName = ExcelUtil.encodingFileName(request, "涉财报表导出模板");
         ExcelUtil.export2WebWithTemplate(response, fileName, "财务导出报表",
                 fileApi.getFileTemplatePath() + File.separator + "涉财报表导出模板.xlsx", list);
-
+        String path = fileApi.getFileTemplatePath();
+        log.info(path);
     }
 }

@@ -197,7 +197,6 @@ selectExportListByCondition
           -- @if(cond.unitId == 429){
                 and ri.district in (#{cond.unitIds})
           -- @}
-          -- @}
           -- @if(cond.unitId != 11 && cond.unitId != 429){
               and ri.district = #{cond.unitId}
           -- @}
