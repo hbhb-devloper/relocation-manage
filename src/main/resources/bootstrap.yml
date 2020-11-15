@@ -51,7 +51,7 @@ port:
   default: 10071
   dev: 10010
   test: 10011
-  prd: 10005
+  prd: 10018
 
 # 指定服务提供方实例地址（为空则不指定）
 feign-url:
@@ -113,9 +113,8 @@ spring:
     consul:
       host: ${host.docker0}
       discovery:
-        prefer-ip-address: true
         instance-id: ${spring.application.name}-${port.prd}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
-        health-check-url: http://${host.proxy}:${port.prd}/actuator/health
-#        hostname: ${host.proxy}
-#        port: ${port.prd}
+        health-check-url: http://${host.docker0}:${port.prd}/actuator/health
+        hostname: ${host.docker0}
+        port: ${port.prd}
