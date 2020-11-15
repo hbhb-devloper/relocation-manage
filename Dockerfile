@@ -4,6 +4,8 @@ ADD ./target/*.jar app.jar
 RUN java -Djarmode=layertools -jar app.jar extract
 
 FROM openjdk:8-jdk-alpine
+# 解决easyexcel导出poi缺少字体的问题
+RUN apk add --update font-adobe-100dpi ttf-dejavu fontconfig
 WORKDIR application
 COPY --from=builder application/dependencies/ ./
 COPY --from=builder application/spring-boot-loader/ ./
