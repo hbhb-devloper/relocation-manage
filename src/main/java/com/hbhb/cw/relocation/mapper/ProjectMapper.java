@@ -42,6 +42,6 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     List<StatementResVO> selectProjectStatementListByUnitId(Integer unitId);
 
-    Map<Integer, Integer> selectProjectWarnCount();
+    List<WarnCountVO> selectProjectWarnCount();
 
 }

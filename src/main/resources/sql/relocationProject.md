@@ -193,7 +193,7 @@ selectProject
   ```sql
         select id, contract_duration 
         from relocation_project
-        where compensation_sate not in (10,80)
+        where compensation_sate not in (10,80,0)
   ```
 updateBatch
 ===
@@ -298,8 +298,8 @@ selectProjectStatementListByUnitId
 selectProjectWarnCount
 ===
 ```sql
-    select unit_id   as unitId,
-           count(id) as count
+    select unit_id as unitId,
+           count(id)  as count
     from relocation_project rp
     where contract_duration mod 3 = 0
       and contract_duration != 0

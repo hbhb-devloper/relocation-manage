@@ -60,7 +60,7 @@ feign-url:
 # 服务提供方实例名称
 provider:
   system-center: system-center-@env@
-  cw-backend: cw-backend-dev
+
 
 ################### 本地环境配置 ###################
 ---
