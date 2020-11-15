@@ -73,7 +73,6 @@ public class IncomeController {
         @Parameter(description = "导出筛选条件实体") @RequestBody IncomeReqVO vo,
         @Parameter(hidden = true) @UserId Integer userId) {
         List<IncomeExportVO> incomeExport = incomeService.selectExportListByCondition(vo, userId);
-        log.info("迁改管理收款导出列表值：{}", incomeExport.toString());
         String fileName = ExcelUtil.encodingFileName(request, "迁改收款数据表");
         ExcelUtil.export2Web(response, fileName, "迁改收款清单", IncomeExportVO.class,
                 incomeExport);
