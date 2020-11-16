@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>com.hbhb</groupId>
-            <artifactId>flow-manage-api</artifactId>
+            <artifactId>flow-center-api</artifactId>
             <version>1.0</version>
         </dependency>
         <dependency>

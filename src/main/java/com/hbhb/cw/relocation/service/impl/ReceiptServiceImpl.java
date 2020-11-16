@@ -14,12 +14,12 @@ import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
 import com.hbhb.cw.systemcenter.api.UnitApi;
 import com.hbhb.cw.systemcenter.model.Unit;
+import com.hbhb.cw.systemcenter.vo.ParentVO;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,12 +49,10 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Resource
     private UnitApi unitApi;
 
-    @Value("${cw.unit-id.hangzhou}")
-    private Integer hangzhou;
-
     @Override
     public PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize) {
-        if (hangzhou.equals(cond.getUnitId())) {
+        ParentVO parentUnit = unitApi.getParentUnit();
+        if (parentUnit.getHangzhou().equals(cond.getUnitId())) {
             cond.setUnitId(null);
         }
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);

@@ -16,12 +16,12 @@ import com.hbhb.cw.relocation.service.InvoiceService;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.enums.AllName;
 import com.hbhb.cw.systemcenter.model.Unit;
+import com.hbhb.cw.systemcenter.vo.ParentVO;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -43,9 +43,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InvoiceServiceImpl implements InvoiceService {
 
-    @Value("${cw.unit-id.benbu}")
-    private Integer benbu;
-
     @Resource
     private InvoiceMapper relocationInvoiceMapper;
 
@@ -65,9 +62,10 @@ public class InvoiceServiceImpl implements InvoiceService {
     public PageResult<InvoiceResVO> getInvoiceList(Integer pageNum, Integer pageSize,
                                                    InvoiceReqVO cond, Integer userId) {
         List<Unit> unitList = unitApiExp.getAllUnitList();
+        ParentVO parentUnit = unitApiExp.getParentUnit();
         List<Integer> unitIds = new ArrayList<>();
         for (Unit unit : unitList) {
-            if (benbu.equals(cond.getUnitId())) {
+            if (parentUnit.getBenbu().equals(cond.getUnitId())) {
                 unitIds.add(unit.getId());
             }
         }

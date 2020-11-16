@@ -16,13 +16,13 @@ import com.hbhb.cw.systemcenter.api.UnitApi;
 import com.hbhb.cw.systemcenter.enums.AllName;
 import com.hbhb.cw.systemcenter.model.SysUser;
 import com.hbhb.cw.systemcenter.model.Unit;
+import com.hbhb.cw.systemcenter.vo.ParentVO;
 import com.hbhb.cw.systemcenter.vo.SysDictVO;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,8 +46,6 @@ public class ProjectServiceImpl implements ProjectService {
     private UnitApi unitApi;
     @Resource
     private SysDictApiExp sysDictApi;
-    @Value("${cw.unit-id.hangzhou}")
-    private Integer hangzhou;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -194,7 +192,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public PageResult<ProjectResVO> getRelocationProjectList(ProjectReqVO cond, Integer pageNum, Integer pageSize) {
         PageRequest<ProjectResVO> request = DefaultPageRequest.of(pageNum, pageSize);
-        if (hangzhou.equals(cond.getUnitId())) {
+        ParentVO parentUnit = unitApi.getParentUnit();
+        if (parentUnit.getHangzhou().equals(cond.getUnitId())) {
             cond.setUnitId(null);
         }
         PageResult<ProjectResVO> list = projectMapper.selectProjectByCond(cond, request);
@@ -203,8 +202,8 @@ public class ProjectServiceImpl implements ProjectService {
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         Map<String, String> compensationSateMap = getCompensationSate();
         list.getList().forEach(item -> {
-                    item.setCompensationSate((compensationSateMap.get(item.getCompensationSate())));
-                    item.setUnitName((unitMap.get(item.getUnitId())));
+            item.setCompensationSate((compensationSateMap.get(item.getCompensationSate())));
+            item.setUnitName((unitMap.get(item.getUnitId())));
                 }
         );
         return list;

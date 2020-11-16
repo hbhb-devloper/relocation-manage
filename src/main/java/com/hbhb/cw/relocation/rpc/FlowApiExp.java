@@ -1,6 +1,7 @@
 package com.hbhb.cw.relocation.rpc;
 
-import com.hbhb.cw.flow.manage.api.FlowApi;
+
+import com.hbhb.cw.flowcenter.api.FlowApi;
 import org.springframework.cloud.openfeign.FeignClient;
 
 /**
