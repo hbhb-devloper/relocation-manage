@@ -114,12 +114,10 @@ public class WarnServiceImpl implements WarnService {
         // 1.按照单位进行统计预警统计信息
         List<WarnCountVO> warnList = projectMapper.selectProjectWarnCount();
         Map<Integer, Integer> warnMap = warnList.stream().collect(Collectors.toMap(WarnCountVO::getUnitId, WarnCountVO::getCount));
-
         // 2.按照统计数据向每个单位负责人推送邮件信息
         List<Integer> userIdList = flowApi.getFlowRoleUserList("迁改预警负责人");
         List<SysUserVO> userList = userApi.getUserList(userIdList);
         Set<Integer> keys = warnMap.keySet();
-
         for (Integer unitId : keys) {
             // 该单位对应的条数
             Integer count = warnMap.get(unitId);

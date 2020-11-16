@@ -165,31 +165,25 @@ IncomeServiceImpl implements IncomeService {
     public void addSaveRelocationInvoice(List<IncomeImportVO> dataList) {
         // 转换单位
         List<Unit> list = unitService.getAllUnitList();
-        Map<String, Integer> unitMap = list.stream().collect(
-                Collectors.toMap(Unit::getShortName, Unit::getId));
+        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getShortName, Unit::getId));
         List<RelocationIncome> incomes = new ArrayList<>();
         for (IncomeImportVO importVO : dataList) {
-            System.out.println(importVO);
             RelocationIncome relocationIncome = new RelocationIncome();
             // 1 迁改 2 搬迁 3 代建
-            relocationIncome.setCategory("迁改".equals(importVO.getCategory()) ? 1
-                    : "搬迁".equals(importVO.getCategory()) ? 2 : 3);
-            relocationIncome.setUnitId(
-                    unitMap.get(importVO.getUnit()) == null ? 11 : unitMap.get(importVO.getUnit()));
+            relocationIncome.setCategory("迁改".equals(importVO.getCategory()) ? 1 : "搬迁".equals(importVO.getCategory()) ? 2 : 3);
+            relocationIncome.setUnitId(unitMap.get(importVO.getUnit()) == null ? 11 : unitMap.get(importVO.getUnit()));
             relocationIncome.setSupplier(importVO.getSupplier());
             relocationIncome.setContractNum(importVO.getContractNum());
             relocationIncome.setContractName(importVO.getContractName());
             relocationIncome.setStartTime(DateUtil.string3DateYMD(importVO.getStartTime()));
-            relocationIncome
-                    .setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
+            relocationIncome.setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
             relocationIncome.setContractAmount(stringToBigDecimal(importVO.getContractAmount()));
             relocationIncome.setInvoiceTime(DateUtil.string3DateYMD(importVO.getInvoiceTime()));
             relocationIncome.setInvoiceNum(importVO.getInvoiceNum());
             relocationIncome.setInvoiceType(importVO.getInvoiceType());
             relocationIncome.setAmount(stringToBigDecimal(importVO.getAmount()));
             relocationIncome.setTax(stringToBigDecimal(importVO.getTax()));
-            relocationIncome
-                    .setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
+            relocationIncome.setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
             relocationIncome.setConstructionName(importVO.getConstructionName());
             // 1 预付款 2 尾款  3 决算款
             relocationIncome.setPaymentType(1);
@@ -205,11 +199,9 @@ IncomeServiceImpl implements IncomeService {
     }
 
     @Override
-    public List<IncomeExportVO> selectExportListByCondition(IncomeReqVO vo,
-                                                            Integer userId) {
+    public List<IncomeExportVO> selectExportListByCondition(IncomeReqVO vo, Integer userId) {
         setConditionDetail(vo, userId);
-        List<IncomeExportVO> relocationIncomeExportVos = relocationIncomeMapper
-                .selectExportList(vo);
+        List<IncomeExportVO> relocationIncomeExportVos = relocationIncomeMapper.selectExportList(vo);
         for (int i = 0; i < relocationIncomeExportVos.size(); i++) {
             IncomeExportVO relocationIncomeExportVO = relocationIncomeExportVos.get(i);
             String category = relocationIncomeExportVO.getCategory();

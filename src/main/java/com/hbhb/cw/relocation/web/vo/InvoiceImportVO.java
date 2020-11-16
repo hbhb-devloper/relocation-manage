@@ -1,10 +1,11 @@
 package com.hbhb.cw.relocation.web.vo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
-import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 /**
  * @author hyk
@@ -32,57 +33,54 @@ public class InvoiceImportVO implements Serializable {
     @ExcelProperty(value = "发票号码", index = 4)
     private String invoiceNumber;
 
-    @ExcelProperty(value = "开票点", index = 5)
-    private String invoiceSite;
-
-    @ExcelProperty(value = "业务类型", index = 6)
+    @ExcelProperty(value = "业务类型", index = 5)
     private String businessType;
 
-    @ExcelProperty(value = "发票类型", index = 7)
+    @ExcelProperty(value = "发票类型", index = 6)
     private String invoiceType;
 
-    @ExcelProperty(value = "购方税号", index = 8)
+    @ExcelProperty(value = "购方税号", index = 7)
     private String buyerTax;
 
-    @ExcelProperty(value = "购方名称", index = 9)
+    @ExcelProperty(value = "购方名称", index = 8)
     private String buyerName;
 
-    @ExcelProperty(value = "开票项目", index = 10)
+    @ExcelProperty(value = "开票项目", index = 9)
     private String invoiceProject;
 
-    @ExcelProperty(value = "开票日期", index = 11)
+    @ExcelProperty(value = "开票日期", index = 10)
     private String invoiceTime;
 
-    @ExcelProperty(value = "金额", index = 12)
+    @ExcelProperty(value = "金额", index = 11)
     private String amount;
 
-    @ExcelProperty(value = "税率", index = 13)
+    @ExcelProperty(value = "税率", index = 12)
     private String taxRate;
 
-    @ExcelProperty(value = "税额", index = 14)
+    @ExcelProperty(value = "税额", index = 13)
     private String taxAmount;
 
-    @ExcelProperty(value = "价税合计", index = 15)
+    @ExcelProperty(value = "价税合计", index = 14)
     private String taxIncludeAmount;
 
-    @ExcelProperty(value = "备注", index = 16)
+    @ExcelProperty(value = "备注", index = 15)
     private String remake;
 
-    @ExcelProperty(value = "申请人", index = 17)
+    @ExcelProperty(value = "申请人", index = 16)
     private String applicant;
 
-    @ExcelProperty(value = "开票人", index = 18)
+    @ExcelProperty(value = "开票人", index = 17)
     private String issuer;
 
-    @ExcelProperty(value = "票据状态", index = 19)
+    @ExcelProperty(value = "票据状态", index = 18)
     private String state;
 
-    @ExcelProperty(value = "是否为自定义菜单开票", index = 20)
+    @ExcelProperty(value = "是否为自定义菜单开票", index = 19)
     private String isImport;
 
-    @ExcelProperty(value = "客户经理", index = 21)
+    @ExcelProperty(value = "客户经理", index = 20)
     private String manager;
 
-    @ExcelProperty(value = "备注修改列：（统一格式）合同号；区县；款项性质；项目信息", index = 22)
+    @ExcelProperty(value = "备注修改列：（统一格式）合同号；区县；款项性质；项目信息", index = 21)
     private String newRemake;
 }

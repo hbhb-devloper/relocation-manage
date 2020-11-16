@@ -19,6 +19,7 @@ import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,8 +49,14 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Resource
     private UnitApi unitApi;
 
+    @Value("${cw.unit-id.hangzhou}")
+    private Integer hangzhou;
+
     @Override
     public PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize) {
+        if (hangzhou.equals(cond.getUnitId())) {
+            cond.setUnitId(null);
+        }
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<ReceiptResVO> receiptRes = receiptMapper.selectReceiptByCond(cond, request);
         List<Unit> unitList = getUnitList();
@@ -126,7 +133,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (!contractNumList.contains(receipt.getContractNum())) {
             msg.add("合同编号：" + receipt.getContractNum() + "在基础信息中不存在请检查！");
         }
-        if (msg.size() == 0) {
+        if (msg.size() != 0) {
             throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_IMPORT_ERROR, msg.toString());
         }
         receiptMapper.insert(receipt);

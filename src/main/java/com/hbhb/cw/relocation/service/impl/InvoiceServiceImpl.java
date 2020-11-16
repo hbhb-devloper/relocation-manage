@@ -113,12 +113,10 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void addSaveRelocationInvoice(List<InvoiceImportVO> dataList) {
 
         List<ProjectInfoVO> projectInfo = relocationInvoiceMapper.getProjectInfo();
-        Map<String, Long> projectMap = projectInfo.stream()
-                .collect(Collectors.toMap(ProjectInfoVO::getInfo, ProjectInfoVO::getId));
+        Map<String, Long> projectMap = projectInfo.stream().collect(Collectors.toMap(ProjectInfoVO::getInfo, ProjectInfoVO::getId));
         // 转换单位
         List<Unit> list = unitApiExp.getAllUnitList();
-        Map<String, Integer> unitMap = list.stream().collect(
-                Collectors.toMap(Unit::getUnitName, Unit::getId));
+        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
         List<RelocationInvoice> invoiceList = new ArrayList<>();
         for (InvoiceImportVO relocationInvoiceImport : dataList) {
             if (!"财务开票".equals(relocationInvoiceImport.getBusinessType())) {
@@ -150,27 +148,21 @@ public class InvoiceServiceImpl implements InvoiceService {
             relocationInvoice.setBuyerTax(relocationInvoiceImport.getBuyerTax());
             relocationInvoice.setBuyerName(relocationInvoiceImport.getBuyerName());
             relocationInvoice.setInvoiceProject(relocationInvoiceImport.getInvoiceProject());
-            relocationInvoice
-                    .setInvoiceTime(relocationInvoiceImport.getInvoiceTime().split("\\.")[0]);
+            relocationInvoice.setInvoiceTime(relocationInvoiceImport.getInvoiceTime().split("\\.")[0]);
             relocationInvoice.setAmount(new BigDecimal(relocationInvoiceImport.getAmount()));
-            relocationInvoice.setTaxRate(new BigDecimal(
-                    relocationInvoiceImport.getTaxRate() == null ? "0"
-                            : relocationInvoiceImport.getTaxRate()));
-            relocationInvoice.setTaxAmount(new BigDecimal(
-                    relocationInvoiceImport.getTaxAmount() == null ? "0"
-                            : relocationInvoiceImport.getTaxAmount()));
-            relocationInvoice
-                    .setTaxIncludeAmount(new BigDecimal(relocationInvoiceImport.getTaxIncludeAmount()));
+            relocationInvoice.setTaxRate(new BigDecimal(relocationInvoiceImport.getTaxRate() == null ? "0"
+                    : relocationInvoiceImport.getTaxRate()));
+            relocationInvoice.setTaxAmount(new BigDecimal(relocationInvoiceImport.getTaxAmount() == null ? "0"
+                    : relocationInvoiceImport.getTaxAmount()));
+            relocationInvoice.setTaxIncludeAmount(new BigDecimal(relocationInvoiceImport.getTaxIncludeAmount()));
             relocationInvoice.setRemake(relocationInvoiceImport.getRemake());
             relocationInvoice.setApplicant(relocationInvoiceImport.getApplicant());
             relocationInvoice.setIssuer(relocationInvoiceImport.getIssuer());
             // 1 蓝字, 0 红字
             relocationInvoice.setState("蓝字".equals(relocationInvoiceImport.getState()) ? 1 : 0);
             // 1 是, 0 否
-            relocationInvoice
-                    .setIsImport("是".equals(relocationInvoiceImport.getIsImport()) ? 1 : 0);
+            relocationInvoice.setIsImport("是".equals(relocationInvoiceImport.getIsImport()) ? 1 : 0);
             relocationInvoice.setBusinessType(relocationInvoiceImport.getBusinessType());
-            relocationInvoice.setInvoiceSite(relocationInvoiceImport.getInvoiceSite());
             relocationInvoice.setManager(relocationInvoiceImport.getManager());
             Long pid = null;
             Integer atype = null;
