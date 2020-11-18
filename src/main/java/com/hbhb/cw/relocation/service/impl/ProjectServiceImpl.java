@@ -217,6 +217,7 @@ public class ProjectServiceImpl implements ProjectService {
         RelocationProject project = new RelocationProject();
         BeanUtils.copyProperties(projectResVO, project);
         //  计划完成时间
+        project.setCompensationSate(Integer.valueOf(projectResVO.getCompensationSate()));
         project.setPlanEndTime(DateUtil.string2DateYMD(projectResVO.getPlanEndTime()));
         //计划实施时间
         project.setPlanStartTime(DateUtil.string2DateYMD(projectResVO.getPlanStartTime()));
