@@ -18,29 +18,13 @@ import java.util.List;
  */
 public interface IncomeMapper extends BaseMapper<RelocationIncome> {
 
-    PageResult<IncomeResVO> getIncomeList(IncomeReqVO cond,
-        PageRequest<IncomeResVO> request);
+    PageResult<IncomeResVO> getIncomeList(IncomeReqVO cond, PageRequest<IncomeResVO> request);
 
-    void insertRelocationIncomeList(List<RelocationIncome> incomes);
-
-    List<RelocationIncomeDetail> selectDetailById(
-        Long id,
-        Integer isNeed,
-        String currentMonth);
-
-    void updateIncomeDetail(RelocationIncomeDetail detail);
-
-    void addIncomeDetail(RelocationIncomeDetail detail);
+    List<RelocationIncomeDetail> selectDetailById(Long id, Integer isNeed, String currentMonth);
 
     List<IncomeExportVO> selectExportList(IncomeReqVO cond);
 
     BigDecimal getMonthAmount(Long id, String currentMonth);
-
-    void updateIncomeUnreceived(Long id, BigDecimal amount);
-
-    void updateIncomeReceived(Long id, BigDecimal amount);
-
-    void updateIsReceived(Long id, int i);
 
     Long selectProject(String invoiceNum);
 }

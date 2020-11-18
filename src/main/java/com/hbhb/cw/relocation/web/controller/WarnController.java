@@ -54,12 +54,14 @@ public class WarnController implements RelocationWarnApi {
 
     @Operation(summary = "预警附件上传")
     @PostMapping(value = "/upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public void uploadSystemFile(@RequestPart(required = false, value = "file") MultipartFile file, @RequestParam("warnId") Long warnId) {
-        WarnFileVO fileVO = new WarnFileVO();
-        Integer userId = 1;
-        FileDetailVO detailVO = fileService.uploadFile(file, FileType.FUND_INVOICE_FILE.value());
+    public FileDetailVO uploadSystemFile(@RequestPart(required = false, value = "file") MultipartFile file) {
+        return fileService.uploadFile(file, FileType.FUND_INVOICE_FILE.value());
+    }
+
+    @Operation(summary = "预警附件保存")
+    @PostMapping(value = "/save")
+    public void andWarnFile(@Parameter(description = "预警附件信息") @RequestBody WarnFileVO fileVO, @UserId Integer userId) {
         SysUserInfo user = userApi.getUserById(userId);
-        fileVO.setFileId(detailVO.getId());
         fileVO.setCreateBy(user.getNickName());
         fileVO.setCreateTime(new Date());
         warnService.addWarnFile(fileVO);

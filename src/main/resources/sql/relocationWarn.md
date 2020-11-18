@@ -1,13 +1,15 @@
 selectProjectWarnByCond
 ===
    ```sql
-        select project_num        as projectNum,
-        rw.unit_id        as unitId,
+        select 
+        rw.id                 as id,
+        project_num        as projectNum,
+        rw.unit_id         as unitId,
         construction_unit  as constructionUnit,
         opposite_unit      as oppositeUnit,
         rw.contract_num    as contractNum,
         anticipate_payment as anticipatePayment,
-        rw.is_received        as isReceived,
+        rw.is_received     as isReceived,
         final_payment      as finalPayment,
         contract_duration  as contractDuration
         from relocation_warn rw

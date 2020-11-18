@@ -109,7 +109,14 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public List<ReceiptExportVO> export(ReceiptReqVO vo) {
+        ParentVO parentUnit = unitApi.getParentUnit();
+        if (parentUnit.getHangzhou().equals(vo.getUnitId())) {
+            vo.setUnitId(null);
+        }
         List<ReceiptResVO> list = receiptMapper.selectReceiptListByCond(vo);
+        List<Unit> unitList = getUnitList();
+        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        list.forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
         return BeanConverter.copyBeanList(list, ReceiptExportVO.class);
     }
 

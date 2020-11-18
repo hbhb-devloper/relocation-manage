@@ -1,10 +1,12 @@
 package com.hbhb.cw.relocation.web.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author xiaokang
@@ -30,4 +32,6 @@ public class IncomeReqVO implements Serializable {
     private Integer unitId;
     @Schema(description = "合同名称")
     private String contractName;
+    @Schema(description = "单位id集合")
+    private List<Integer> unitIds;
 }

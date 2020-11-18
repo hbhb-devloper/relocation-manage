@@ -13,6 +13,8 @@ import java.io.Serializable;
 public class WarnResVO implements Serializable {
     private static final long serialVersionUID = -82461158691671865L;
 
+    private Long id;
+
     @Schema(description = "项目编号")
     private String projectNum;
 

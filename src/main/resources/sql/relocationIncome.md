@@ -5,7 +5,7 @@ select
     -- @pageTag(){
     ri.id,
     category,
-    u.unit_name unit,
+    unit_id unit,
     supplier,
     contract_num contractNum,
     contract_name contractName,
@@ -27,10 +27,10 @@ select
     unreceived
     -- @}
     from relocation_income ri
-    left join unit u on ri.unit_id = u.id
+  
     -- @where(){
       -- @if(cond.unitId == 429){
-        and ri.unit_id in (SELECT id FROM unit WHERE parent_id = 429)
+        and ri.unit_id in (#{cond.unitIds})
       -- @}
       -- @if(isNotEmpty(cond.unitId) && cond.unitId != 11 && cond.unitId != 429){
         and ri.unit_id = #{cond.unitId}
@@ -39,7 +39,7 @@ select
         and contract_deadline >= #{cond.contractDeadlineFrom}
       -- @}
       -- @if(isNotEmpty(cond.contractDeadlineTo)){
-        and contract_deadline <= #{contractDeadlineTo}
+        and contract_deadline <= #{cond.contractDeadlineTo}
       -- @}
       -- @if(isNotEmpty(cond.contractName)){
         and contract_name like concat('%', #{cond.contractName},'%')
@@ -51,7 +51,7 @@ select
         and start_time >= #{cond.startTimeFrom}
       -- @}
       -- @if(isNotEmpty(cond.startTimeTo)){
-        and start_time <= #{startTimeTo}
+        and start_time <= #{cond.startTimeTo}
       -- @}
     -- @}
     -- @pageIgnoreTag(){

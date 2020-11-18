@@ -18,6 +18,7 @@ import com.hbhb.cw.relocation.web.vo.IncomeReqVO;
 import com.hbhb.cw.relocation.web.vo.IncomeResVO;
 import com.hbhb.cw.systemcenter.enums.AllName;
 import com.hbhb.cw.systemcenter.model.Unit;
+import com.hbhb.cw.systemcenter.vo.ParentVO;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -50,7 +51,7 @@ IncomeServiceImpl implements IncomeService {
     private IncomeDetailMapper incomeDetailMapper;
 
     @Resource
-    private UnitApiExp unitService;
+    private UnitApiExp unitApiExp;
 
     @Resource
     private SysUserApiExp sysUserApiExp;
@@ -70,6 +71,16 @@ IncomeServiceImpl implements IncomeService {
     @Override
     public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize,
                                                  IncomeReqVO cond, Integer userId) {
+        List<Unit> unitList = unitApiExp.getAllUnitList();
+        ParentVO parentUnit = unitApiExp.getParentUnit();
+        List<Integer> unitIds = new ArrayList<>();
+        for (Unit unit : unitList) {
+            if (parentUnit.getBenbu().equals(cond.getUnitId())) {
+                unitIds.add(unit.getId());
+            }
+        }
+        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        cond.setUnitIds(unitIds);
         setConditionDetail(cond, userId);
         PageRequest<IncomeResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<IncomeResVO> incomeList = relocationIncomeMapper.getIncomeList(cond, request);
@@ -83,9 +94,9 @@ IncomeServiceImpl implements IncomeService {
             } else if ("3".equals(category)) {
                 relocationIncomeResVO.setCategory("代建");
             }
-            BigDecimal monthAmount = relocationIncomeMapper
-                    .getMonthAmount(relocationIncomeResVO.getId(), DateUtil.getCurrentMonth());
+            BigDecimal monthAmount = relocationIncomeMapper.getMonthAmount(relocationIncomeResVO.getId(), DateUtil.getCurrentMonth());
             relocationIncomeResVO.setMonthAmount(monthAmount);
+            relocationIncomeResVO.setUnit(unitMap.get(Integer.valueOf(relocationIncomeResVO.getUnit())));
         }
         return incomeList;
     }
@@ -164,7 +175,7 @@ IncomeServiceImpl implements IncomeService {
     @Transactional(rollbackFor = Exception.class)
     public void addSaveRelocationInvoice(List<IncomeImportVO> dataList) {
         // 转换单位
-        List<Unit> list = unitService.getAllUnitList();
+        List<Unit> list = unitApiExp.getAllUnitList();
         Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getShortName, Unit::getId));
         List<RelocationIncome> incomes = new ArrayList<>();
         for (IncomeImportVO importVO : dataList) {
