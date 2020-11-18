@@ -19,10 +19,6 @@ public interface InvoiceMapper extends BaseMapper<RelocationInvoice> {
 
     PageResult<InvoiceResVO> selectListByCondition(InvoiceReqVO cond, PageRequest request);
 
-    RelocationInvoice getInvoiceDetailById(Long id);
-
-    void updateByPrimaryKey(RelocationInvoice invoice);
-
     List<ProjectInfoVO> getProjectInfo();
 
     List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO cond);

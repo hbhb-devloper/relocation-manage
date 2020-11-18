@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -74,7 +75,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         PageResult<InvoiceResVO> invoiceResVo = relocationInvoiceMapper.selectListByCondition(cond, request);
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         invoiceResVo.getList().forEach(item -> {
-            item.setInvoiceType(State.ONE.value().equals(item.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
+            item.setInvoiceTypeLabel(State.ONE.value().equals(item.getInvoiceType().toString()) ? InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
             item.setState(State.ONE.value().equals(item.getState()) ? InvoiceSate.BLUE_STATE.value() : InvoiceSate.RED_STATE.value());
             item.setIsImport(State.ONE.value().equals(item.getState()) ? State.YES.value() : State.NO.value());
             item.setUnit(unitMap.get(item.getUnitId()));
@@ -89,16 +90,15 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-
-    public void updateInvoice(RelocationInvoice invoice) {
-        translation(invoice);
+    public void updateInvoice(InvoiceResVO invoiceVo) {
+        RelocationInvoice invoice = translation(invoiceVo);
         relocationInvoiceMapper.updateById(invoice);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addInvoice(RelocationInvoice invoice) {
-        translation(invoice);
+    public void addInvoice(InvoiceResVO invoiceVo) {
+        RelocationInvoice invoice = translation(invoiceVo);
         relocationInvoiceMapper.insert(invoice);
         RelocationIncome relocationIncome = getRelocationIncome(invoice, invoice.getProjectId(), invoice.getPaymentType());
         relocationIncomeMapper.insert(relocationIncome);
@@ -145,7 +145,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             relocationInvoice.setBuyerTax(relocationInvoiceImport.getBuyerTax());
             relocationInvoice.setBuyerName(relocationInvoiceImport.getBuyerName());
             relocationInvoice.setInvoiceProject(relocationInvoiceImport.getInvoiceProject());
-            relocationInvoice.setInvoiceTime(relocationInvoiceImport.getInvoiceTime().split("\\.")[0]);
+            relocationInvoice.setInvoiceTime(DateUtil.string3DateYMD(relocationInvoiceImport.getInvoiceTime()));
             relocationInvoice.setAmount(new BigDecimal(relocationInvoiceImport.getAmount()));
             relocationInvoice.setTaxRate(new BigDecimal(relocationInvoiceImport.getTaxRate() == null ? "0"
                     : relocationInvoiceImport.getTaxRate()));
@@ -236,12 +236,14 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
     }
 
-    private void translation(RelocationInvoice invoice) {
+    private RelocationInvoice translation(InvoiceResVO invoiceVo) {
+        RelocationInvoice invoice = new RelocationInvoice();
         // 转换单位
+        BeanUtils.copyProperties(invoiceVo, invoice);
         List<Unit> list = unitApiExp.getAllUnitList();
         Map<String, Integer> unitMap = list.stream().collect(
                 Collectors.toMap(Unit::getUnitName, Unit::getId));
-        String remake = invoice.getRemake();
+        String remake = invoiceVo.getRemake();
         String[] split = remake.split("；");
         //合同号
         String contractNum = split[0];
@@ -267,9 +269,16 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setPaymentType(atype);
         // 项目信息 匹配id
         String pinfo = split[3];
-        Long pid = relocationInvoiceMapper
-                .selectPidByCondition(contractNum, unitId, pinfo);
+        Long pid = relocationInvoiceMapper.selectPidByCondition(contractNum, unitId, pinfo);
+        if (pid == null) {
+            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_REMAKE_ERROR);
+        }
         invoice.setProjectId(pid);
+        invoice.setInvoiceTime(DateUtil.string2DateYMD(invoiceVo.getInvoiceTime()));
+        invoice.setState(Integer.valueOf(invoiceVo.getState()));
+        invoice.setIsImport(Integer.valueOf(invoiceVo.getIsImport()));
+        invoice.setDistrict(Integer.valueOf(invoiceVo.getDistrict()));
+        return invoice;
     }
 
     private RelocationIncome getRelocationIncome(RelocationInvoice relocationInvoice, Long pid,
@@ -284,11 +293,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         relocationIncome.setStartTime(relocationProject.getPlanStartTime());
         relocationIncome.setContractDeadline(relocationProject.getPlanEndTime());
         relocationIncome.setContractAmount(relocationProject.getCompensationAmount());
-        relocationIncome
-                .setInvoiceTime(DateUtil.stringToDate(relocationInvoice.getInvoiceTime()));
+        relocationIncome.setInvoiceTime(relocationInvoice.getInvoiceTime());
         relocationIncome.setInvoiceNum(relocationInvoice.getInvoiceNumber());
-        relocationIncome.setInvoiceType(
-                relocationInvoice.getInvoiceType() == 1 ? InvoiceType.ELECTRONIC_PLAIN_INVOICE.value() : InvoiceType.ELECTRONIC_SPECIAL_INVOICE.value());
+        relocationIncome.setInvoiceType(relocationInvoice.getInvoiceType() == 1 ? InvoiceType.ELECTRONIC_PLAIN_INVOICE.value() : InvoiceType.ELECTRONIC_SPECIAL_INVOICE.value());
         relocationIncome.setAmount(relocationInvoice.getAmount());
         relocationIncome.setTax(relocationInvoice.getTaxAmount());
         relocationIncome.setTaxIncludeAmount(relocationInvoice.getTaxIncludeAmount());

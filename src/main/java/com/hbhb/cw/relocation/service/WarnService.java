@@ -10,7 +10,7 @@ public interface WarnService {
     /**
      * 根据条件查询预警信息
      */
-    List<WarnResVO> getWarn(WarnReqVO reqVO);
+    List<WarnResVO> getWarn(WarnReqVO reqVO, Integer userId);
 
     /**
      * 根据条件导出预警信息

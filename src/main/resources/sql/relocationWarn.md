@@ -23,6 +23,9 @@ selectProjectWarnByCond
         -- @if(!isEmpty(cond.contractDuration)){                
            and contract_duration = #{cond.contractDuration}
         -- @} 
+        -- @if(!isEmpty(cond.unitId)){                
+           and rw.unit_id = #{cond.unitId}
+        -- @}
     -- @}
 ```
 

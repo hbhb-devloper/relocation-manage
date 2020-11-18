@@ -8,7 +8,6 @@ import org.beetl.sql.annotation.entity.AutoID;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * @author xiaokang
@@ -40,7 +39,9 @@ public class InvoiceResVO implements Serializable {
     @Schema(description = "业务类型")
     private String businessType;
     @Schema(description = "发票类型")
-    private String invoiceType;
+    private Integer invoiceType;
+    @Schema(description = "发票类型")
+    private String invoiceTypeLabel;
     @Schema(description = "购方税号")
     private String buyerTax;
     @Schema(description = "购方名称")
@@ -48,7 +49,7 @@ public class InvoiceResVO implements Serializable {
     @Schema(description = "开票项目")
     private String invoiceProject;
     @Schema(description = "开票日期")
-    private Date invoiceTime;
+    private String invoiceTime;
     @Schema(description = "金额")
     private BigDecimal amount;
     @Schema(description = "税率")
@@ -69,4 +70,6 @@ public class InvoiceResVO implements Serializable {
     private String isImport;
     @Schema(description = "客户经理")
     private String manager;
+
+
 }

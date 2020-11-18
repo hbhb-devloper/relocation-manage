@@ -34,14 +34,14 @@ public interface InvoiceService {
      *
      * @param invoice
      */
-    void updateInvoice(RelocationInvoice invoice);
+    void updateInvoice(InvoiceResVO invoice);
 
     /**
      * 新增发票
      *
      * @param invoice
      */
-    void addInvoice(RelocationInvoice invoice);
+    void addInvoice(InvoiceResVO invoice);
 
     /**
      * 检测文件类型

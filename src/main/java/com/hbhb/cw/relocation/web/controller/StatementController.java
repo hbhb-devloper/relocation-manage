@@ -39,7 +39,7 @@ public class StatementController {
             @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
             @Parameter(description = "查询单位") @RequestParam(required = false) Integer unitId) {
         pageNum = pageNum == null ? 1 : pageNum;
-        pageSize = pageSize == null ? 20 : pageSize;
+        pageSize = pageSize == null ? 30 : pageSize;
         return statementService.getStatementList(pageNum, pageSize, unitId);
     }
 

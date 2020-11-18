@@ -61,8 +61,9 @@ selectProjectByCond
                 and project_name like concat('%', #{cond.projectName},'%')
             -- @}
      -- @}
+            order by contract_num
 ```
-selectProjectNum
+selectProjectNum    
 ===
 ```sql
     select project_num from relocation_project

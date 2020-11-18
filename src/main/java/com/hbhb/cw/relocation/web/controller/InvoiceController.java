@@ -60,17 +60,13 @@ public class InvoiceController {
 
     @Operation(summary = "新增迁改发票")
     @PostMapping("/add")
-    public void addInvoice(@RequestBody RelocationInvoice invoice) {
-        try {
-            invoiceService.addInvoice(invoice);
-        } catch (Exception e) {
-            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_EXIST_PROJECT_ERROR);
-        }
+    public void addInvoice(@RequestBody InvoiceResVO invoice) {
+        invoiceService.addInvoice(invoice);
     }
 
     @Operation(summary = "修改迁改发票")
     @PutMapping
-    public void updateInvoice(@RequestBody RelocationInvoice invoice) {
+    public void updateInvoice(@RequestBody InvoiceResVO invoice) {
         try {
             invoiceService.updateInvoice(invoice);
         } catch (Exception e) {

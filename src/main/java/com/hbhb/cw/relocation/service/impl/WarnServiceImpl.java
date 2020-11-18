@@ -14,6 +14,7 @@ import com.hbhb.cw.relocation.service.WarnService;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.model.SysFile;
 import com.hbhb.cw.systemcenter.model.Unit;
+import com.hbhb.cw.systemcenter.vo.SysUserInfo;
 import com.hbhb.cw.systemcenter.vo.SysUserVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -58,7 +59,13 @@ public class WarnServiceImpl implements WarnService {
 
 
     @Override
-    public List<WarnResVO> getWarn(WarnReqVO reqVO) {
+    public List<WarnResVO> getWarn(WarnReqVO reqVO, Integer userId) {
+        SysUserInfo user = userApi.getUserById(userId);
+        if ("admin".equals(user.getUserName())) {
+            reqVO.setUnitId(null);
+        } else {
+            reqVO.setUnitId(user.getUnitId());
+        }
         List<Unit> unitList = unitApi.getAllUnitList();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         List<WarnResVO> warnResVo = warnMapper.selectProjectWarnByCond(reqVO);

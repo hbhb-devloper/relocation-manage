@@ -10,6 +10,7 @@ import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.enums.FileType;
 import com.hbhb.cw.systemcenter.vo.FileDetailVO;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
+import com.hbhb.web.annotation.UserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,8 +40,8 @@ public class WarnController implements RelocationWarnApi {
 
     @Operation(summary = "预警提示列表")
     @GetMapping("/list")
-    public List<WarnResVO> getWarn(@Parameter(description = "预警查询条件") WarnReqVO warnReqVO) {
-        return warnService.getWarn(warnReqVO);
+    public List<WarnResVO> getWarn(@Parameter(description = "预警查询条件") WarnReqVO warnReqVO, @UserId Integer userId) {
+        return warnService.getWarn(warnReqVO, userId);
     }
 
     @Operation(summary = "导出预警提示信息")

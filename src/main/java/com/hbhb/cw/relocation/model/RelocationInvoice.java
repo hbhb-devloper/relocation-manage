@@ -1,12 +1,14 @@
 package com.hbhb.cw.relocation.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.Serializable;
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.beetl.sql.annotation.entity.AutoID;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * @author xiaokang
@@ -50,8 +52,8 @@ public class RelocationInvoice implements Serializable {
     @Schema(description ="开票项目")
     private String invoiceProject;
 
-    @Schema(description ="开票日期")
-    private String invoiceTime;
+    @Schema(description = "开票日期")
+    private Date invoiceTime;
 
     @Schema(description ="金额")
     private BigDecimal amount;
