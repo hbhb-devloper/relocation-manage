@@ -110,8 +110,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void addSaveRelocationInvoice(List<InvoiceImportVO> dataList) {
         List<ProjectInfoVO> projectInfo = relocationInvoiceMapper.getProjectInfo();
         Map<String, Long> projectMap = projectInfo.stream().collect(Collectors.toMap(ProjectInfoVO::getInfo, ProjectInfoVO::getId));
-
-
+        // TODO 发票匹配验证
         // 转换单位
         List<Unit> list = unitApiExp.getAllUnitList();
         Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
@@ -209,8 +208,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO vo, Integer userId) {
         setConditionDetail(vo, userId);
         List<Unit> unitList = unitApiExp.getAllUnitList();
-        List<InvoiceExportResVO> exportResVos = relocationInvoiceMapper
-                .selectExportListByCondition(vo);
+        List<InvoiceExportResVO> exportResVos = relocationInvoiceMapper.selectExportListByCondition(vo);
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         exportResVos.forEach(item -> {
             item.setInvoiceType(State.ONE.value().equals(item.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
@@ -241,17 +239,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         // 转换单位
         BeanUtils.copyProperties(invoiceVo, invoice);
         List<Unit> list = unitApiExp.getAllUnitList();
-        Map<String, Integer> unitMap = list.stream().collect(
-                Collectors.toMap(Unit::getUnitName, Unit::getId));
+        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
         String remake = invoiceVo.getRemake();
-        int count = 0;
-        String b = ";";
-        String c = "；";
-        while (remake.contains(b) || remake.contains(c)) {
-            remake = remake.substring(remake.indexOf(b) + 1);
-            ++count;
-        }
-        if (count < 3) {
+        if (!remake.contains(";") || !remake.contains("；")) {
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_REMAKE_ERROR);
         }
         String[] split = remake.split("；");
@@ -327,4 +317,6 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
         }
     }
+
+
 }
