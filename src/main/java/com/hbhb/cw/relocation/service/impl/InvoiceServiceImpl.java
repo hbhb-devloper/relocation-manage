@@ -244,6 +244,16 @@ public class InvoiceServiceImpl implements InvoiceService {
         Map<String, Integer> unitMap = list.stream().collect(
                 Collectors.toMap(Unit::getUnitName, Unit::getId));
         String remake = invoiceVo.getRemake();
+        int count = 0;
+        String b = ";";
+        String c = "；";
+        while (remake.contains(b) || remake.contains(c)) {
+            remake = remake.substring(remake.indexOf(b) + 1);
+            ++count;
+        }
+        if (count < 3) {
+            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_REMAKE_ERROR);
+        }
         String[] split = remake.split("；");
         //合同号
         String contractNum = split[0];

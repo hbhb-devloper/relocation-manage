@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -73,7 +74,7 @@ public class ReceiptController {
         try {
             EasyExcel.read(file.getInputStream(), ReceiptImportVO.class,
                     new ReceiptListener(receiptService)).sheet().doRead();
-        } catch (Exception e) {
+        } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
             throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_IMPORT_ERROR);
         }

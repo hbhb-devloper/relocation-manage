@@ -83,7 +83,7 @@ public class InvoiceController {
         try {
             EasyExcel.read(file.getInputStream(), InvoiceImportVO.class,
                     new InvoiceListener(invoiceService)).sheet().doRead();
-        } catch (IOException e) {
+        } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
         }
         log.info("迁改发票导入结束，总共耗时：" + (System.currentTimeMillis() - begin) / 1000 + "s");

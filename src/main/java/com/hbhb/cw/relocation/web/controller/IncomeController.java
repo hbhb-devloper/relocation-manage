@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -59,8 +60,8 @@ public class IncomeController {
         incomeService.judgeFileName(fileName);
         try {
             EasyExcel.read(file.getInputStream(), IncomeImportVO.class,
-                new IncomeListener(incomeService)).sheet().doRead();
-        } catch (Exception e) {
+                    new IncomeListener(incomeService)).sheet().doRead();
+        } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_IMPORT_ERROR);
         }
