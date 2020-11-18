@@ -44,7 +44,7 @@ public class ProjectController implements RelocationProjectApi {
         try {
             EasyExcel.read(file.getInputStream(), ProjectImportVO.class,
                     new ProjectListener(projectService)).sheet().doRead();
-        } catch (IOException e) {
+        } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
             throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR);
         }

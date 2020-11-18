@@ -90,6 +90,8 @@ public class ProjectServiceImpl implements ProjectService {
             } else {
                 project.setCompensationSate(0);
             }
+
+
             project.setContractNum(importVO.getContractNum() == null ? "" : importVO.getContractNum());
             project.setContractName(importVO.getContractName() == null ? "" : importVO.getContractName());
             project.setContractType(importVO.getContractType() == null ? "" : importVO.getContractType());
@@ -102,6 +104,7 @@ public class ProjectServiceImpl implements ProjectService {
             project.setFinalPayment(importVO.getFinalPayment() == null ? new BigDecimal(0) : new BigDecimal(importVO.getFinalPayment()));
             project.setMaterialBudget(importVO.getMaterialBudget() == null ? new BigDecimal(0) : new BigDecimal(importVO.getMaterialBudget()));
             project.setMaterialCost(importVO.getMaterialCost() == null ? new BigDecimal(0) : new BigDecimal(importVO.getMaterialCost()));
+
             // 判断合同状态
             try {
                 if (!isEmpty(importVO.getCompensationSate())) {
@@ -235,6 +238,8 @@ public class ProjectServiceImpl implements ProjectService {
         project.setAnticipatePayment(new BigDecimal(projectResVO.getAnticipatePayment()));
         // 决算款到账金额（元）
         project.setFinalPayment(new BigDecimal(projectResVO.getFinalPayment()));
+        // 赔补金额
+        project.setCompensationAmount(new BigDecimal(projectResVO.getCompensationAmount()));
         projectMapper.updateById(project);
     }
 

@@ -100,8 +100,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void addInvoice(RelocationInvoice invoice) {
         translation(invoice);
         relocationInvoiceMapper.insert(invoice);
-        RelocationIncome relocationIncome = getRelocationIncome(invoice,
-                invoice.getProjectId(), invoice.getPaymentType());
+        RelocationIncome relocationIncome = getRelocationIncome(invoice, invoice.getProjectId(), invoice.getPaymentType());
         relocationIncomeMapper.insert(relocationIncome);
     }
 
@@ -109,19 +108,19 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addSaveRelocationInvoice(List<InvoiceImportVO> dataList) {
-
         List<ProjectInfoVO> projectInfo = relocationInvoiceMapper.getProjectInfo();
         Map<String, Long> projectMap = projectInfo.stream().collect(Collectors.toMap(ProjectInfoVO::getInfo, ProjectInfoVO::getId));
+
+
         // 转换单位
         List<Unit> list = unitApiExp.getAllUnitList();
         Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
         List<RelocationInvoice> invoiceList = new ArrayList<>();
         for (InvoiceImportVO relocationInvoiceImport : dataList) {
             if (!"财务开票".equals(relocationInvoiceImport.getBusinessType())) {
-                throw new InvoiceException(
-                        InvoiceErrorCode.RELOCATION_INVOICE_IMPORT_BUSTYPE_ERROR);
+                throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_IMPORT_BUSTYPE_ERROR);
             }
-            String newRemake = relocationInvoiceImport.getNewRemake();
+            String newRemake = relocationInvoiceImport.getRemake();
             Matcher m = Pattern.compile(Pattern.quote("；")).matcher(newRemake);
             int i = 0;
             while (m.find()) {
@@ -170,8 +169,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 //合同号
                 String contractNum = split[0];
                 if (contractNum.startsWith("（")) {
-                    contractNum = contractNum
-                            .substring(contractNum.indexOf("（") + 1, contractNum.lastIndexOf("）"));
+                    contractNum = contractNum.substring(contractNum.indexOf("（") + 1, contractNum.lastIndexOf("）"));
                 }
                 //区县
                 String unit = split[1];
@@ -195,10 +193,10 @@ public class InvoiceServiceImpl implements InvoiceService {
                 String pinfo = split[3];
                 String key = contractNum + unitId + pinfo;
                 pid = projectMap.get(key);
-                if (pid == null) {
-                    throw new InvoiceException(
-                            InvoiceErrorCode.RELOCATION_INVOICE_EXIST_PROJECT_ERROR);
+                if (pid != null) {
+                    throw new RelocationException(RelocationErrorCode.RELOCATION_INVOICE_EXIST_PROJECT_ERROR, "发票编号: " + relocationInvoiceImport.getInvoiceNumber() + " 在项目中不存在");
                 }
+
             }
             relocationInvoice.setPaymentType(atype);
             relocationInvoice.setProjectId(pid);

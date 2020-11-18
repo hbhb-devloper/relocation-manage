@@ -19,4 +19,10 @@ public class InvoiceException extends BusinessException {
         super(errorCode.getCode(), MessageConvert.convert(errorCode.getMessage()));
         this.code = errorCode.getCode();
     }
+
+    public InvoiceException(InvoiceErrorCode errorCode, String msg) {
+        super(errorCode.getCode(), msg);
+        this.code = errorCode.getCode();
+    }
+
 }
