@@ -18,7 +18,7 @@ import com.hbhb.cw.systemcenter.model.SysUser;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.ParentVO;
 import com.hbhb.cw.systemcenter.vo.SysDictVO;
-import lombok.extern.slf4j.Slf4j;
+
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
@@ -26,13 +26,19 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URLDecoder;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 import static com.alibaba.excel.util.StringUtils.isEmpty;
 
@@ -196,16 +202,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public PageResult<ProjectResVO> getRelocationProjectList(ProjectReqVO cond, Integer pageNum, Integer pageSize) {
-
-        if (cond.getContractNum() != null) {
-            String s = null;
-            try {
-                s = URLDecoder.decode(cond.getContractNum(), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            cond.setContractNum(s);
-        }
         PageRequest<ProjectResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         ParentVO parentUnit = unitApi.getParentUnit();
         if (parentUnit.getHangzhou().equals(cond.getUnitId())) {

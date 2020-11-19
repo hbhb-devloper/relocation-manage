@@ -1,11 +1,13 @@
 package com.hbhb.cw.relocation.web.vo;
 
+import com.hbhb.web.annotation.Decode;
+
+import java.io.Serializable;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +19,7 @@ public class WarnReqVO implements Serializable {
     private String contractDuration;
 
     @Schema(description = "合同编号")
+    @Decode
     private String contractNum;
 
     @Schema(description = "项目编号")

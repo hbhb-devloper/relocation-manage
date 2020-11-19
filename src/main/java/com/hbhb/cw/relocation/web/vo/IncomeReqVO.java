@@ -1,12 +1,14 @@
 package com.hbhb.cw.relocation.web.vo;
 
+import com.hbhb.web.annotation.Decode;
+
+import java.io.Serializable;
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * @author xiaokang
@@ -19,6 +21,7 @@ public class IncomeReqVO implements Serializable {
     private static final long serialVersionUID = -1608188188520678836L;
 
     @Schema(description = "合同编号")
+    @Decode
     private String contractNum;
     @Schema(description = "起始时间（最小）")
     private String startTimeFrom;

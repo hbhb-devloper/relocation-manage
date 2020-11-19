@@ -11,20 +11,21 @@ import com.hbhb.cw.relocation.web.vo.FinanceReqVO;
 import com.hbhb.cw.relocation.web.vo.FinanceResVO;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
-import lombok.extern.slf4j.Slf4j;
+
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author hyk
@@ -45,11 +46,7 @@ public class FinanceServiceImpl implements FinanceService {
 
     @Override
     public PageResult<FinanceResVO> getFinanceList(Integer pageNum, Integer pageSize,
-                                                   FinanceReqVO cond, Integer userId) throws UnsupportedEncodingException {
-        if (cond.getContractNum() != null) {
-            String s = URLDecoder.decode(cond.getContractNum(), "UTF-8");
-            cond.setContractNum(s);
-        }
+                                                   FinanceReqVO cond, Integer userId) {
         String currentYear = DateUtil.getCurrentYear();
         if (StringUtils.isEmpty(cond.getYear())) {
             cond.setYear(currentYear);

@@ -9,14 +9,23 @@ import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.mapper.WarnMapper;
 import com.hbhb.cw.relocation.model.RelocationFile;
 import com.hbhb.cw.relocation.model.RelocationWarn;
-import com.hbhb.cw.relocation.rpc.*;
+import com.hbhb.cw.relocation.rpc.FileApiExp;
+import com.hbhb.cw.relocation.rpc.FlowApiExp;
+import com.hbhb.cw.relocation.rpc.MailApiExp;
+import com.hbhb.cw.relocation.rpc.SysUserApiExp;
+import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.service.WarnService;
-import com.hbhb.cw.relocation.web.vo.*;
+import com.hbhb.cw.relocation.web.vo.WarnCountVO;
+import com.hbhb.cw.relocation.web.vo.WarnExportVO;
+import com.hbhb.cw.relocation.web.vo.WarnFileResVO;
+import com.hbhb.cw.relocation.web.vo.WarnFileVO;
+import com.hbhb.cw.relocation.web.vo.WarnReqVO;
+import com.hbhb.cw.relocation.web.vo.WarnResVO;
 import com.hbhb.cw.systemcenter.model.SysFile;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
 import com.hbhb.cw.systemcenter.vo.SysUserVO;
-import lombok.extern.slf4j.Slf4j;
+
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
@@ -24,12 +33,17 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URLDecoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author wangxiaogang
@@ -65,16 +79,6 @@ public class WarnServiceImpl implements WarnService {
 
     @Override
     public List<WarnResVO> getWarn(WarnReqVO reqVO, Integer userId) {
-        // 处理json格式
-        if (reqVO.getContractNum() != null) {
-            String s = null;
-            try {
-                s = URLDecoder.decode(reqVO.getContractNum(), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            reqVO.setContractNum(s);
-        }
         SysUserInfo user = userApi.getUserById(userId);
         if ("admin".equals(user.getUserName())) {
             reqVO.setUnitId(null);
@@ -196,15 +200,6 @@ public class WarnServiceImpl implements WarnService {
 
     @Override
     public PageResult<WarnResVO> getWarnList(WarnReqVO cond, Integer userId, Integer pageNum, Integer pageSize) {
-        if (cond.getContractNum() != null) {
-            String s = null;
-            try {
-                s = URLDecoder.decode(cond.getContractNum(), "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            cond.setContractNum(s);
-        }
         Map<Integer, String> unitMap = getUnit();
         SysUserInfo userById = userApi.getUserById(userId);
         cond.setUnitId(userById.getUnitId());

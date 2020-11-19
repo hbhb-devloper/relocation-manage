@@ -1,7 +1,10 @@
 package com.hbhb.cw.relocation.web.vo;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import com.hbhb.web.annotation.Decode;
+
 import java.io.Serializable;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,7 +38,8 @@ public class FinanceReqVO implements Serializable {
     @Schema(description ="立项时间")
     private String projectTime;
 
-    @Schema(description ="合同编号")
+    @Schema(description = "合同编号")
+    @Decode
     private String contractNum;
 
     @Schema(description ="预付款是否已到账")
