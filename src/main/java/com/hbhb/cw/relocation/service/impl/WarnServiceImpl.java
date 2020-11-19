@@ -17,12 +17,17 @@ import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
 import com.hbhb.cw.systemcenter.vo.SysUserVO;
 import lombok.extern.slf4j.Slf4j;
+import org.beetl.sql.core.page.DefaultPageRequest;
+import org.beetl.sql.core.page.PageRequest;
+import org.beetl.sql.core.page.PageResult;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,14 +65,24 @@ public class WarnServiceImpl implements WarnService {
 
     @Override
     public List<WarnResVO> getWarn(WarnReqVO reqVO, Integer userId) {
+        // 处理json格式
+        if (reqVO.getContractNum() != null) {
+            String s = null;
+            try {
+                s = URLDecoder.decode(reqVO.getContractNum(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            reqVO.setContractNum(s);
+        }
         SysUserInfo user = userApi.getUserById(userId);
         if ("admin".equals(user.getUserName())) {
             reqVO.setUnitId(null);
         } else {
             reqVO.setUnitId(user.getUnitId());
         }
-        List<Unit> unitList = unitApi.getAllUnitList();
-        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        Map<Integer, String> unitMap = getUnit();
+        // 组装单位，状态
         List<WarnResVO> warnResVo = warnMapper.selectProjectWarnByCond(reqVO);
         Map<String, String> isReceived = getIsReceived();
         warnResVo.forEach(item -> {
@@ -78,11 +93,15 @@ public class WarnServiceImpl implements WarnService {
     }
 
     @Override
-    public List<WarnExportVO> export(WarnReqVO reqVO) {
-        List<WarnResVO> list = warnMapper.selectProjectWarnByCond(reqVO);
+    public List<WarnExportVO> export(WarnReqVO cond) {
+        List<WarnResVO> list = warnMapper.selectProjectWarnByCond(cond);
         List<Unit> unitList = unitApi.getAllUnitList();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
-        list.forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
+        Map<String, String> isReceived = getIsReceived();
+        list.forEach(item -> {
+            item.setUnitName(unitMap.get(item.getUnitId()));
+            item.setIsReceived(isReceived.get(item.getIsReceived()));
+        });
         return BeanConverter.copyBeanList(list, WarnExportVO.class);
     }
 
@@ -160,14 +179,43 @@ public class WarnServiceImpl implements WarnService {
     @Override
     public List<WarnFileResVO> getWarnFileList(Long warnId) {
         List<Integer> list = fileMapper.selectFileByWarnId(warnId);
-        List<SysFile> fileList = fileApiExp.getFileList(list);
-        List<WarnFileResVO> fileVo = new ArrayList<>();
-        fileList.forEach(item -> fileVo.add(WarnFileResVO.builder()
-                .fileId(item.getId())
-                .fileName(item.getFileName())
-                .filepath(item.getFilePath())
-                .build()));
-        return fileVo;
+        if (list.size() > 0) {
+            List<SysFile> fileList = fileApiExp.getFileList(list);
+            List<WarnFileResVO> fileVo = new ArrayList<>();
+            fileList.forEach(item -> fileVo.add(WarnFileResVO.builder()
+                    .fileId(item.getId())
+                    .fileName(item.getFileName())
+                    .filepath(item.getFilePath())
+                    .build()));
+
+
+            return fileVo;
+        }
+        return null;
+    }
+
+    @Override
+    public PageResult<WarnResVO> getWarnList(WarnReqVO cond, Integer userId, Integer pageNum, Integer pageSize) {
+        if (cond.getContractNum() != null) {
+            String s = null;
+            try {
+                s = URLDecoder.decode(cond.getContractNum(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            cond.setContractNum(s);
+        }
+        Map<Integer, String> unitMap = getUnit();
+        SysUserInfo userById = userApi.getUserById(userId);
+        cond.setUnitId(userById.getUnitId());
+        PageRequest<WarnResVO> request = DefaultPageRequest.of(pageNum, pageSize);
+        PageResult<WarnResVO> warnResVo = warnMapper.selectWarnListByCond(cond, request);
+        Map<String, String> isReceived = getIsReceived();
+        warnResVo.getList().forEach(item -> {
+            item.setIsReceived(isReceived.get(item.getIsReceived()));
+            item.setUnitName(unitMap.get(item.getUnitId()));
+        });
+        return warnResVo;
     }
 
     private Map<String, String> getIsReceived() {
@@ -175,5 +223,10 @@ public class WarnServiceImpl implements WarnService {
         receivedMap.put(IsReceived.RECEIVED_CODE.value(), IsReceived.RECEIVED.value());
         receivedMap.put(IsReceived.NOT_RECEIVED_CODE.value(), IsReceived.NOT_RECEIVED.value());
         return receivedMap;
+    }
+
+    private Map<Integer, String> getUnit() {
+        List<Unit> unitList = unitApi.getAllUnitList();
+        return unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
     }
 }

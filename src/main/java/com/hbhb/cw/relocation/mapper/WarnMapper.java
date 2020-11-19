@@ -5,6 +5,8 @@ import com.hbhb.cw.relocation.model.RelocationWarn;
 import com.hbhb.cw.relocation.web.vo.WarnReqVO;
 import com.hbhb.cw.relocation.web.vo.WarnResVO;
 import com.hbhb.web.beetlsql.BaseMapper;
+import org.beetl.sql.core.page.PageRequest;
+import org.beetl.sql.core.page.PageResult;
 
 import java.util.List;
 
@@ -19,4 +21,5 @@ public interface WarnMapper extends BaseMapper<RelocationWarn> {
 
     int selectWarnCountByUnitId(Integer unitId);
 
+    PageResult<WarnResVO> selectWarnListByCond(WarnReqVO cond, PageRequest<WarnResVO> request);
 }

@@ -73,8 +73,7 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
     @Override
-    public List<FinanceResVO> selectExportListByCondition(FinanceReqVO cond,
-                                                          Integer userId) {
+    public List<FinanceResVO> selectExportListByCondition(FinanceReqVO cond, Integer userId) {
         setUnitId(cond, userId);
         String currentYear = DateUtil.getCurrentYear();
         if (StringUtils.isEmpty(cond.getYear())) {

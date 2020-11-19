@@ -46,7 +46,7 @@ public class ReceiptExportVO {
             borderTop = BorderStyle.NONE, borderBottom = BorderStyle.NONE,
             verticalAlignment = VerticalAlignment.CENTER)
     @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER)
-    private String unit;
+    private String unitName;
 
     @ColumnWidth(20)
     @ExcelProperty(value = "赔补金额", index = 2)

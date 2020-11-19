@@ -208,6 +208,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             RelocationIncome relocationIncome = getRelocationIncome(relocationInvoice, pid, atype);
             incomeList.add(relocationIncome);
         }
+
         relocationInvoiceMapper.insertBatch(invoiceList);
         relocationIncomeMapper.insertBatch(incomeList);
     }
