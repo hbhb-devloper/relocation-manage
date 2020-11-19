@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -241,8 +242,13 @@ public class InvoiceServiceImpl implements InvoiceService {
         List<Unit> list = unitApiExp.getAllUnitList();
         Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
         String remake = invoiceVo.getRemake();
-        if (!remake.contains(";") || !remake.contains("；")) {
+        // 按照英文分隔符划分
+        List<String> arrList = Arrays.asList(remake.split(";"));
+        // 按照中文分隔符划分
+        List<String> brrList = Arrays.asList(remake.split("；"));
+        if (arrList.size() != 4 && brrList.size() != 4) {
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_REMAKE_ERROR);
+
         }
         String[] split = remake.split("；");
         //合同号

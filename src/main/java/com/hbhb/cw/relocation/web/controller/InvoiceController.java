@@ -2,8 +2,6 @@ package com.hbhb.cw.relocation.web.controller;
 
 import com.alibaba.excel.EasyExcel;
 import com.hbhb.core.utils.ExcelUtil;
-import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
-import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.model.RelocationInvoice;
 import com.hbhb.cw.relocation.service.InvoiceService;
 import com.hbhb.cw.relocation.service.listener.InvoiceListener;
@@ -67,11 +65,7 @@ public class InvoiceController {
     @Operation(summary = "修改迁改发票")
     @PutMapping
     public void updateInvoice(@RequestBody InvoiceResVO invoice) {
-        try {
-            invoiceService.updateInvoice(invoice);
-        } catch (Exception e) {
-            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_EXIST_PROJECT_ERROR);
-        }
+        invoiceService.updateInvoice(invoice);
     }
 
     @Operation(summary = "迁改管理发票导入")

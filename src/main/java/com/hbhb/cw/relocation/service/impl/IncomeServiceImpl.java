@@ -160,13 +160,13 @@ IncomeServiceImpl implements IncomeService {
         income1.setId(incomeId);
         if (relocationIncome.getReceived().compareTo(relocationIncome.getReceivable()) == 0
                 && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) == 0) {
-            income.setIsReceived(3);
+            income1.setIsReceived(3);
             relocationIncomeMapper.updateTemplateById(income1);
         }
         //未收完 2
         if (relocationIncome.getReceived().compareTo(relocationIncome.getReceivable()) < 0
                 && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
-            income.setIsReceived(2);
+            income1.setIsReceived(2);
             relocationIncomeMapper.updateTemplateById(income1);
         }
     }
