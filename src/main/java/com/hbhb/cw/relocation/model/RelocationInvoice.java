@@ -94,8 +94,4 @@ public class RelocationInvoice implements Serializable {
     @Schema(description = "所属项目名")
     private Long projectId;
 
-    /**
-     * 项目是否匹配
-     */
-    private Boolean projectState;
 }

@@ -1,16 +1,13 @@
 package com.hbhb.cw.relocation.service.impl;
 
 import com.hbhb.core.utils.DateUtil;
-import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
-import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationIncomeDetail;
-import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.service.IncomeService;
@@ -22,7 +19,7 @@ import com.hbhb.cw.systemcenter.enums.AllName;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.ParentVO;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
-
+import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
@@ -30,15 +27,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author hyk
@@ -134,21 +128,21 @@ IncomeServiceImpl implements IncomeService {
         // todo 此处应该使用备注格式字段去反查，而不是发票编号
         Long pid = relocationIncomeMapper.selectProject(relocationIncome.getInvoiceNum());
         Integer paymentType = relocationIncome.getPaymentType();
-        if (pid == null) {
-            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_NOT_PROJECT);
-        } else {
-            RelocationProject project = relocationProjectMapper.single(pid);
-            BigDecimal anticipatePayment = project.getAnticipatePayment();
-            BigDecimal finalPayment = project.getFinalPayment();
-            RelocationProject relocationProject = new RelocationProject();
-            // 同步修改项目信息表数据
-            if (paymentType == 1) {
-                relocationProject.setAnticipatePayment(anticipatePayment.add(amount));
-            } else {
-                relocationProject.setFinalPayment(finalPayment.add(amount));
-            }
-            relocationProjectMapper.updateTemplateById(relocationProject);
-        }
+//        if (pid == null) {
+//            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_NOT_PROJECT);
+//        } else {
+//            RelocationProject project = relocationProjectMapper.single(pid);
+//            BigDecimal anticipatePayment = project.getAnticipatePayment();
+//            BigDecimal finalPayment = project.getFinalPayment();
+//            RelocationProject relocationProject = new RelocationProject();
+//            // 同步修改项目信息表数据
+//            if (paymentType == 1) {
+//                relocationProject.setAnticipatePayment(anticipatePayment.add(amount));
+//            } else {
+//                relocationProject.setFinalPayment(finalPayment.add(amount));
+//            }
+//            relocationProjectMapper.updateTemplateById(relocationProject);
+//        }
         RelocationIncome single = relocationIncomeMapper.single(incomeId);
         RelocationIncome income = new RelocationIncome();
         income.setId(incomeId);

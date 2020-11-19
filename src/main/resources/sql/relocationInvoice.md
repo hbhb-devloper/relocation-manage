@@ -24,8 +24,7 @@ selectListByCondition
         ri.issuer,
         ri.state,
         ri.is_import          isImport,
-        ri.manager,
-        ri.project_state      projectState
+        ri.manager
         -- @}
     from relocation_invoice ri
         -- @where(){
@@ -77,8 +76,7 @@ getInvoiceDetailById
         ri.issuer,
         ri.state,
         ri.is_import          isImport,
-        ri.manager,
-        ri.project_state      projectState
+        ri.manager
     from relocation_invoice ri
         where ri.id = #{id}
 ```
@@ -193,8 +191,7 @@ selectExportListByCondition
         ri.issuer,
         ri.state,
         ri.is_import          isImport,
-        ri.manager,
-        ri.project_state      projectState
+        ri.manager
     from relocation_invoice ri
         -- @where(){
           -- @if(cond.unitId == 429){

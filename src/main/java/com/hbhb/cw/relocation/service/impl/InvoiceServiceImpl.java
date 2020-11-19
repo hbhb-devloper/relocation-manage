@@ -195,18 +195,16 @@ public class InvoiceServiceImpl implements InvoiceService {
                 String key = contractNum + unitId + pinfo;
                 // 若发票可以与项目信息匹配则设置项目状态匹配，否则为不匹配
                 pid = projectMap.get(key);
-                if (pid != null) {
-                    relocationInvoice.setProjectState(true);
-                } else {
-                    relocationInvoice.setProjectState(true);
-                }
             }
             relocationInvoice.setPaymentType(atype);
             relocationInvoice.setProjectId(pid);
-            invoiceList.add(relocationInvoice);
-            //导入发票后 同步添加到收款
-            RelocationIncome relocationIncome = getRelocationIncome(relocationInvoice, pid, atype);
-            incomeList.add(relocationIncome);
+            // 判断发票是否匹配基础信息若匹配则导入不匹配则导入失败
+            if (pid != null) {
+                invoiceList.add(relocationInvoice);
+                //导入发票后 同步添加到收款
+                RelocationIncome relocationIncome = getRelocationIncome(relocationInvoice, pid, atype);
+                incomeList.add(relocationIncome);
+            }
         }
 
         relocationInvoiceMapper.insertBatch(invoiceList);

@@ -79,7 +79,7 @@ public class WarnExportVO implements Serializable {
             borderTop = BorderStyle.NONE, borderBottom = BorderStyle.NONE,
             verticalAlignment = VerticalAlignment.CENTER)
     @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER)
-    private String compensationSate;
+    private String isReceived;
 
     @ColumnWidth(20)
     @ExcelProperty(value = "决算款到账金额（元）", index = 6)

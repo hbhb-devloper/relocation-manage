@@ -20,12 +20,16 @@ selectReceiptListByCond
             and rr.unit_id = #{cond.unitId}
        -- @}
        -- @if(!isEmpty(cond.invoiceTimeFrom)){
-        and rr.receipt_time between #{cond.invoiceTimeFrom}
-        and #{cond.invoiceTimeTo}
-       -- @} 
+        and rr.receipt_time >= #{cond.invoiceTimeFrom}
+       -- @}
+       -- @if(!isEmpty(cond.invoiceTimeTo)){
+        and rr.receipt_time <= #{cond.invoiceTimeTo}
+      -- @} 
       -- @if(!isEmpty(cond.amountFrom)){
-        and rr.compensation_amount between #{cond.amountFrom}
-        and #{cond.amountTo}
+        and rr.compensation_amount >= #{cond.amountFrom}
+      -- @}
+     -- @if(!isEmpty(cond.amountTo)){
+        and rr.compensation_amount<= #{cond.amountTo}
       -- @} 
      -- @} 
 ```
@@ -53,12 +57,16 @@ selectReceiptByCond
             and rr.unit_id = #{cond.unitId}
        -- @}
        -- @if(!isEmpty(cond.invoiceTimeFrom)){
-        and rr.receipt_time between #{cond.invoiceTimeFrom}
-        and #{cond.invoiceTimeTo}
+        and rr.receipt_time >= #{cond.invoiceTimeFrom}
+       -- @}
+       -- @if(!isEmpty(cond.invoiceTimeTo)){
+        and rr.receipt_time <= #{cond.invoiceTimeTo}
       -- @} 
       -- @if(!isEmpty(cond.amountFrom)){
-        and rr.compensation_amount between #{cond.amountFrom}
-        and #{cond.amountTo}
+        and rr.compensation_amount >= #{cond.amountFrom}
+      -- @}
+     -- @if(!isEmpty(cond.amountTo)){
+        and rr.compensation_amount<= #{cond.amountTo}
       -- @} 
      -- @} 
 ```
