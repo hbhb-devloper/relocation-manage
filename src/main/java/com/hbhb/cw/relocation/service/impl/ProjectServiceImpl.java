@@ -27,7 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -194,6 +196,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public PageResult<ProjectResVO> getRelocationProjectList(ProjectReqVO cond, Integer pageNum, Integer pageSize) {
+
+        if (cond.getContractNum() != null) {
+            String s = null;
+            try {
+                s = URLDecoder.decode(cond.getContractNum(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            cond.setContractNum(s);
+        }
         PageRequest<ProjectResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         ParentVO parentUnit = unitApi.getParentUnit();
         if (parentUnit.getHangzhou().equals(cond.getUnitId())) {

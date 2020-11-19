@@ -33,7 +33,7 @@ selectListByCondition
                 and ri.district in (#{cond.unitIds})
             -- @}
             -- @if(cond.unitId != 11 && cond.unitId != 429){
-                and ri.district = #{cond.unitId}
+                and ri.unit_id = #{cond.unitId}
             -- @}
             -- @if(isNotEmpty(cond.amountFrom)){
                 and ri.amount >= #{cond.amountFrom}
@@ -201,7 +201,7 @@ selectExportListByCondition
                 and ri.district in (#{cond.unitIds})
           -- @}
           -- @if(cond.unitId != 11 && cond.unitId != 429){
-              and ri.district = #{cond.unitId}
+              and ri.unit_id = #{cond.unitId}
           -- @}
           -- @if(isNotEmpty(cond.amountFrom)){
               and ri.amount >= #{cond.amountFrom}

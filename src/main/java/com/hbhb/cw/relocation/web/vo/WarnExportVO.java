@@ -99,5 +99,5 @@ public class WarnExportVO implements Serializable {
             borderTop = BorderStyle.NONE, borderBottom = BorderStyle.NONE,
             verticalAlignment = VerticalAlignment.CENTER)
     @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER)
-    private String contractDuration;
+    private Integer contractDuration;
 }

@@ -14,6 +14,7 @@ import com.hbhb.web.annotation.UserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.beetl.sql.core.page.PageResult;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -87,8 +88,19 @@ public class WarnController implements RelocationWarnApi {
     @Override
     public int getWarnCount(Integer unitId) {
         return warnService.getWarnCount(unitId);
-
     }
+
+    @Operation(summary = "预警提示列表")
+    @GetMapping("/tree-list")
+    public PageResult<WarnResVO> getWarnList(
+            @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
+            @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
+            @Parameter(description = "预警查询条件") WarnReqVO warnReqVO, @UserId Integer userId) {
+        pageNum = pageNum == null ? 1 : pageNum;
+        pageSize = pageSize == null ? 30 : pageSize;
+        return warnService.getWarnList(warnReqVO, userId, pageNum, pageSize);
+    }
+
 }
 
 

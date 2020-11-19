@@ -22,7 +22,7 @@ import com.hbhb.cw.systemcenter.enums.AllName;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.ParentVO;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
-
+import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
@@ -30,15 +30,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author hyk
@@ -74,8 +73,16 @@ IncomeServiceImpl implements IncomeService {
     }
 
     @Override
-    public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize,
-                                                 IncomeReqVO cond, Integer userId) {
+    public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize, IncomeReqVO cond, Integer userId) {
+        if (cond.getContractNum() != null) {
+            String s = null;
+            try {
+                s = URLDecoder.decode(cond.getContractNum(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            cond.setContractNum(s);
+        }
         List<Unit> unitList = unitApiExp.getAllUnitList();
         ParentVO parentUnit = unitApiExp.getParentUnit();
         List<Integer> unitIds = new ArrayList<>();
@@ -119,8 +126,7 @@ IncomeServiceImpl implements IncomeService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addIncomeDetail(RelocationIncomeDetail detail,
-                                Integer userId) {
+    public void addIncomeDetail(RelocationIncomeDetail detail, Integer userId) {
         String currentMonth = DateUtil.getCurrentMonth();
         detail.setPayMonth(currentMonth);
         detail.setPayMonth(detail.getPayMonth().replace("-", ""));
