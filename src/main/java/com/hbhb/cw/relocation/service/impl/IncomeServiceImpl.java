@@ -1,7 +1,9 @@
 package com.hbhb.cw.relocation.service.impl;
 
 import com.hbhb.core.utils.DateUtil;
+import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
+import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
@@ -129,11 +131,13 @@ IncomeServiceImpl implements IncomeService {
         RelocationIncome relocationIncome = relocationIncomeMapper.single(incomeId);
         Long pid = relocationIncomeMapper.selectProject(relocationIncome.getInvoiceNum());
         Integer paymentType = relocationIncome.getPaymentType();
-        RelocationProject project = relocationProjectMapper.single(pid);
-        BigDecimal anticipatePayment = project.getAnticipatePayment();
-        BigDecimal finalPayment = project.getFinalPayment();
-        RelocationProject relocationProject = new RelocationProject();
-        if (pid != null) {
+        if (pid == null) {
+            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_NOT_PROJECT);
+        } else {
+            RelocationProject project = relocationProjectMapper.single(pid);
+            BigDecimal anticipatePayment = project.getAnticipatePayment();
+            BigDecimal finalPayment = project.getFinalPayment();
+            RelocationProject relocationProject = new RelocationProject();
             // 同步修改项目信息表数据
             if (paymentType == 1) {
                 relocationProject.setAnticipatePayment(anticipatePayment.add(amount));

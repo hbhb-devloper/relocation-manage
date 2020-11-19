@@ -16,6 +16,7 @@ public enum InvoiceErrorCode {
     RELOCATION_INCOME_IMPORT_ERROR("80004", "relocation.income.import.error"),
     RELOCATION_FINANCE_QUERY_PARAM_ERROR("80005", "relocation.finance.query.param.error"),
     FILE_NAME_ERROR("80006", "file.data.name.error"),
+    RELOCATION_INCOME_NOT_PROJECT("80007", "relocation.income.not.project"),
     ;
 
     private String code;

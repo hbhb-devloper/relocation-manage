@@ -130,8 +130,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_REMAKE_ERROR);
             }
             RelocationInvoice relocationInvoice = new RelocationInvoice();
-            relocationInvoice.setUnitId(109);
-            relocationInvoice.setDistrict(109);
+            relocationInvoice.setUnitId(unitMap.get(relocationInvoiceImport.getUnitId()));
+            relocationInvoice.setDistrict(unitMap.get(relocationInvoiceImport.getDistrict()));
             relocationInvoice.setInvoiceCode(relocationInvoiceImport.getInvoiceCode());
             relocationInvoice.setInvoiceNumber(relocationInvoiceImport.getInvoiceNumber());
             String invoiceType = relocationInvoiceImport.getInvoiceType();
@@ -145,7 +145,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             relocationInvoice.setBuyerTax(relocationInvoiceImport.getBuyerTax());
             relocationInvoice.setBuyerName(relocationInvoiceImport.getBuyerName());
             relocationInvoice.setInvoiceProject(relocationInvoiceImport.getInvoiceProject());
-            relocationInvoice.setInvoiceTime(DateUtil.string3DateYMD(relocationInvoiceImport.getInvoiceTime()));
+            relocationInvoice.setInvoiceTime(DateUtil.string2DateYMD(relocationInvoiceImport.getInvoiceTime()));
             relocationInvoice.setAmount(new BigDecimal(relocationInvoiceImport.getAmount()));
             relocationInvoice.setTaxRate(new BigDecimal(relocationInvoiceImport.getTaxRate() == null ? "0"
                     : relocationInvoiceImport.getTaxRate()));
@@ -192,10 +192,12 @@ public class InvoiceServiceImpl implements InvoiceService {
                 // 项目信息 匹配id
                 String pinfo = split[3];
                 String key = contractNum + unitId + pinfo;
+                // 若发票可以与项目信息匹配则设置项目状态匹配，否则为不匹配
                 pid = projectMap.get(key);
                 if (pid != null) {
-                    throw new RelocationException(RelocationErrorCode.RELOCATION_INVOICE_EXIST_PROJECT_ERROR, "发票编号: " + relocationInvoiceImport.getInvoiceNumber() + " 在项目中不存在");
+                    relocationInvoice.setProjectState(false);
                 }
+                relocationInvoice.setProjectState(true);
 
             }
             relocationInvoice.setPaymentType(atype);

@@ -191,7 +191,8 @@ selectExportListByCondition
         ri.issuer,
         ri.state,
         ri.is_import          isImport,
-        ri.manager
+        ri.manager,
+        ri.project_state      projectState
     from relocation_invoice ri
         -- @where(){
           -- @if(cond.unitId == 429){

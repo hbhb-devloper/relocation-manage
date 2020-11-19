@@ -85,12 +85,17 @@ public class RelocationInvoice implements Serializable {
     @Schema(description ="是否为自定义菜单开票1:是0:否")
     private Integer isImport;
 
-    @Schema(description ="客户经理")
+    @Schema(description = "客户经理")
     private String manager;
 
-    @Schema(description ="款项类型")
+    @Schema(description = "款项类型")
     private Integer paymentType;
 
-    @Schema(description ="所属项目名")
+    @Schema(description = "所属项目名")
     private Long projectId;
+
+    /**
+     * 项目是否匹配
+     */
+    private Boolean projectState;
 }

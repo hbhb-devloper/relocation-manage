@@ -21,7 +21,7 @@ public class InvoiceListener extends AnalysisEventListener {
     /**
      * 批处理条数，每隔多少条清理一次list ，方便内存回收
      */
-    private static final int BATCH_COUNT = 10000;
+    private static final int BATCH_COUNT = 500;
 
 
     /**

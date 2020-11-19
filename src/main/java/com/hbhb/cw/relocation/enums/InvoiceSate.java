@@ -14,7 +14,7 @@ public enum InvoiceSate {
     /**
      * 蓝字
      */
-    BLUE_STATE("篮字");
+    BLUE_STATE("蓝字");
 
     private final String value;
 
