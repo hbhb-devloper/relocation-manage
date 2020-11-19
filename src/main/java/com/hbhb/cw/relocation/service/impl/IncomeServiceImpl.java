@@ -22,7 +22,7 @@ import com.hbhb.cw.systemcenter.enums.AllName;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.ParentVO;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
-import lombok.extern.slf4j.Slf4j;
+
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
@@ -30,12 +30,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author hyk
@@ -129,6 +132,8 @@ IncomeServiceImpl implements IncomeService {
         detail.setCreateTime(DateUtil.getCurrentDate());
         incomeDetailMapper.insert(detail);
         RelocationIncome relocationIncome = relocationIncomeMapper.single(incomeId);
+
+        // todo 此处应该使用备注格式字段去反查，而不是发票编号
         Long pid = relocationIncomeMapper.selectProject(relocationIncome.getInvoiceNum());
         Integer paymentType = relocationIncome.getPaymentType();
         if (pid == null) {
