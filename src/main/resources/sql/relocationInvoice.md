@@ -24,7 +24,8 @@ selectListByCondition
         ri.issuer,
         ri.state,
         ri.is_import          isImport,
-        ri.manager
+        ri.manager,
+        ri.project_state      projectState
         -- @}
     from relocation_invoice ri
         -- @where(){
@@ -76,7 +77,8 @@ getInvoiceDetailById
         ri.issuer,
         ri.state,
         ri.is_import          isImport,
-        ri.manager
+        ri.manager,
+        ri.project_state      projectState
     from relocation_invoice ri
         where ri.id = #{id}
 ```

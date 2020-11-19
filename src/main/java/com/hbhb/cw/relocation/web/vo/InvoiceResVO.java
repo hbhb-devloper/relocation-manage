@@ -71,6 +71,6 @@ public class InvoiceResVO implements Serializable {
     @Schema(description = "客户经理")
     private String manager;
     @Schema(description = "项目状态")
-    private Boolean projectState;
+    private Integer projectState;
 
 }

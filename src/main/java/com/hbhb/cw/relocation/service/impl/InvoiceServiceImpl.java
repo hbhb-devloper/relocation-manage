@@ -195,10 +195,10 @@ public class InvoiceServiceImpl implements InvoiceService {
                 // 若发票可以与项目信息匹配则设置项目状态匹配，否则为不匹配
                 pid = projectMap.get(key);
                 if (pid != null) {
-                    relocationInvoice.setProjectState(false);
+                    relocationInvoice.setProjectState(true);
+                } else {
+                    relocationInvoice.setProjectState(true);
                 }
-                relocationInvoice.setProjectState(true);
-
             }
             relocationInvoice.setPaymentType(atype);
             relocationInvoice.setProjectId(pid);

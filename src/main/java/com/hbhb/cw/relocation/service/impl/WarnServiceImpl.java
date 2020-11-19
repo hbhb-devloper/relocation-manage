@@ -104,6 +104,7 @@ public class WarnServiceImpl implements WarnService {
         List<WarnResVO> warnResVO = projectMapper.selectProjectWarn();
         List<RelocationWarn> list = new ArrayList<>();
         warnResVO.forEach(item -> list.add(RelocationWarn.builder()
+                .unitId(item.getUnitId())
                 .projectNum(item.getProjectNum())
                 .anticipatePayment(new BigDecimal(item.getAnticipatePayment()))
                 .constructionUnit(item.getConstructionUnit())

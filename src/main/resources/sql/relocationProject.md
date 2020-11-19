@@ -221,7 +221,7 @@ selectProjectWarn
 ===
  ```sql
     select project_num        as projectNum,
-           rp.id              as unitId,
+           rp.unit_id              as unitId,
            construction_unit  as constructionUnit,
            opposite_unit      as oppositeUnit,
            rp.contract_num    as contractNum,
