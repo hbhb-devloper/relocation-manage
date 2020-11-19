@@ -120,6 +120,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         Map<String, Integer> unitMap = list.stream().collect(
                 Collectors.toMap(Unit::getUnitName, Unit::getId));
         List<RelocationInvoice> invoiceList = new ArrayList<>();
+        List<RelocationIncome> incomeList = new ArrayList<>();
         for (InvoiceImportVO relocationInvoiceImport : dataList) {
             if (!"财务开票".equals(relocationInvoiceImport.getBusinessType())) {
                 throw new InvoiceException(
@@ -213,8 +214,12 @@ public class InvoiceServiceImpl implements InvoiceService {
             relocationInvoice.setPaymentType(atype);
             relocationInvoice.setProjectId(pid);
             invoiceList.add(relocationInvoice);
+            //导入发票后 同步添加到收款
+            RelocationIncome relocationIncome = getRelocationIncome(relocationInvoice, pid, atype);
+            incomeList.add(relocationIncome);
         }
         relocationInvoiceMapper.insertBatch(invoiceList);
+        relocationIncomeMapper.insertBatch(incomeList);
     }
 
     @Override
@@ -311,6 +316,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         relocationIncome.setReceivable(relocationInvoice.getTaxIncludeAmount());
         relocationIncome.setReceived(new BigDecimal(0));
         relocationIncome.setUnreceived(relocationInvoice.getTaxIncludeAmount());
+        // 匹配项目id 数据库暂无字段
+        // relocationIncome.setProjectId(relocationInvoice.getProjectId());
         return relocationIncome;
     }
 
