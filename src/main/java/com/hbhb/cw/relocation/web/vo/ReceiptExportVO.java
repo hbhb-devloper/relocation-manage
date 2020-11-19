@@ -6,13 +6,15 @@ import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.alibaba.excel.annotation.write.style.ContentStyle;
 import com.alibaba.excel.annotation.write.style.HeadFontStyle;
 import com.alibaba.excel.annotation.write.style.HeadStyle;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author wxg
@@ -73,7 +75,7 @@ public class ReceiptExportVO {
             borderLeft = BorderStyle.NONE, borderRight = BorderStyle.NONE,
             borderTop = BorderStyle.NONE, borderBottom = BorderStyle.NONE,
             verticalAlignment = VerticalAlignment.CENTER)
-    @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER)
+    @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER, wrapped = true)
     private String contractName;
 
     @ColumnWidth(20)
@@ -105,7 +107,7 @@ public class ReceiptExportVO {
     @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER)
     private String receiptAmount;
 
-    @ColumnWidth(20)
+    @ColumnWidth(25)
     @ExcelProperty(value = "开收据时间", index = 8)
     @HeadFontStyle(fontHeightInPoints = 11, bold = false)
     @HeadStyle(fillPatternType = FillPatternType.NO_FILL, wrapped = false,
@@ -115,13 +117,13 @@ public class ReceiptExportVO {
     @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER)
     private String receiptTime;
 
-    @ColumnWidth(50)
+    @ColumnWidth(60)
     @ExcelProperty(value = "备注修改列：（统一格式）合同号；区县；款项性质；项目信息", index = 9)
     @HeadFontStyle(fontHeightInPoints = 11, bold = false)
     @HeadStyle(fillPatternType = FillPatternType.NO_FILL, wrapped = false,
             borderLeft = BorderStyle.NONE, borderRight = BorderStyle.NONE,
             borderTop = BorderStyle.NONE, borderBottom = BorderStyle.NONE,
             verticalAlignment = VerticalAlignment.CENTER)
-    @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER)
+    @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER, wrapped = true)
     private String remake;
 }
