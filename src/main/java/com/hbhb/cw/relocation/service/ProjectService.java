@@ -27,7 +27,7 @@ public interface ProjectService {
      * @param pageSize 条数
      * @return 列表
      */
-    PageResult<ProjectResVO> getRelocationProjectList(ProjectReqVO cond, Integer pageNum, Integer pageSize);
+    PageResult<ProjectResVO> getRelocationProjectList(ProjectReqVO cond, Integer pageNum, Integer pageSize, Integer userId);
 
     /**
      * 修改迁改项目信息

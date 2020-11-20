@@ -10,6 +10,7 @@ import com.hbhb.cw.relocation.web.vo.ProjectImportVO;
 import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
 import com.hbhb.cw.relocation.web.vo.ProjectResVO;
 import com.hbhb.cw.systemcenter.model.SysUser;
+import com.hbhb.web.annotation.UserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -56,10 +57,10 @@ public class ProjectController implements RelocationProjectApi {
     public PageResult<ProjectResVO> getProjectList(
             @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
             @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
-            @Parameter(description = "接收参数实体") ProjectReqVO cond) {
+            @Parameter(description = "接收参数实体") ProjectReqVO cond, @UserId Integer userId) {
         pageNum = pageNum == null ? 1 : pageNum;
         pageSize = pageSize == null ? 10 : pageSize;
-        return projectService.getRelocationProjectList(cond, pageNum, pageSize);
+        return projectService.getRelocationProjectList(cond, pageNum, pageSize, userId);
     }
 
     @Operation(summary = "修改迁改项目信息")

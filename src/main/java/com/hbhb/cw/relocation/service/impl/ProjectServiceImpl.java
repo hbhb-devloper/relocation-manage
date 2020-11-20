@@ -7,6 +7,7 @@ import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.rpc.SysDictApiExp;
+import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.service.ProjectService;
 import com.hbhb.cw.relocation.web.vo.AmountVO;
 import com.hbhb.cw.relocation.web.vo.ProjectImportVO;
@@ -18,7 +19,8 @@ import com.hbhb.cw.systemcenter.model.SysUser;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.ParentVO;
 import com.hbhb.cw.systemcenter.vo.SysDictVO;
-
+import com.hbhb.cw.systemcenter.vo.SysUserInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
@@ -26,19 +28,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
-
-import lombok.extern.slf4j.Slf4j;
 
 import static com.alibaba.excel.util.StringUtils.isEmpty;
 
@@ -54,6 +48,8 @@ public class ProjectServiceImpl implements ProjectService {
     private UnitApi unitApi;
     @Resource
     private SysDictApiExp sysDictApi;
+    @Resource
+    private SysUserApiExp userAip;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -201,11 +197,16 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
-    public PageResult<ProjectResVO> getRelocationProjectList(ProjectReqVO cond, Integer pageNum, Integer pageSize) {
+    public PageResult<ProjectResVO> getRelocationProjectList(ProjectReqVO cond, Integer pageNum, Integer pageSize, Integer userId) {
         PageRequest<ProjectResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         ParentVO parentUnit = unitApi.getParentUnit();
         if (parentUnit.getHangzhou().equals(cond.getUnitId())) {
             cond.setUnitId(null);
+        }
+        // 判断用户单位
+        SysUserInfo user = userAip.getUserById(userId);
+        if (!user.getUnitId().equals(parentUnit.getHangzhou())) {
+            cond.setUnitId(user.getUnitId());
         }
         PageResult<ProjectResVO> list = projectMapper.selectProjectByCond(cond, request);
         // 组装赔补状态
@@ -213,8 +214,8 @@ public class ProjectServiceImpl implements ProjectService {
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         Map<String, String> compensationSateMap = getCompensationSate();
         list.getList().forEach(item -> {
-            item.setCompensationSate((compensationSateMap.get(item.getCompensationSate())));
-            item.setUnitName((unitMap.get(item.getUnitId())));
+                    item.setCompensationSate((compensationSateMap.get(item.getCompensationSate())));
+                    item.setUnitName((unitMap.get(item.getUnitId())));
                 }
         );
         return list;

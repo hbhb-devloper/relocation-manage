@@ -6,6 +6,7 @@ import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.ReceiptMapper;
 import com.hbhb.cw.relocation.model.RelocationReceipt;
+import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.service.ProjectService;
 import com.hbhb.cw.relocation.service.ReceiptService;
 import com.hbhb.cw.relocation.web.vo.ReceiptExportVO;
@@ -15,6 +16,7 @@ import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
 import com.hbhb.cw.systemcenter.api.UnitApi;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.ParentVO;
+import com.hbhb.cw.systemcenter.vo.SysUserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
@@ -48,12 +50,19 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Resource
     private UnitApi unitApi;
+    @Resource
+    private SysUserApiExp userAip;
 
     @Override
-    public PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize) {
+    public PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize, Integer userId) {
         ParentVO parentUnit = unitApi.getParentUnit();
         if (parentUnit.getHangzhou().equals(cond.getUnitId())) {
             cond.setUnitId(null);
+        }
+        // 判断用户单位
+        SysUserInfo user = userAip.getUserById(userId);
+        if (!user.getUnitId().equals(parentUnit.getHangzhou())) {
+            cond.setUnitId(user.getUnitId());
         }
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<ReceiptResVO> receiptRes = receiptMapper.selectReceiptByCond(cond, request);
@@ -108,11 +117,17 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    public List<ReceiptExportVO> export(ReceiptReqVO vo) {
+    public List<ReceiptExportVO> export(ReceiptReqVO vo, Integer userId) {
         ParentVO parentUnit = unitApi.getParentUnit();
         if (parentUnit.getHangzhou().equals(vo.getUnitId())) {
             vo.setUnitId(null);
         }
+        // 判断用户单位
+        SysUserInfo user = userAip.getUserById(userId);
+        if (!user.getUnitId().equals(parentUnit.getHangzhou())) {
+            vo.setUnitId(user.getUnitId());
+        }
+
         List<ReceiptResVO> list = receiptMapper.selectReceiptListByCond(vo);
         List<Unit> unitList = getUnitList();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));

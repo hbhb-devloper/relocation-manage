@@ -10,6 +10,7 @@ import com.hbhb.cw.relocation.web.vo.ReceiptExportVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptImportVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
+import com.hbhb.web.annotation.UserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -43,10 +44,10 @@ public class ReceiptController {
     public PageResult<ReceiptResVO> getReceiptList(
             @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
             @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
-            @Parameter(description = "接收参数实体") ReceiptReqVO cond) {
+            @Parameter(description = "接收参数实体") ReceiptReqVO cond, @UserId Integer userId) {
         pageNum = pageNum == null ? 1 : pageNum;
         pageSize = pageSize == null ? 10 : pageSize;
-        return receiptService.getReceiptList(cond, pageNum, pageSize);
+        return receiptService.getReceiptList(cond, pageNum, pageSize, userId);
     }
 
     @Operation(summary = "新增迁改收据")
@@ -85,8 +86,8 @@ public class ReceiptController {
     @Operation(summary = "迁改管理收据导出")
     @PostMapping("/export")
     public void exportReceipt(HttpServletRequest request, HttpServletResponse response,
-                              @Parameter(description = "导出筛选条件实体") @RequestBody ReceiptReqVO vo) {
-        List<ReceiptExportVO> list = receiptService.export(vo);
+                              @Parameter(description = "导出筛选条件实体") @RequestBody ReceiptReqVO vo, @UserId Integer userId) {
+        List<ReceiptExportVO> list = receiptService.export(vo, userId);
         String fileName = ExcelUtil.encodingFileName(request, "签报列表");
         ExcelUtil.export2Web(response, fileName, fileName, ReceiptExportVO.class, list);
     }

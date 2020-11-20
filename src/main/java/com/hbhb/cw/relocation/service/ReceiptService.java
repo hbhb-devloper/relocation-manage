@@ -17,7 +17,7 @@ public interface ReceiptService {
      * @param pageSize 条数
      * @return 收据列表
      */
-    PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize);
+    PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize, Integer userId);
 
     /**
      * 导入数据信息
@@ -33,7 +33,7 @@ public interface ReceiptService {
      * @param vo 查询条件
      * @return 列表
      */
-    List<ReceiptExportVO> export(ReceiptReqVO vo);
+    List<ReceiptExportVO> export(ReceiptReqVO vo, Integer userId);
 
     /**
      *  新增收据信息
