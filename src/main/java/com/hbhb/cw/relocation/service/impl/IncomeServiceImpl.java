@@ -1,6 +1,7 @@
 package com.hbhb.cw.relocation.service.impl;
 
 import com.hbhb.core.utils.DateUtil;
+import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
@@ -95,6 +96,10 @@ IncomeServiceImpl implements IncomeService {
             BigDecimal monthAmount = relocationIncomeMapper.getMonthAmount(relocationIncomeResVO.getId(), DateUtil.getCurrentMonth());
             relocationIncomeResVO.setMonthAmount(monthAmount);
             relocationIncomeResVO.setUnit(unitMap.get(Integer.valueOf(relocationIncomeResVO.getUnit())));
+            if ("1".equals(relocationIncomeResVO.getIsReceived())) {
+                relocationIncomeResVO.setIsReceived(IsReceived.RECEIVED.value());
+            }
+            relocationIncomeResVO.setIsReceived(IsReceived.NOT_RECEIVED.value());
         }
         return incomeList;
     }
