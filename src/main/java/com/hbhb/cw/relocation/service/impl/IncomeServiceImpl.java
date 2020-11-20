@@ -98,8 +98,9 @@ IncomeServiceImpl implements IncomeService {
             relocationIncomeResVO.setUnit(unitMap.get(Integer.valueOf(relocationIncomeResVO.getUnit())));
             if ("1".equals(relocationIncomeResVO.getIsReceived())) {
                 relocationIncomeResVO.setIsReceived(IsReceived.RECEIVED.value());
+            } else {
+                relocationIncomeResVO.setIsReceived(IsReceived.NOT_RECEIVED.value());
             }
-            relocationIncomeResVO.setIsReceived(IsReceived.NOT_RECEIVED.value());
         }
         return incomeList;
     }
