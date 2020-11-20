@@ -143,19 +143,19 @@ IncomeServiceImpl implements IncomeService {
 //            }
 //            relocationProjectMapper.updateTemplateById(relocationProject);
 //        }
+        //未收减少
         RelocationIncome single = relocationIncomeMapper.single(incomeId);
         RelocationIncome income = new RelocationIncome();
         income.setId(incomeId);
         income.setUnreceived(single.getUnreceived().subtract(amount));
         income.setReceived(single.getReceived().add(amount));
-        //未收减少
-        relocationIncomeMapper.updateTemplateById(single);
+        relocationIncomeMapper.updateTemplateById(income);
         //已收增加
-        relocationIncomeMapper.updateTemplateById(single);
         RelocationIncome single1 = relocationIncomeMapper.single(incomeId);
         BigDecimal receivable = single1.getReceivable();
         BigDecimal unreceived = single1.getUnreceived();
         relocationIncome.setReceived(receivable.subtract(unreceived));
+        relocationIncomeMapper.updateTemplateById(single1);
         //已收完的情况 3
         RelocationIncome income1 = new RelocationIncome();
         income1.setId(incomeId);

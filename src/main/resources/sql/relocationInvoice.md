@@ -223,3 +223,9 @@ selectPidByCondition
         and contract_num = #{contractNum}
         and project_name = #{pinfo}
 ```
+
+selectInvoiceRemake
+===
+```sql
+select remake  from relocation_invoice
+```

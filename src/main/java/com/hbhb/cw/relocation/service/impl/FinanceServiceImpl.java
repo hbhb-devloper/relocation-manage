@@ -11,21 +11,18 @@ import com.hbhb.cw.relocation.web.vo.FinanceReqVO;
 import com.hbhb.cw.relocation.web.vo.FinanceResVO;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.SysUserInfo;
-
+import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author hyk
@@ -58,7 +55,7 @@ public class FinanceServiceImpl implements FinanceService {
 
         List<Unit> unitList = unitApi.getAllUnitList();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
-
+        // 组装理赔方式、收款状态、县市
         financeResVos.getList().forEach(item -> {
             //网银打款、现金转账，开具发票收据
             item.setPayType("网银打款");
@@ -78,10 +75,13 @@ public class FinanceServiceImpl implements FinanceService {
         }
         List<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond);
         Map<String, String> isReceived = getIsReceived();
+        List<Unit> unitList = unitApi.getAllUnitList();
+        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         financeResVos.forEach(item -> {
             //网银打款、现金转账，开具发票收据
             item.setPayType("网银打款");
             item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
+            item.setUnit(unitMap.get(item.getUnitId()));
         });
         return financeResVos;
     }

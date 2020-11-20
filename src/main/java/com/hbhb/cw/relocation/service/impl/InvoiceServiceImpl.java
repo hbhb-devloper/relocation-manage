@@ -112,6 +112,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         List<ProjectInfoVO> projectInfo = relocationInvoiceMapper.getProjectInfo();
         Map<String, Long> projectMap = projectInfo.stream().collect(Collectors.toMap(ProjectInfoVO::getInfo, ProjectInfoVO::getId));
         // TODO 发票匹配验证
+        // 查找发票备注格式、
+        List<String> remakeList = relocationInvoiceMapper.selectInvoiceRemake();
+
         // 转换单位
         List<Unit> list = unitApiExp.getAllUnitList();
         Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
@@ -199,12 +202,14 @@ public class InvoiceServiceImpl implements InvoiceService {
             relocationInvoice.setPaymentType(atype);
             relocationInvoice.setProjectId(pid);
             // 判断发票是否匹配基础信息若匹配则导入不匹配则导入失败
-            if (pid != null) {
+            // 用已存在备注列与导入对比若存在则不添加
+            if (pid != null && !remakeList.contains(newRemake)) {
                 invoiceList.add(relocationInvoice);
                 //导入发票后 同步添加到收款
                 RelocationIncome relocationIncome = getRelocationIncome(relocationInvoice, pid, atype);
                 incomeList.add(relocationIncome);
             }
+
         }
 
         relocationInvoiceMapper.insertBatch(invoiceList);
