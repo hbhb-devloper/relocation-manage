@@ -10,7 +10,7 @@ import com.hbhb.cw.relocation.service.FinanceService;
 import com.hbhb.cw.relocation.web.vo.FinanceReqVO;
 import com.hbhb.cw.relocation.web.vo.FinanceResVO;
 import com.hbhb.cw.systemcenter.model.Unit;
-import com.hbhb.cw.systemcenter.vo.SysUserInfo;
+import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
@@ -87,7 +87,7 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
     private void setUnitId(FinanceReqVO cond, Integer userId) {
-        SysUserInfo user = sysUserApiExp.getUserById(userId);
+        UserInfo user = sysUserApiExp.getUserById(userId);
         if (!"admin".equals(user.getUserName())) {
             cond.setUnitId(user.getUnitId());
         }

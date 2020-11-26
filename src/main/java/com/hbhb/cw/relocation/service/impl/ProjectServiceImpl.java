@@ -1,274 +1,1 @@
-package com.hbhb.cw.relocation.service.impl;
-
-
-import com.hbhb.core.utils.DateUtil;
-import com.hbhb.cw.relocation.enums.RelocationErrorCode;
-import com.hbhb.cw.relocation.exception.RelocationException;
-import com.hbhb.cw.relocation.mapper.ProjectMapper;
-import com.hbhb.cw.relocation.model.RelocationProject;
-import com.hbhb.cw.relocation.rpc.SysDictApiExp;
-import com.hbhb.cw.relocation.rpc.SysUserApiExp;
-import com.hbhb.cw.relocation.service.ProjectService;
-import com.hbhb.cw.relocation.web.vo.AmountVO;
-import com.hbhb.cw.relocation.web.vo.ProjectImportVO;
-import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
-import com.hbhb.cw.relocation.web.vo.ProjectResVO;
-import com.hbhb.cw.systemcenter.api.UnitApi;
-import com.hbhb.cw.systemcenter.enums.AllName;
-import com.hbhb.cw.systemcenter.model.SysUser;
-import com.hbhb.cw.systemcenter.model.Unit;
-import com.hbhb.cw.systemcenter.vo.ParentVO;
-import com.hbhb.cw.systemcenter.vo.SysDictVO;
-import com.hbhb.cw.systemcenter.vo.SysUserInfo;
-import lombok.extern.slf4j.Slf4j;
-import org.beetl.sql.core.page.DefaultPageRequest;
-import org.beetl.sql.core.page.PageRequest;
-import org.beetl.sql.core.page.PageResult;
-import org.springframework.beans.BeanUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.alibaba.excel.util.StringUtils.isEmpty;
-
-/**
- * @author wangxiaogang
- */
-@Service
-@Slf4j
-public class ProjectServiceImpl implements ProjectService {
-    @Resource
-    private ProjectMapper projectMapper;
-    @Resource
-    private UnitApi unitApi;
-    @Resource
-    private SysDictApiExp sysDictApi;
-    @Resource
-    private SysUserApiExp userAip;
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void addSaveRelocationProject(List<ProjectImportVO> importVOList) {
-        // 查询所有项目编号，用于做导入对比
-        List<String> projectNumList = projectMapper.selectProjectNum();
-        // 转换单位
-        List<Unit> list = unitApi.getAllUnitList();
-        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
-        // 主动迁改被动迁改（0-主动、1-被动）
-        Map<String, Boolean> isInitiativeMap = new HashMap<>();
-        isInitiativeMap.put("主动", true);
-        isInitiativeMap.put("被动", false);
-        // 有无补偿（0-无补偿、1-有补偿、2-项目取消）
-        Map<String, Boolean> hasCompensationMap = new HashMap<>();
-        hasCompensationMap.put("无", false);
-        hasCompensationMap.put("有", true);
-        // 所有合同编号
-        List<String> contractNumList = new ArrayList<>();
-        List<SysDictVO> stateList = sysDictApi.getCompensationSate();
-        Map<String, String> stateMap = stateList.stream().collect(
-                Collectors.toMap(SysDictVO::getLabel, SysDictVO::getValue));
-        // 异常信息
-        List<String> msg = new ArrayList<>();
-        List<RelocationProject> projectList = new ArrayList<>();
-        for (ProjectImportVO importVO : importVOList) {
-            //获取合同编号
-            contractNumList.add(importVO.getContractNum());
-            RelocationProject project = new RelocationProject();
-            BeanUtils.copyProperties(importVO, project);
-            if (projectNumList.contains(importVO.getProjectNum())) {
-                msg.add("项目编号为:" + importVO.getProjectNum() + "已存在");
-            }
-            project.setUnitId(unitMap.get(importVO.getUnitName()));
-            project.setHasCompensation(hasCompensationMap.get(importVO.getHasCompensation()));
-            project.setIsInitiative(isInitiativeMap.get(importVO.getIsInitiative()));
-            project.setPlanStartTime(DateUtil.string3DateYMD(importVO.getPlanStartTime()));
-            project.setPlanEndTime(DateUtil.string3DateYMD(importVO.getPlanEndTime()));
-            project.setActualEndTime(DateUtil.string3DateYMD(importVO.getActualEndTime()));
-            if (!isEmpty(importVO.getCompensationSate())) {
-                project.setCompensationSate(Integer.valueOf(stateMap.get(importVO.getCompensationSate())));
-            } else {
-                project.setCompensationSate(0);
-            }
-
-
-            project.setContractNum(importVO.getContractNum() == null ? "" : importVO.getContractNum());
-            project.setContractName(importVO.getContractName() == null ? "" : importVO.getContractName());
-            project.setContractType(importVO.getContractType() == null ? "" : importVO.getContractType());
-            project.setAnticipatePayable(importVO.getAnticipatePayable() == null ? new BigDecimal(0) : new BigDecimal(importVO.getAnticipatePayable()));
-            project.setAnticipatePayment(importVO.getAnticipatePayment() == null ? new BigDecimal(0) : new BigDecimal(importVO.getAnticipatePayment()));
-            project.setCompensationAmount(importVO.getCompensationAmount() == null ? new BigDecimal(0) : new BigDecimal(importVO.getCompensationAmount()));
-            project.setConstructionAuditCost(importVO.getConstructionAuditCost() == null ? new BigDecimal(0) : new BigDecimal(importVO.getConstructionAuditCost()));
-            project.setConstructionBudget(importVO.getConstructionBudget() == null ? new BigDecimal(0) : new BigDecimal(importVO.getConstructionBudget()));
-            project.setConstructionCost(importVO.getConstructionCost() == null ? new BigDecimal(0) : new BigDecimal(importVO.getConstructionCost()));
-            project.setFinalPayment(importVO.getFinalPayment() == null ? new BigDecimal(0) : new BigDecimal(importVO.getFinalPayment()));
-            project.setMaterialBudget(importVO.getMaterialBudget() == null ? new BigDecimal(0) : new BigDecimal(importVO.getMaterialBudget()));
-            project.setMaterialCost(importVO.getMaterialCost() == null ? new BigDecimal(0) : new BigDecimal(importVO.getMaterialCost()));
-
-            // 判断合同状态
-            try {
-                if (!isEmpty(importVO.getCompensationSate())) {
-                    int compensationSate = Integer.parseInt(stateMap.get(importVO.getCompensationSate()));
-                    if (!isEmpty(importVO.getActualEndTime()) && compensationSate != 10 && compensationSate != 80) {
-                        project.setContractDuration(DateUtil.monthBetween(importVO.getActualEndTime(), DateUtil.dateToStringYmd(new Date())));
-                    } else {
-                        project.setContractDuration(0);
-                    }
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            projectList.add(project);
-        }
-        // 检验导入数据是否有重复
-        long count = importVOList.stream().distinct().count();
-        if (count < importVOList.size()) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_INVOICE_EXIST_PROJECT_ERROR, msg.toString());
-        } else if (!msg.isEmpty()) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
-        }
-        // 更新赔补金额（新增的项目的施工费占整个合同的百分比）
-        // 未导入前获取赔补赔补总额
-        Map<String, BigDecimal> compensationMap = projectMapper.selectSumCompensationAmount();
-        // 导入前合同编号
-        HashSet<String> set = new HashSet<>(contractNumList);
-        contractNumList.clear();
-        contractNumList.addAll(set);
-        projectMapper.insertBatch(projectList);
-        // 导入后本次导入所有合同信息
-        // 对比导入前后合同是否已存在 ，若未存在则不修改，若已存则修改
-        List<String> contractNumNewList = new ArrayList<>();
-        // 查出已存在的合同编号
-        // todo 待优化
-        if (!isEmpty(contractNumList) && !isEmpty(compensationMap)) {
-            for (String contractNum : contractNumList) {
-                for (String oldContractNum : compensationMap.keySet()) {
-                    if (oldContractNum.equals(contractNum)) {
-                        contractNumNewList.add(contractNum);
-                    }
-                }
-            }
-            if (contractNumNewList.size() != 0) {
-                // 插入后赔补信息
-                List<AmountVO> amountVO = projectMapper.selectCompensationAmount(contractNumNewList);
-                // 需要修改合同编号施工费统计列表
-                Map<String, BigDecimal> constructionBudgetMap = projectMapper.selectSumConstructionBudget(contractNumNewList);
-                List<AmountVO> relocation = new ArrayList<>();
-                for (AmountVO amount : amountVO) {
-                    AmountVO relocationAmountVO = new AmountVO();
-                    BigDecimal budgetTotal = constructionBudgetMap.get(amount.getContractNum());
-                    // 修改项目
-                    relocationAmountVO.setCompensationAmount((amount.getConstructionBudget().divide(budgetTotal, 2))
-                            .multiply(compensationMap.get(amount.getContractNum())));
-                    relocationAmountVO.setContractNum(amount.getContractNum());
-                    relocationAmountVO.setConstructionBudget(amount.getConstructionBudget());
-                    relocationAmountVO.setId(amount.getId());
-                    relocation.add(relocationAmountVO);
-                }
-                // 按合同编号批量修改
-                projectMapper.updateBatch(relocation);
-            }
-        }
-    }
-
-
-    @Override
-    public List<String> getContractNumList() {
-        return projectMapper.selectContractNumList();
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updateContractDuration() {
-        // 查出所有除全额回款、合同未签订项目
-        List<RelocationProject> projectList = projectMapper.selectProject();
-        for (RelocationProject project : projectList) {
-            project.setContractDuration(project.getContractDuration() + 1);
-        }
-        if (!projectList.isEmpty()) {
-            // 批量修改未回款合同历时
-            projectMapper.updateBatchTempById(projectList);
-        }
-    }
-
-
-    @Override
-    public PageResult<ProjectResVO> getRelocationProjectList(ProjectReqVO cond, Integer pageNum, Integer pageSize, Integer userId) {
-        PageRequest<ProjectResVO> request = DefaultPageRequest.of(pageNum, pageSize);
-        ParentVO parentUnit = unitApi.getParentUnit();
-        if (parentUnit.getHangzhou().equals(cond.getUnitId())) {
-            cond.setUnitId(null);
-        }
-        // 判断用户单位
-        SysUserInfo user = userAip.getUserById(userId);
-        if (!user.getUnitId().equals(parentUnit.getHangzhou())) {
-            cond.setUnitId(user.getUnitId());
-        }
-        PageResult<ProjectResVO> list = projectMapper.selectProjectByCond(cond, request);
-        // 组装赔补状态
-        List<Unit> unitList = unitApi.getAllUnitList();
-        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
-        Map<String, String> compensationSateMap = getCompensationSate();
-        list.getList().forEach(item -> {
-                    item.setCompensationSate((compensationSateMap.get(item.getCompensationSate())));
-                    item.setUnitName((unitMap.get(item.getUnitId())));
-                }
-        );
-        return list;
-    }
-
-    @Override
-    public void updateRelocationProject(ProjectResVO projectResVO, SysUser user) {
-        RelocationProject project = new RelocationProject();
-        BeanUtils.copyProperties(projectResVO, project);
-        //  计划完成时间
-        project.setCompensationSate(Integer.valueOf(projectResVO.getCompensationSate()));
-        project.setPlanEndTime(DateUtil.string2DateYMD(projectResVO.getPlanEndTime()));
-        //计划实施时间
-        project.setPlanStartTime(DateUtil.string2DateYMD(projectResVO.getPlanStartTime()));
-        // 实际结束时间
-        project.setActualEndTime(DateUtil.string2DateYMD(projectResVO.getActualEndTime()));
-        //施工费（预算：元）
-        project.setConstructionBudget(new BigDecimal(projectResVO.getConstructionBudget()));
-        //甲供材料费(预算:元)
-        project.setMaterialBudget(new BigDecimal(projectResVO.getMaterialBudget()));
-        //施工费(送审结算:元)
-        project.setConstructionCost(new BigDecimal(projectResVO.getConstructionCost()));
-        //甲供材料费(送审结算:元)
-        project.setMaterialCost(new BigDecimal(projectResVO.getMaterialCost()));
-        //施工费审定金额(审计后:元)
-        project.setConstructionAuditCost(new BigDecimal(projectResVO.getConstructionAuditCost()));
-        //预付款应付金额（元）
-        project.setAnticipatePayable(new BigDecimal(projectResVO.getAnticipatePayable()));
-        // 预付款到账金额（元）
-        project.setAnticipatePayment(new BigDecimal(projectResVO.getAnticipatePayment()));
-        // 决算款到账金额（元）
-        project.setFinalPayment(new BigDecimal(projectResVO.getFinalPayment()));
-        // 赔补金额
-        project.setCompensationAmount(new BigDecimal(projectResVO.getCompensationAmount()));
-        projectMapper.updateById(project);
-    }
-
-    @Override
-    public void deleteRelocationProject(Long id, SysUser user) {
-        projectMapper.deleteById(id);
-    }
-
-    private Map<String, String> getCompensationSate() {
-        List<SysDictVO> compensationSateList = sysDictApi.getCompensationSate();
-        return compensationSateList.stream().collect(Collectors.toMap(SysDictVO::getValue, SysDictVO::getLabel));
-    }
-
-    @Override
-    public void judgeFileName(String fileName) {
-        int i = fileName.lastIndexOf(".");
-        String name = fileName.substring(i);
-        if (!(AllName.XLS.getValue().equals(name) || AllName.XLSX.getValue().equals(name))) {
-            throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
-        }
-    }
-}
+package com.hbhb.cw.relocation.service.impl;import com.alibaba.excel.support.ExcelTypeEnum;import com.hbhb.core.utils.DateUtil;import com.hbhb.cw.relocation.enums.RelocationErrorCode;import com.hbhb.cw.relocation.exception.RelocationException;import com.hbhb.cw.relocation.mapper.ProjectMapper;import com.hbhb.cw.relocation.model.RelocationProject;import com.hbhb.cw.relocation.rpc.SysDictApiExp;import com.hbhb.cw.relocation.rpc.SysUserApiExp;import com.hbhb.cw.relocation.service.ProjectService;import com.hbhb.cw.relocation.web.vo.*;import com.hbhb.cw.systemcenter.api.UnitApi;import com.hbhb.cw.systemcenter.model.Unit;import com.hbhb.cw.systemcenter.model.User;import com.hbhb.cw.systemcenter.vo.DictVO;import com.hbhb.cw.systemcenter.vo.FileVO;import com.hbhb.cw.systemcenter.vo.UnitTopVO;import com.hbhb.cw.systemcenter.vo.UserInfo;import lombok.extern.slf4j.Slf4j;import org.beetl.sql.core.page.DefaultPageRequest;import org.beetl.sql.core.page.PageRequest;import org.beetl.sql.core.page.PageResult;import org.springframework.beans.BeanUtils;import org.springframework.stereotype.Service;import org.springframework.transaction.annotation.Transactional;import org.springframework.web.multipart.MultipartFile;import javax.annotation.Resource;import java.math.BigDecimal;import java.text.ParseException;import java.util.*;import java.util.stream.Collectors;import static com.alibaba.excel.util.StringUtils.isEmpty;/** * @author wangxiaogang */@Service@Slf4jpublic class ProjectServiceImpl implements ProjectService {    @Resource    private ProjectMapper projectMapper;    @Resource    private UnitApi unitApi;    @Resource    private SysDictApiExp sysDictApi;    @Resource    private SysUserApiExp userAip;    @Override    @Transactional(rollbackFor = Exception.class)    public void addSaveRelocationProject(List<ProjectImportVO> importVOList, Map<Integer, String> importHeadMap) throws ParseException {        System.out.println(importHeadMap);        Map<Integer, String> headMap = projectHead();        for (Map.Entry<Integer, String> entry : headMap.entrySet()) {            String m1value = entry.getValue() == null ? "" : entry.getValue();            String m2value = importHeadMap.get(entry.getKey()) == null ? "" : importHeadMap.get(entry.getKey());            if (!m1value.equals(m2value)) {                //若两个map中相同key对应的value不相等                throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);            }        }        // 查询所有项目编号，用于做导入对比        List<String> projectNumList = projectMapper.selectProjectNum();        // 转换单位        List<Unit> list = unitApi.getAllUnitList();        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));        // 主动迁改被动迁改（0-主动、1-被动）        Map<String, Boolean> isInitiativeMap = new HashMap<>();        isInitiativeMap.put("主动", true);        isInitiativeMap.put("被动", false);        // 有无补偿（0-无补偿、1-有补偿、2-项目取消）        Map<String, Boolean> hasCompensationMap = new HashMap<>();        hasCompensationMap.put("无", false);        hasCompensationMap.put("有", true);        // 所有合同编号        List<String> contractNumList = new ArrayList<>();        List<DictVO> stateList = sysDictApi.getCompensationSate();        Map<String, String> stateMap = stateList.stream().collect(                Collectors.toMap(DictVO::getLabel, DictVO::getValue));        // 异常信息        List<String> msg = new ArrayList<>();        List<RelocationProject> projectList = new ArrayList<>();        int i = 1;        for (ProjectImportVO importVO : importVOList) {            //获取合同编号            contractNumList.add(importVO.getContractNum());            RelocationProject project = new RelocationProject();            BeanUtils.copyProperties(importVO, project);            if (projectNumList.contains(importVO.getProjectNum())) {                msg.add("在excel表中第" + i + "行，项目编号为:" + importVO.getProjectNum() + "已存在基础信息表中\n");            }            i++;            project.setUnitId(unitMap.get(importVO.getUnitName()));            project.setHasCompensation(hasCompensationMap.get(importVO.getHasCompensation()));            project.setIsInitiative(isInitiativeMap.get(importVO.getIsInitiative()));            project.setPlanStartTime(DateUtil.string3DateYMD(importVO.getPlanStartTime()));            project.setPlanEndTime(DateUtil.string3DateYMD(importVO.getPlanEndTime()));            project.setActualEndTime(DateUtil.string3DateYMD(importVO.getActualEndTime()));            if (!isEmpty(importVO.getCompensationSate())) {                project.setCompensationSate(Integer.valueOf(stateMap.get(importVO.getCompensationSate())));            } else {                project.setCompensationSate(0);            }            project.setContractNum(importVO.getContractNum() == null ? "" : importVO.getContractNum());            project.setContractName(importVO.getContractName() == null ? "" : importVO.getContractName());            project.setContractType(importVO.getContractType() == null ? "" : importVO.getContractType());            project.setAnticipatePayable(importVO.getAnticipatePayable() == null ? new BigDecimal(0) : new BigDecimal(importVO.getAnticipatePayable()));            project.setAnticipatePayment(importVO.getAnticipatePayment() == null ? new BigDecimal(0) : new BigDecimal(importVO.getAnticipatePayment()));            project.setCompensationAmount(importVO.getCompensationAmount() == null ? new BigDecimal(0) : new BigDecimal(importVO.getCompensationAmount()));            project.setConstructionAuditCost(importVO.getConstructionAuditCost() == null ? new BigDecimal(0) : new BigDecimal(importVO.getConstructionAuditCost()));            project.setConstructionBudget(importVO.getConstructionBudget() == null ? new BigDecimal(0) : new BigDecimal(importVO.getConstructionBudget()));            project.setConstructionCost(importVO.getConstructionCost() == null ? new BigDecimal(0) : new BigDecimal(importVO.getConstructionCost()));            project.setFinalPayment(importVO.getFinalPayment() == null ? new BigDecimal(0) : new BigDecimal(importVO.getFinalPayment()));            project.setMaterialBudget(importVO.getMaterialBudget() == null ? new BigDecimal(0) : new BigDecimal(importVO.getMaterialBudget()));            project.setMaterialCost(importVO.getMaterialCost() == null ? new BigDecimal(0) : new BigDecimal(importVO.getMaterialCost()));            // 判断合同状态            if (!isEmpty(importVO.getCompensationSate())) {                int compensationSate = Integer.parseInt(stateMap.get(importVO.getCompensationSate()));                if (!isEmpty(importVO.getActualEndTime()) && compensationSate != 10 && compensationSate != 80) {                    project.setContractDuration(DateUtil.monthBetween(importVO.getActualEndTime(), DateUtil.dateToStringYmd(new Date())));                } else {                    project.setContractDuration(0);                }            }            projectList.add(project);        }        // 检验导入数据是否有重复        long count = importVOList.stream().distinct().count();        if (count < importVOList.size()) {            throw new RelocationException(RelocationErrorCode.RELOCATION_INVOICE_EXIST_PROJECT_ERROR, msg.toString());        } else if (!msg.isEmpty()) {            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());        }        // 修改赔补金额        updateCompensationAmount(contractNumList, projectList);    }    @Override    public List<String> getContractNumList() {        return projectMapper.selectContractNumList();    }    @Override    @Transactional(rollbackFor = Exception.class)    public void updateContractDuration() {        // 查出所有除全额回款、合同未签订项目        List<RelocationProject> projectList = projectMapper.selectProject();        for (RelocationProject project : projectList) {            project.setContractDuration(project.getContractDuration() + 1);        }        if (!projectList.isEmpty()) {            // 批量修改未回款合同历时            projectMapper.updateBatchTempById(projectList);        }    }    @Override    public PageResult<ProjectResVO> getRelocationProjectList(ProjectReqVO cond, Integer pageNum, Integer pageSize, Integer userId) {        PageRequest<ProjectResVO> request = DefaultPageRequest.of(pageNum, pageSize);        UnitTopVO parentUnit = unitApi.getTopUnit();        if (parentUnit.getHangzhou().equals(cond.getUnitId())) {            cond.setUnitId(null);        }        // 判断用户单位        UserInfo user = userAip.getUserById(userId);        if (!user.getUnitId().equals(parentUnit.getHangzhou())) {            cond.setUnitId(user.getUnitId());        }        PageResult<ProjectResVO> list = projectMapper.selectProjectByCond(cond, request);        // 组装赔补状态        List<Unit> unitList = unitApi.getAllUnitList();        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));        Map<String, String> compensationSateMap = getCompensationSate();        list.getList().forEach(item -> {                    item.setCompensationSate((compensationSateMap.get(item.getCompensationSate())));                    item.setUnitName((unitMap.get(item.getUnitId())));                }        );        return list;    }    @Override    public void updateRelocationProject(ProjectResVO projectResVO, User user) {        RelocationProject project = new RelocationProject();        BeanUtils.copyProperties(projectResVO, project);        //  计划完成时间        project.setCompensationSate(Integer.valueOf(projectResVO.getCompensationSate()));        project.setPlanEndTime(DateUtil.string2DateYMD(projectResVO.getPlanEndTime()));        //计划实施时间        project.setPlanStartTime(DateUtil.string2DateYMD(projectResVO.getPlanStartTime()));        // 实际结束时间        project.setActualEndTime(DateUtil.string2DateYMD(projectResVO.getActualEndTime()));        //施工费（预算：元）        project.setConstructionBudget(new BigDecimal(projectResVO.getConstructionBudget()));        //甲供材料费(预算:元)        project.setMaterialBudget(new BigDecimal(projectResVO.getMaterialBudget()));        //施工费(送审结算:元)        project.setConstructionCost(new BigDecimal(projectResVO.getConstructionCost()));        //甲供材料费(送审结算:元)        project.setMaterialCost(new BigDecimal(projectResVO.getMaterialCost()));        //施工费审定金额(审计后:元)        project.setConstructionAuditCost(new BigDecimal(projectResVO.getConstructionAuditCost()));        //预付款应付金额（元）        project.setAnticipatePayable(new BigDecimal(projectResVO.getAnticipatePayable()));        // 预付款到账金额（元）        project.setAnticipatePayment(new BigDecimal(projectResVO.getAnticipatePayment()));        // 决算款到账金额（元）        project.setFinalPayment(new BigDecimal(projectResVO.getFinalPayment()));        // 赔补金额        project.setCompensationAmount(new BigDecimal(projectResVO.getCompensationAmount()));        projectMapper.updateById(project);    }    @Override    public void deleteRelocationProject(Long id, User user) {        projectMapper.deleteById(id);    }    private Map<String, String> getCompensationSate() {        // 获取赔补状态        List<DictVO> compensationSateList = sysDictApi.getCompensationSate();        return compensationSateList.stream().collect(Collectors.toMap(DictVO::getValue, DictVO::getLabel));    }    @Override    public void judgeFileName(String fileName) {        int i = fileName.lastIndexOf(".");        String name = fileName.substring(i);        if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue().equals(name))) {            throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);        }    }    @Override    public void deleteBatch(List<Long> ids) {        //todo  批量删除 目前项目信息与发票收据未做关联，不去验证是否有相关联的数据        // 1.查询基础表中已关联的发票、收据、以及预警中不可进行删除的id        List<Long> projectId = projectMapper.selectNotCorrelationId();        // 2.批量删除无关联的项目        projectMapper.deleteBatch(projectId);    }    @Override    public ProjectResVO getProject(Long id) {        return projectMapper.selectProjectById(id);    }    @Override    public Boolean judgeContractNum(MultipartFile[] files) {        // 获取所有上传文件名        List<String> fileNameList = new ArrayList<>();        for (MultipartFile file : files) {            String fileName = file.getOriginalFilename();            if (fileName != null) {                fileNameList.add(fileName.substring(0, fileName.indexOf(".")));            }        }        // 获取所有合同编号        List<String> contractNum = projectMapper.selectContractNumList();        // 比较判断上传文件与合同编号对应，对应则返回true,否则为false        return contractNum.containsAll(fileNameList);    }    @Override    public void updateContractFileId(List<FileVO> file) {        List<ContractFileVO> contractFileVOList = new ArrayList<>();        for (FileVO fileVo : file) {            ContractFileVO fileVO = new ContractFileVO();            fileVO.setContractNum(fileVo.getFileName());            fileVO.setFileId(fileVO.getFileId());            contractFileVOList.add(fileVO);        }        projectMapper.updateContractFileId(contractFileVOList);    }    private void updateCompensationAmount(List<String> contractNumList, List<RelocationProject> projectList) {        // 更新赔补金额（新增的项目的施工费占整个合同的百分比）        // 未导入前获取赔补赔补总额        Map<String, BigDecimal> compensationMap = projectMapper.selectSumCompensationAmount();        // 导入前合同编号        HashSet<String> set = new HashSet<>(contractNumList);        contractNumList.clear();        contractNumList.addAll(set);        projectMapper.insertBatch(projectList);        // 导入后本次导入所有合同信息        // 对比导入前后合同是否已存在 ，若未存在则不修改，若已存则修改        List<String> contractNumNewList = new ArrayList<>();        // 查出已存在的合同编号        // todo 待优化        if (!isEmpty(contractNumList) && !isEmpty(compensationMap)) {            for (String contractNum : contractNumList) {                for (String oldContractNum : compensationMap.keySet()) {                    if (oldContractNum.equals(contractNum)) {                        contractNumNewList.add(contractNum);                    }                }            }            // 判断是否有存在的合同编号            if (contractNumNewList.size() != 0) {                // 插入后赔补信息                List<AmountVO> amountVO = projectMapper.selectCompensationAmount(contractNumNewList);                // 需要修改合同编号施工费统计列表                Map<String, BigDecimal> constructionBudgetMap = projectMapper.selectSumConstructionBudget(contractNumNewList);                List<AmountVO> relocation = new ArrayList<>();                for (AmountVO amount : amountVO) {                    AmountVO relocationAmountVO = new AmountVO();                    BigDecimal budgetTotal = constructionBudgetMap.get(amount.getContractNum());                    // 修改项目                    relocationAmountVO.setCompensationAmount((amount.getConstructionBudget().divide(budgetTotal, 2))                            .multiply(compensationMap.get(amount.getContractNum())));                    relocationAmountVO.setContractNum(amount.getContractNum());                    relocationAmountVO.setConstructionBudget(amount.getConstructionBudget());                    relocationAmountVO.setId(amount.getId());                    relocation.add(relocationAmountVO);                }                // 按合同编号批量修改                projectMapper.updateBatch(relocation);            }        }    }    private Map<Integer, String> projectHead() {        Map<Integer, String> headMap = new HashMap<>();        headMap.put(0, "区域");        headMap.put(1, "迁改项目编号");        headMap.put(2, "EOMS迁移修缮管理流程工单号");        headMap.put(3, "EOMS光缆割接流程工单号");        headMap.put(4, "计划施工时间");        headMap.put(5, "计划完成时间");        headMap.put(6, "实际完工时间");        headMap.put(7, "施工单位");        headMap.put(8, "工程名称");        headMap.put(9, "迁改涉及网络层级（省干、汇聚、接入、驻地网）");        headMap.put(10, "施工费(预算:元)");        headMap.put(11, "甲供材料费(预算:元)");        headMap.put(12, "施工费(送审结算:元)");        headMap.put(13, "甲供材料费(送审结算:元)");        headMap.put(14, "施工费审定金额(审计后:元)");        headMap.put(15, "主动迁改或者被动");        headMap.put(16, "性质归类");        headMap.put(17, "迁改原因");        headMap.put(18, "对方单位");        headMap.put(19, "对方联系人");        headMap.put(20, "对方联系电话");        headMap.put(21, "有无赔补");        headMap.put(22, "被动无赔类型");        headMap.put(23, "合同编号");        headMap.put(24, "赔补合同名");        headMap.put(25, "赔补金额（元）");        headMap.put(26, "预付款应付金额（元）");        headMap.put(27, "预付款到账金额（元）");        headMap.put(28, "决算款到账金额（元）\n" +                "（注：决算款不包含预付款）");        headMap.put(29, "赔补状态（合同签订中/预付款未开票/\n" +                "预付款已开票未到账/\n" +                "预付款已到账，施工中/\n" +                "决算编制审计中/\n" +                "决算款已开票未到账/\n" +                "全额回款）注：必须从以上选项中");        headMap.put(30, "未全额回款合同\n" +                "合同签订时长（月）");        headMap.put(31, "赔补特殊情况备注（赔补性质变更、决算款有调整或小于协议金额等特殊情况说明）");        headMap.put(32, "月报");        headMap.put(33, "年份");//        headMap.put(34, "合同类型");        return headMap;    }}

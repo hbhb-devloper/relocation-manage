@@ -1,13 +1,13 @@
 package com.hbhb.cw.relocation.model;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * @author dxk
@@ -63,4 +63,8 @@ public class RelocationReceipt implements Serializable {
      * 备注（合同号；区县；款项性质；项目信息；）
      */
     private String remake;
+    /**
+     * 收据编号
+     */
+    private String receiptNum;
 }

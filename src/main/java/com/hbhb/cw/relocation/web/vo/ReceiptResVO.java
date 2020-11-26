@@ -24,6 +24,8 @@ public class ReceiptResVO implements Serializable {
     private Integer unitId;
     @Schema(description = "地区(单位)id")
     private String unitName;
+    @Schema(description = "收据编号")
+    private String receiptNum;
     @Schema(description = "赔补金额")
     private String compensationAmount;
     @Schema(description = "已到账金额")

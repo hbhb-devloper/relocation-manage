@@ -8,7 +8,7 @@ import com.hbhb.cw.relocation.web.vo.ProjectResVO;
 import com.hbhb.cw.relocation.web.vo.StatementExportVO;
 import com.hbhb.cw.relocation.web.vo.StatementResVO;
 import com.hbhb.cw.systemcenter.model.Unit;
-import com.hbhb.cw.systemcenter.vo.ParentVO;
+import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
@@ -33,7 +33,7 @@ public class StatementServiceImpl implements StatementService {
 
     @Override
     public PageResult<StatementResVO> getStatementList(Integer pageNum, Integer pageSize, Integer unitId) {
-        ParentVO parentUnit = unitApi.getParentUnit();
+        UnitTopVO parentUnit = unitApi.getTopUnit();
         if (parentUnit.getHangzhou().equals(unitId)) {
             unitId = null;
         }
@@ -47,7 +47,7 @@ public class StatementServiceImpl implements StatementService {
 
     @Override
     public List<StatementExportVO> export(Integer unitId) {
-        ParentVO parentUnit = unitApi.getParentUnit();
+        UnitTopVO parentUnit = unitApi.getTopUnit();
         if (parentUnit.getHangzhou().equals(unitId)) {
             unitId = null;
         }

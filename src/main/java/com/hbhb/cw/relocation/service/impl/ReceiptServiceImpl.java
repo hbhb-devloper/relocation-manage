@@ -15,8 +15,8 @@ import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
 import com.hbhb.cw.systemcenter.api.UnitApi;
 import com.hbhb.cw.systemcenter.model.Unit;
-import com.hbhb.cw.systemcenter.vo.ParentVO;
-import com.hbhb.cw.systemcenter.vo.SysUserInfo;
+import com.hbhb.cw.systemcenter.vo.UnitTopVO;
+import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
@@ -55,12 +55,12 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize, Integer userId) {
-        ParentVO parentUnit = unitApi.getParentUnit();
+        UnitTopVO parentUnit = unitApi.getTopUnit();
         if (parentUnit.getHangzhou().equals(cond.getUnitId())) {
             cond.setUnitId(null);
         }
         // 判断用户单位
-        SysUserInfo user = userAip.getUserById(userId);
+        UserInfo user = userAip.getUserById(userId);
         if (!user.getUnitId().equals(parentUnit.getHangzhou())) {
             cond.setUnitId(user.getUnitId());
         }
@@ -80,9 +80,12 @@ public class ReceiptServiceImpl implements ReceiptService {
         Map<String, Integer> unitMap = list.stream()
                 .collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
         List<RelocationReceipt> receiptList = new ArrayList<>();
-        // 验证导入编号是否存在
+        // 验证导入合同编号是否存在
         List<String> contractNumList = projectService.getContractNumList();
+        // 查询收据编号
+        List<String> receiptNumList = receiptMapper.selectReceiptNum();
         // 检验导入数据准确性
+        int i = 1;
         for (ReceiptImportVO importVos : dataList) {
             String remake = importVos.getRemake();
             // 按照英文分隔符划分
@@ -92,10 +95,18 @@ public class ReceiptServiceImpl implements ReceiptService {
             if (arrList.size() != 4 && brrList.size() != 4) {
                 msg.add("请检查备注修改列：" + remake + "格式");
             }
+            // 判断收据编号是否已存在
+            if (receiptNumList.contains(importVos.getReceiptNum())) {
+                msg.add("excel表中第" + i + "行，收据编号为：" + importVos.getReceiptNum() + "在收据信息表中已存在！请仔细检查后重新导入");
+            }
             // 判断合同编号是否存在基础项目表中
             if (!contractNumList.contains(importVos.getContractNum())) {
                 msg.add("合同编号：" + importVos.getContractNum() + "在基础信息中不存在请检查！");
             }
+            // todo 缺少与基础信息表进行验证，目前导入数据"备注修改列"数据存在匹配不符待后续数据完善进行匹配验证
+            //1.获取基础信息中所对应的数据
+            // 2.与导入数据备注修改列进行比较
+            i++;
         }
         if (msg.isEmpty()) {
             throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_IMPORT_ERROR, msg.toString());
@@ -118,12 +129,12 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public List<ReceiptExportVO> export(ReceiptReqVO vo, Integer userId) {
-        ParentVO parentUnit = unitApi.getParentUnit();
+        UnitTopVO parentUnit = unitApi.getTopUnit();
         if (parentUnit.getHangzhou().equals(vo.getUnitId())) {
             vo.setUnitId(null);
         }
         // 判断用户单位
-        SysUserInfo user = userAip.getUserById(userId);
+        UserInfo user = userAip.getUserById(userId);
         if (!user.getUnitId().equals(parentUnit.getHangzhou())) {
             vo.setUnitId(user.getUnitId());
         }

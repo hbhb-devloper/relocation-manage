@@ -44,4 +44,12 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     List<WarnCountVO> selectProjectWarnCount();
 
+    void deleteBatch(List<Long> list);
+
+    List<Long> selectNotCorrelationId();
+
+    ProjectResVO selectProjectById(Long id);
+
+    void updateContractFileId(List<ContractFileVO> list);
+
 }

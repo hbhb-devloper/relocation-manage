@@ -15,7 +15,10 @@ import java.util.List;
  */
 public interface ReceiptMapper extends BaseMapper<RelocationReceipt> {
 
-    PageResult<ReceiptResVO>selectReceiptByCond(ReceiptReqVO cond, PageRequest<ReceiptResVO> request);
+    PageResult<ReceiptResVO> selectReceiptByCond(ReceiptReqVO cond, PageRequest<ReceiptResVO> request);
 
-    List<ReceiptResVO>  selectReceiptListByCond(ReceiptReqVO cond);
+    List<ReceiptResVO> selectReceiptListByCond(ReceiptReqVO cond);
+
+    List<String> selectReceiptNum();
+
 }

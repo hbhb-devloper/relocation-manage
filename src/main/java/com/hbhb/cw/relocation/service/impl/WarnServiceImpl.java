@@ -12,10 +12,10 @@ import com.hbhb.cw.relocation.model.RelocationWarn;
 import com.hbhb.cw.relocation.rpc.*;
 import com.hbhb.cw.relocation.service.WarnService;
 import com.hbhb.cw.relocation.web.vo.*;
-import com.hbhb.cw.systemcenter.model.SysFile;
+import com.hbhb.cw.systemcenter.model.File;
 import com.hbhb.cw.systemcenter.model.Unit;
-import com.hbhb.cw.systemcenter.vo.SysUserInfo;
-import com.hbhb.cw.systemcenter.vo.SysUserVO;
+import com.hbhb.cw.systemcenter.vo.UserInfo;
+import com.hbhb.cw.systemcenter.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
@@ -63,7 +63,7 @@ public class WarnServiceImpl implements WarnService {
 
     @Override
     public List<WarnResVO> getWarn(WarnReqVO reqVO, Integer userId) {
-        SysUserInfo user = userApi.getUserById(userId);
+        UserInfo user = userApi.getUserById(userId);
         if ("admin".equals(user.getUserName())) {
             reqVO.setUnitId(null);
         } else {
@@ -131,13 +131,13 @@ public class WarnServiceImpl implements WarnService {
         Map<Integer, Integer> warnMap = warnList.stream().collect(Collectors.toMap(WarnCountVO::getUnitId, WarnCountVO::getCount));
         // 2.按照统计数据向每个单位负责人推送邮件信息
         List<Integer> userIdList = flowApi.getFlowRoleUserList("迁改预警负责人");
-        List<SysUserVO> userList = userApi.getUserList(userIdList);
+        List<UserVO> userList = userApi.getUserList(userIdList);
         Set<Integer> keys = warnMap.keySet();
         for (Integer unitId : keys) {
             // 该单位对应的条数
             Integer count = warnMap.get(unitId);
             // 向每个单位负责人推送邮件
-            for (SysUserVO userVO : userList) {
+            for (UserVO userVO : userList) {
                 if (unitId.equals(userVO.getUnitId())) {
                     mailApi.postMail(MailVO.builder()
                             .content(count.toString())
@@ -168,7 +168,7 @@ public class WarnServiceImpl implements WarnService {
     public List<WarnFileResVO> getWarnFileList(Long warnId) {
         List<Integer> list = fileMapper.selectFileByWarnId(warnId);
         if (list.size() > 0) {
-            List<SysFile> fileList = fileApiExp.getFileList(list);
+            List<File> fileList = fileApiExp.getFileInfo(list);
             List<WarnFileResVO> fileVo = new ArrayList<>();
             fileList.forEach(item -> fileVo.add(WarnFileResVO.builder()
                     .fileId(item.getId())
@@ -188,7 +188,7 @@ public class WarnServiceImpl implements WarnService {
         List<Integer> userIds = flowApi.getFlowRoleUserList("迁改预警负责人");
         if (userIds.contains(userId)) {
             Map<Integer, String> unitMap = getUnit();
-            SysUserInfo userById = userApi.getUserById(userId);
+            UserInfo userById = userApi.getUserById(userId);
             cond.setUnitId(userById.getUnitId());
             PageRequest<WarnResVO> request = DefaultPageRequest.of(pageNum, pageSize);
             PageResult<WarnResVO> warnResVo = warnMapper.selectWarnListByCond(cond, request);

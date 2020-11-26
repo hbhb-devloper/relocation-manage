@@ -70,3 +70,10 @@ selectReceiptByCond
       -- @} 
      -- @} 
 ```
+
+selectReceiptNum
+===
+```sql
+select receipt_num from relocation_receipt
+group by receipt_num
+```

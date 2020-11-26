@@ -163,4 +163,8 @@ public class RelocationProject implements Serializable {
      * 迁改原因
      */
     private String cause;
+    /**
+     * 合同文件id
+     */
+    private Long fileId;
 }

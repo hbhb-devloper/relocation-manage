@@ -1,5 +1,6 @@
 package com.hbhb.cw.relocation.service.impl;
 
+import com.alibaba.excel.support.ExcelTypeEnum;
 import com.hbhb.core.utils.DateUtil;
 import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
@@ -16,10 +17,9 @@ import com.hbhb.cw.relocation.web.vo.IncomeExportVO;
 import com.hbhb.cw.relocation.web.vo.IncomeImportVO;
 import com.hbhb.cw.relocation.web.vo.IncomeReqVO;
 import com.hbhb.cw.relocation.web.vo.IncomeResVO;
-import com.hbhb.cw.systemcenter.enums.AllName;
 import com.hbhb.cw.systemcenter.model.Unit;
-import com.hbhb.cw.systemcenter.vo.ParentVO;
-import com.hbhb.cw.systemcenter.vo.SysUserInfo;
+import com.hbhb.cw.systemcenter.vo.UnitTopVO;
+import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
@@ -63,7 +63,7 @@ IncomeServiceImpl implements IncomeService {
     public void judgeFileName(String fileName) {
         int i = fileName.lastIndexOf(".");
         String name = fileName.substring(i);
-        if (!(AllName.XLS.getValue().equals(name) || AllName.XLSX.getValue().equals(name))) {
+        if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue().equals(name))) {
             throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
         }
     }
@@ -71,7 +71,7 @@ IncomeServiceImpl implements IncomeService {
     @Override
     public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize, IncomeReqVO cond, Integer userId) {
         List<Unit> unitList = unitApiExp.getAllUnitList();
-        ParentVO parentUnit = unitApiExp.getParentUnit();
+        UnitTopVO parentUnit = unitApiExp.getTopUnit();
         List<Integer> unitIds = new ArrayList<>();
         for (Unit unit : unitList) {
             if (parentUnit.getBenbu().equals(cond.getUnitId())) {
@@ -122,7 +122,7 @@ IncomeServiceImpl implements IncomeService {
         String currentMonth = DateUtil.getCurrentMonth();
         detail.setPayMonth(currentMonth);
         detail.setPayMonth(detail.getPayMonth().replace("-", ""));
-        SysUserInfo user = sysUserApiExp.getUserById(userId);
+        UserInfo user = sysUserApiExp.getUserById(userId);
         String nickName = user.getNickName();
         BigDecimal amount = detail.getAmount();
         Long incomeId = detail.getIncomeId();
@@ -275,7 +275,7 @@ IncomeServiceImpl implements IncomeService {
 
 
     private void setConditionDetail(IncomeReqVO cond, Integer userId) {
-        SysUserInfo user = sysUserApiExp.getUserById(userId);
+        UserInfo user = sysUserApiExp.getUserById(userId);
         if (!"admin".equals(user.getUserName())) {
             cond.setUnitId(user.getUnitId());
         }
