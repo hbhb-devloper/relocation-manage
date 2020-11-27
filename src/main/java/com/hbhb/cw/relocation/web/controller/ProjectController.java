@@ -115,13 +115,16 @@ public class ProjectController implements RelocationProjectApi {
 
     @Operation(summary = "上传合同")
     @PostMapping(value = "/upload", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public void upload(@RequestPart(required = false, value = "files") MultipartFile[] files) {
-        Boolean a = projectService.judgeContractNum(files);
+    public void upload(@RequestPart(required = false, value = "file") MultipartFile file) {
+        Boolean a = projectService.judgeContractNum(file);
         if (a) {
-            List<FileVO> file = fileApi.uploadFileBatch(files, FileType.RELOCATION_CONTRACT_FILE.value());
-            projectService.updateContractFileId(file);
+            FileVO files = fileApi.uploadFile(file, FileType.RELOCATION_CONTRACT_FILE.value());
+            projectService.updateContractFileId(files);
         } else {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR);
+            throw new RelocationException(RelocationErrorCode.RELOCATION_CONTRACT_ERROR, file.getOriginalFilename() + "未匹配导入失败");
         }
     }
+
+
 }
+

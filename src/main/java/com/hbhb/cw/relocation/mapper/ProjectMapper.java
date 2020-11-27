@@ -50,6 +50,6 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     ProjectResVO selectProjectById(Long id);
 
-    void updateContractFileId(List<ContractFileVO> list);
+    List<Long> selectProjectIdByContractNum(String contractNum);
 
 }

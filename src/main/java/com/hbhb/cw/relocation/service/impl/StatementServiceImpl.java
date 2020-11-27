@@ -42,6 +42,7 @@ public class StatementServiceImpl implements StatementService {
         List<Unit> unitList = unitApi.getAllUnitList();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         statementResVO.getList().forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
+
         return statementResVO;
     }
 

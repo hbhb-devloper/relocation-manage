@@ -73,4 +73,7 @@ public class StatementResVO implements Serializable {
 
     @Schema(description = "当年赔补开票（万元）")
     private BigDecimal thisYearInvoiceAccount;
+
+    @Schema(description = "当年收款金额（万元）")
+    private BigDecimal thisYearReceivable;
 }

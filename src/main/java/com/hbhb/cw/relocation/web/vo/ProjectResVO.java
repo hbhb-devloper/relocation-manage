@@ -128,4 +128,8 @@ public class ProjectResVO implements Serializable {
 
     @Schema(description = "合同类型")
     private String contractType;
+
+    @Schema(description = "文件id")
+    private String fileId;
+
 }

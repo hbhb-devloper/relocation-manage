@@ -85,12 +85,12 @@ public interface ProjectService {
      * @param files 附件
      * @return 是否包含
      */
-    Boolean judgeContractNum(MultipartFile[] files);
+    Boolean judgeContractNum(MultipartFile files);
 
     /**
      * 修改合同文件id
      *
      * @param file 文件信息
      */
-    void updateContractFileId(List<FileVO> file);
+    void updateContractFileId(FileVO file);
 }

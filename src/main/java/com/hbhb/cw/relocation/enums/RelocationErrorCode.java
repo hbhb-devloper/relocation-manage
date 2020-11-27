@@ -19,6 +19,7 @@ public enum RelocationErrorCode {
     RELOCATION_RECEIPT_IMPORT_ERROR("80906", "relocation.receipt.import.error"),
     FILE_DATA_NAME_ERROR("80907", "file.data.name.error"),
     RELOCATION_TEMPLATE_ERROR("80908", "relocation.template.error"),
+    RELOCATION_CONTRACT_ERROR("80909", "relocation.contract.error"),
     ;
 
 
