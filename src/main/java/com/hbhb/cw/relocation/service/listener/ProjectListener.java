@@ -78,6 +78,20 @@ public class ProjectListener extends AnalysisEventListener {
         }
     }
 
+    @Override
+    public void onException(Exception exception, AnalysisContext context) {
+        log.info("解析出错：" + exception.getMessage());
+        int row = 0, column = 0;
+        if (exception instanceof ExcelDataConvertException) {
+            ExcelDataConvertException convertException = (ExcelDataConvertException) exception;
+            row = convertException.getRowIndex();
+            column = convertException.getColumnIndex();
+            log.error("解析出错：{}行 {}列", row, column);
+            String msg = "解析出错" + "第" + row + "行,第" + column + "列";
+            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg);
+        }
+    }
+
     /**
      * 获取表头
      */
@@ -89,17 +103,5 @@ public class ProjectListener extends AnalysisEventListener {
         // 根据自己的情况去做表头的判断即可
     }
 
-    @Override
-    public void onException(Exception exception, AnalysisContext context) throws Exception {
-        log.info("解析出错：" + exception.getMessage());
 
-        int row = 0, column = 0;
-        if (exception instanceof ExcelDataConvertException) {
-            ExcelDataConvertException convertException = (ExcelDataConvertException) exception;
-            row = convertException.getRowIndex();
-            column = convertException.getColumnIndex();
-            log.error("解析出错：{}行 {}列", row, column);
-
-        }
-    }
 }

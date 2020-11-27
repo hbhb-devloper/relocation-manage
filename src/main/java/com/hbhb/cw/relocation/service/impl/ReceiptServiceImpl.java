@@ -151,7 +151,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         RelocationReceipt receipt = setReceipt(receiptResVO);
         // 新增收据验证
         List<String> msg = new ArrayList<>();
-        List<String> contractNumList = projectService.getContractNumList();
+
         String remake = receipt.getRemake();
         // 按照英文分隔符划分
         List<String> arrList = Arrays.asList(remake.split(";"));
@@ -161,6 +161,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             msg.add("请检查备注修改列：" + remake + "格式");
         }
         // 判断合同编号是否存在基础项目表中
+        List<String> contractNumList = projectService.getContractNumList();
         if (!contractNumList.contains(receipt.getContractNum())) {
             msg.add("合同编号：" + receipt.getContractNum() + "在基础信息中不存在请检查！");
         }
