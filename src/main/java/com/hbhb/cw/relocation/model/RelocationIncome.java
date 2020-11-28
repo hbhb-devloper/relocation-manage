@@ -7,6 +7,7 @@ import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.beetl.sql.annotation.entity.AutoID;
 
 /**
  * @author dxk
@@ -20,6 +21,7 @@ public class RelocationIncome implements Serializable {
     /**
      * id
      */
+    @AutoID
     private Long id;
     /**
      * 类别

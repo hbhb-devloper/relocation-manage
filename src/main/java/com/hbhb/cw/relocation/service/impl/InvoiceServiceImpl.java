@@ -62,7 +62,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public PageResult<InvoiceResVO> getInvoiceList(Integer pageNum, Integer pageSize,
-                                                   InvoiceReqVO cond, Integer userId) {
+        InvoiceReqVO cond, Integer userId) {
         List<Unit> unitList = unitApiExp.getAllUnitList();
         UnitTopVO parentUnit = unitApiExp.getTopUnit();
         List<Integer> unitIds = new ArrayList<>();
@@ -73,12 +73,17 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
         cond.setUnitIds(unitIds);
         PageRequest<InvoiceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
-        PageResult<InvoiceResVO> invoiceResVo = relocationInvoiceMapper.selectListByCondition(cond, request);
-        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        PageResult<InvoiceResVO> invoiceResVo = relocationInvoiceMapper
+            .selectListByCondition(cond, request);
+        Map<Integer, String> unitMap = unitList.stream()
+            .collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         invoiceResVo.getList().forEach(item -> {
-            item.setInvoiceTypeLabel(State.ONE.value().equals(item.getInvoiceType().toString()) ? InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
-            item.setState(State.ONE.value().equals(item.getState()) ? InvoiceSate.BLUE_STATE.value() : InvoiceSate.RED_STATE.value());
-            item.setIsImport(State.ONE.value().equals(item.getState()) ? State.YES.value() : State.NO.value());
+            item.setInvoiceTypeLabel(State.ONE.value().equals(item.getInvoiceType().toString())
+                ? InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
+            item.setState(State.ONE.value().equals(item.getState()) ? InvoiceSate.BLUE_STATE.value()
+                : InvoiceSate.RED_STATE.value());
+            item.setIsImport(
+                State.ONE.value().equals(item.getState()) ? State.YES.value() : State.NO.value());
             item.setUnit(unitMap.get(item.getUnitId()));
             item.setDistrict(unitMap.get(item.getDistrictId()));
         });
@@ -99,9 +104,17 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addInvoice(InvoiceResVO invoiceVo) {
+        RelocationInvoice single = relocationInvoiceMapper.single(invoiceVo.getInvoiceNumber());
+        Integer re = relocationInvoiceMapper
+            .selectListByNumber(invoiceVo.getInvoiceNumber());
+        if (re > 0) {
+            throw new InvoiceException(
+                InvoiceErrorCode.RELOCATION_INVOICE_IMPORT_BUSTYPE_ERROR);
+        }
         RelocationInvoice invoice = translation(invoiceVo);
         relocationInvoiceMapper.insert(invoice);
-        RelocationIncome relocationIncome = getRelocationIncome(invoice, invoice.getProjectId(), invoice.getPaymentType());
+        //invoice.getProjectId(),invoice.getPaymentType()
+        RelocationIncome relocationIncome = getRelocationIncome(invoice);
         relocationIncomeMapper.insert(relocationIncome);
     }
 
@@ -110,21 +123,39 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Transactional(rollbackFor = Exception.class)
     public void addSaveRelocationInvoice(List<InvoiceImportVO> dataList) {
         List<ProjectInfoVO> projectInfo = relocationInvoiceMapper.getProjectInfo();
-        Map<String, Long> projectMap = projectInfo.stream().collect(Collectors.toMap(ProjectInfoVO::getInfo, ProjectInfoVO::getId));
-        // TODO 发票匹配验证
-        // 查找发票备注格式、
+        Map<String, Long> projectMap = projectInfo.stream()
+            .collect(Collectors.toMap(ProjectInfoVO::getInfo, ProjectInfoVO::getId));
+        // TODO 发票匹配验证 本年度不做匹配
+        // 查找发票备注格式
         List<String> remakeList = relocationInvoiceMapper.selectInvoiceRemake();
-
+        List<String> invoiceNumber = relocationInvoiceMapper.selectInvoiceNumber();
         // 转换单位
         List<Unit> list = unitApiExp.getAllUnitList();
-        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
+        Map<String, Integer> unitMap = list.stream()
+            .collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
         List<RelocationInvoice> invoiceList = new ArrayList<>();
         List<RelocationIncome> incomeList = new ArrayList<>();
+        long count = dataList.stream().distinct().count();
+        if (count < dataList.size()) {
+            throw new InvoiceException(
+                InvoiceErrorCode.RELOCATION_INCOME_EXCEL_EXIST);
+        }
+        List<String> msg = new ArrayList<>();
+        int i = 1;
         for (InvoiceImportVO relocationInvoiceImport : dataList) {
-            if (!"财务开票".equals(relocationInvoiceImport.getBusinessType())) {
-                throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_IMPORT_BUSTYPE_ERROR);
+            boolean contains = invoiceNumber.contains(relocationInvoiceImport.getNumber());
+            if (contains) {
+                //throw  new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_NUMBER_EXIST);
+                msg.add("在excel表中第" + i + "行，项目编号为:" + relocationInvoiceImport.getNumber()
+                    + "已存在发票表中\n");
             }
-            String newRemake = relocationInvoiceImport.getRemake();
+            // todo 财务开票不再进行判断?
+            /*if (!"财务开票".equals(relocationInvoiceImport.getBusinessType())) {
+                throw new InvoiceException(
+                    InvoiceErrorCode.RELOCATION_INVOICE_IMPORT_BUSTYPE_ERROR);
+            }*/
+            // todo 不再匹配备注列
+            /*String newRemake = relocationInvoiceImport.getRemake();
             Matcher m = Pattern.compile(Pattern.quote("；")).matcher(newRemake);
             int i = 0;
             while (m.find()) {
@@ -132,15 +163,17 @@ public class InvoiceServiceImpl implements InvoiceService {
             }
             if (i != 3) {
                 throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_REMAKE_ERROR);
-            }
+            }*/
             RelocationInvoice relocationInvoice = new RelocationInvoice();
             relocationInvoice.setUnitId(unitMap.get(relocationInvoiceImport.getUnitId()));
             relocationInvoice.setDistrict(unitMap.get(relocationInvoiceImport.getDistrict()));
             relocationInvoice.setInvoiceCode(relocationInvoiceImport.getInvoiceCode());
             relocationInvoice.setInvoiceNumber(relocationInvoiceImport.getInvoiceNumber());
             String invoiceType = relocationInvoiceImport.getInvoiceType();
+
+            // todo 发票类型重新区别  添加字典?
             if ("电子增值税普通发票".equals(invoiceType) || "增值税电子普票".equals(invoiceType)
-                    || "增值税电子普通发票".equals(invoiceType) || "增值税普票".equals(invoiceType)) {
+                || "增值税电子普通发票".equals(invoiceType) || "增值税普票".equals(invoiceType)) {
                 relocationInvoice.setInvoiceType(1);
             }
             if ("电子增值税专用发票".equals(invoiceType) || "增值税专用发票".equals(invoiceType)) {
@@ -149,31 +182,38 @@ public class InvoiceServiceImpl implements InvoiceService {
             relocationInvoice.setBuyerTax(relocationInvoiceImport.getBuyerTax());
             relocationInvoice.setBuyerName(relocationInvoiceImport.getBuyerName());
             relocationInvoice.setInvoiceProject(relocationInvoiceImport.getInvoiceProject());
-            relocationInvoice.setInvoiceTime(DateUtil.string2DateYMD(relocationInvoiceImport.getInvoiceTime()));
+            relocationInvoice
+                .setInvoiceTime(DateUtil.string2DateYMD(relocationInvoiceImport.getInvoiceTime()));
             relocationInvoice.setAmount(new BigDecimal(relocationInvoiceImport.getAmount()));
-            relocationInvoice.setTaxRate(new BigDecimal(relocationInvoiceImport.getTaxRate() == null ? "0"
+            relocationInvoice
+                .setTaxRate(new BigDecimal(relocationInvoiceImport.getTaxRate() == null ? "0"
                     : relocationInvoiceImport.getTaxRate()));
-            relocationInvoice.setTaxAmount(new BigDecimal(relocationInvoiceImport.getTaxAmount() == null ? "0"
+            relocationInvoice
+                .setTaxAmount(new BigDecimal(relocationInvoiceImport.getTaxAmount() == null ? "0"
                     : relocationInvoiceImport.getTaxAmount()));
-            relocationInvoice.setTaxIncludeAmount(new BigDecimal(relocationInvoiceImport.getTaxIncludeAmount()));
+            relocationInvoice
+                .setTaxIncludeAmount(new BigDecimal(relocationInvoiceImport.getTaxIncludeAmount()));
             relocationInvoice.setRemake(relocationInvoiceImport.getRemake());
             relocationInvoice.setApplicant(relocationInvoiceImport.getApplicant());
             relocationInvoice.setIssuer(relocationInvoiceImport.getIssuer());
             // 1 蓝字, 0 红字
             relocationInvoice.setState("蓝字".equals(relocationInvoiceImport.getState()) ? 1 : 0);
             // 1 是, 0 否
-            relocationInvoice.setIsImport("是".equals(relocationInvoiceImport.getIsImport()) ? 1 : 0);
+            relocationInvoice
+                .setIsImport("是".equals(relocationInvoiceImport.getIsImport()) ? 1 : 0);
             relocationInvoice.setBusinessType(relocationInvoiceImport.getBusinessType());
             relocationInvoice.setManager(relocationInvoiceImport.getManager());
-            Long pid = null;
+            /*Long pid = null;
             Integer atype = null;
+            // todo 今年度不再匹配项目编号
             if (!StringUtils.isEmpty(newRemake) && !"作废".contains(newRemake) && !"发票作废"
-                    .equals(newRemake)) {
+                .equals(newRemake)) {
                 String[] split = newRemake.split("；");
                 //合同号
                 String contractNum = split[0];
                 if (contractNum.startsWith("（")) {
-                    contractNum = contractNum.substring(contractNum.indexOf("（") + 1, contractNum.lastIndexOf("）"));
+                    contractNum = contractNum
+                        .substring(contractNum.indexOf("（") + 1, contractNum.lastIndexOf("）"));
                 }
                 //区县
                 String unit = split[1];
@@ -198,20 +238,29 @@ public class InvoiceServiceImpl implements InvoiceService {
                 String key = contractNum + unitId + pinfo;
                 // 若发票可以与项目信息匹配则设置项目状态匹配，否则为不匹配
                 pid = projectMap.get(key);
-            }
-            relocationInvoice.setPaymentType(atype);
-            relocationInvoice.setProjectId(pid);
+            }*/
+            //relocationInvoice.setPaymentType(atype);
+            //relocationInvoice.setProjectId(pid);
             // 判断发票是否匹配基础信息若匹配则导入不匹配则导入失败
             // 用已存在备注列与导入对比若存在则不添加
-            if (pid != null && !remakeList.contains(newRemake)) {
+            // todo 导入发票成功后放入收款
+            /*if (pid != null && !remakeList.contains(newRemake)) {
                 invoiceList.add(relocationInvoice);
                 //导入发票后 同步添加到收款
-                RelocationIncome relocationIncome = getRelocationIncome(relocationInvoice, pid, atype);
+                RelocationIncome relocationIncome = getRelocationIncome(relocationInvoice, pid,
+                    atype);
                 incomeList.add(relocationIncome);
-            }
+            }*/
 
+            // todo 导入发票成功后放入收款
+            invoiceList.add(relocationInvoice);
+            RelocationIncome relocationIncome = getRelocationIncome(relocationInvoice);
+            incomeList.add(relocationIncome);
         }
-
+        if (!msg.isEmpty()) {
+            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_NUMBER_EXIST,
+                msg.toString());
+        }
         relocationInvoiceMapper.insertBatch(invoiceList);
         relocationIncomeMapper.insertBatch(incomeList);
     }
@@ -220,12 +269,18 @@ public class InvoiceServiceImpl implements InvoiceService {
     public List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO vo, Integer userId) {
         setConditionDetail(vo, userId);
         List<Unit> unitList = unitApiExp.getAllUnitList();
-        List<InvoiceExportResVO> exportResVos = relocationInvoiceMapper.selectExportListByCondition(vo);
-        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        List<InvoiceExportResVO> exportResVos = relocationInvoiceMapper
+            .selectExportListByCondition(vo);
+        Map<Integer, String> unitMap = unitList.stream()
+            .collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         exportResVos.forEach(item -> {
-            item.setInvoiceType(State.ONE.value().equals(item.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
-            item.setState(State.ONE.value().equals(item.getState()) ? InvoiceSate.BLUE_STATE.value() : InvoiceSate.RED_STATE.value());
-            item.setIsImport(State.ONE.value().equals(item.getState()) ? State.YES.value() : State.NO.value());
+            item.setInvoiceType(
+                State.ONE.value().equals(item.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value()
+                    : InvoiceType.SPECIAL_INVOICE.value());
+            item.setState(State.ONE.value().equals(item.getState()) ? InvoiceSate.BLUE_STATE.value()
+                : InvoiceSate.RED_STATE.value());
+            item.setIsImport(
+                State.ONE.value().equals(item.getState()) ? State.YES.value() : State.NO.value());
             item.setUnit(unitMap.get(item.getUnitId()));
             item.setDistrict(unitMap.get(item.getDistrictId()));
         });
@@ -251,8 +306,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         // 转换单位
         BeanUtils.copyProperties(invoiceVo, invoice);
         List<Unit> list = unitApiExp.getAllUnitList();
-        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
-        String remake = invoiceVo.getRemake();
+        Map<String, Integer> unitMap = list.stream()
+            .collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
+        // todo 备注列不再有用
+        /*String remake = invoiceVo.getRemake();
         // 按照英文分隔符划分
         List<String> arrList = Arrays.asList(remake.split(";"));
         // 按照中文分隔符划分
@@ -289,8 +346,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         Long pid = relocationInvoiceMapper.selectPidByCondition(contractNum, unitId, pinfo);
         if (pid == null) {
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_REMAKE_ERROR);
-        }
-        invoice.setProjectId(pid);
+        }*/
+        //invoice.setProjectId(pid);
         invoice.setInvoiceTime(DateUtil.string2DateYMD(invoiceVo.getInvoiceTime()));
         invoice.setState(Integer.valueOf(invoiceVo.getState()));
         invoice.setIsImport(Integer.valueOf(invoiceVo.getIsImport()));
@@ -298,32 +355,35 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoice;
     }
 
-    private RelocationIncome getRelocationIncome(RelocationInvoice relocationInvoice, Long pid,
-                                                 Integer atype) {
+    private RelocationIncome getRelocationIncome(RelocationInvoice relocationInvoice) {
         RelocationIncome relocationIncome = new RelocationIncome();
-        RelocationProject relocationProject = projectMapper.single(pid);
+        //RelocationProject relocationProject = projectMapper.single(pid);
         relocationIncome.setCategory(1);
         relocationIncome.setUnitId(relocationInvoice.getUnitId());
         relocationIncome.setSupplier(relocationInvoice.getBuyerName());
-        relocationIncome.setContractNum(relocationProject.getContractNum());
-        relocationIncome.setContractName(relocationProject.getContractName());
-        relocationIncome.setStartTime(relocationProject.getPlanStartTime());
-        relocationIncome.setContractDeadline(relocationProject.getPlanEndTime());
-        relocationIncome.setContractAmount(relocationProject.getCompensationAmount());
+        // todo 发票信息获取
+        //relocationIncome.setContractNum(relocationProject.getContractNum());
+        //relocationIncome.setContractName(relocationProject.getContractName());
+        //relocationIncome.setStartTime(relocationProject.getPlanStartTime());
+        //relocationIncome.setContractDeadline(relocationProject.getPlanEndTime());
+        //relocationIncome.setContractAmount(relocationProject.getCompensationAmount());
         relocationIncome.setInvoiceTime(relocationInvoice.getInvoiceTime());
         relocationIncome.setInvoiceNum(relocationInvoice.getInvoiceNumber());
-        relocationIncome.setInvoiceType(relocationInvoice.getInvoiceType() == 1 ? InvoiceType.ELECTRONIC_PLAIN_INVOICE.value() : InvoiceType.ELECTRONIC_SPECIAL_INVOICE.value());
+        relocationIncome.setInvoiceType(
+            relocationInvoice.getInvoiceType() == 1 ? InvoiceType.ELECTRONIC_PLAIN_INVOICE.value()
+                : InvoiceType.ELECTRONIC_SPECIAL_INVOICE.value());
         relocationIncome.setAmount(relocationInvoice.getAmount());
         relocationIncome.setTax(relocationInvoice.getTaxAmount());
         relocationIncome.setTaxIncludeAmount(relocationInvoice.getTaxIncludeAmount());
-        relocationIncome.setConstructionName(relocationProject.getProjectName());
-        relocationIncome.setPaymentType(atype);
+        //relocationIncome.setConstructionName(relocationProject.getProjectName());
+        //relocationIncome.setPaymentType(atype);
         relocationIncome.setIsReceived(1);
+        // todo 账龄从合同日期到现在?
         relocationIncome.setAging(0);
         relocationIncome.setReceivable(relocationInvoice.getTaxIncludeAmount());
         relocationIncome.setReceived(new BigDecimal(0));
         relocationIncome.setUnreceived(relocationInvoice.getTaxIncludeAmount());
-        // 匹配项目id 数据库暂无字段
+        // todo 匹配项目id 数据库暂无字段
         // relocationIncome.setProjectId(relocationInvoice.getProjectId());
         return relocationIncome;
     }
@@ -332,7 +392,8 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void judgeFileName(String fileName) {
         int i = fileName.lastIndexOf(".");
         String name = fileName.substring(i);
-        if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue().equals(name))) {
+        if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue()
+            .equals(name))) {
             throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
         }
     }

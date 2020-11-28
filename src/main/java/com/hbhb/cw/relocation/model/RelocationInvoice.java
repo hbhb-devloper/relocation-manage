@@ -18,71 +18,72 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RelocationInvoice implements Serializable {
+
     private static final long serialVersionUID = -2593276476905787755L;
     @AutoID
     private Long id;
 
-    @Schema(description ="区县")
+    @Schema(description = "区县")
     private Integer district;
 
-    @Schema(description ="市县")
+    @Schema(description = "市县")
     private Integer unitId;
 
-    @Schema(description ="发票代码")
+    @Schema(description = "发票代码")
     private String invoiceCode;
 
-    @Schema(description ="发票号码")
+    @Schema(description = "发票号码")
     private String invoiceNumber;
 
-    @Schema(description ="开票点")
+    @Schema(description = "开票点")
     private String invoiceSite;
 
-    @Schema(description ="业务类型")
+    @Schema(description = "业务类型")
     private String businessType;
 
-    @Schema(description ="发票类型")
+    @Schema(description = "发票类型")
     private Integer invoiceType;
 
-    @Schema(description ="购方税号")
+    @Schema(description = "购方税号")
     private String buyerTax;
 
-    @Schema(description ="购方名称")
+    @Schema(description = "购方名称")
     private String buyerName;
 
-    @Schema(description ="开票项目")
+    @Schema(description = "开票项目")
     private String invoiceProject;
 
     @Schema(description = "开票日期")
     private Date invoiceTime;
 
-    @Schema(description ="金额")
+    @Schema(description = "金额")
     private BigDecimal amount;
 
-    @Schema(description ="税率")
+    @Schema(description = "税率")
     private BigDecimal taxRate;
 
-    @Schema(description ="税额")
+    @Schema(description = "税额")
     private BigDecimal taxAmount;
 
-    @Schema(description ="价税合计")
+    @Schema(description = "价税合计")
     private BigDecimal taxIncludeAmount;
 
-    @Schema(description ="备注")
+    @Schema(description = "备注")
     private String remake;
 
-    @Schema(description ="描述")
+    @Schema(description = "描述")
     private String describe;
 
-    @Schema(description ="申请人")
+    @Schema(description = "申请人")
     private String applicant;
 
-    @Schema(description ="开票人")
+    @Schema(description = "开票人")
     private String issuer;
 
-    @Schema(description ="票据状态1:蓝字0:红字")
+    @Schema(description = "票据状态1:蓝字0:红字")
     private Integer state;
 
-    @Schema(description ="是否为自定义菜单开票1:是0:否")
+    @Schema(description = "是否为自定义菜单开票1:是0:否")
     private Integer isImport;
 
     @Schema(description = "客户经理")

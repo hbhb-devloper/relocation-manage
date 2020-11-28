@@ -27,4 +27,8 @@ public interface InvoiceMapper extends BaseMapper<RelocationInvoice> {
 
     List<String> selectInvoiceRemake();
 
+    Integer selectListByNumber(String invoiceNumber);
+
+    List<String> selectInvoiceNumber();
+
 }

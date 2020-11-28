@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.beetl.sql.annotation.entity.AutoID;
 
 /**
  * @since 2020-09-25
@@ -18,6 +19,7 @@ public class RelocationIncomeDetail implements Serializable {
     private static final long serialVersionUID = -7894679294000895303L;
 
     @Schema(description = "id")
+    @AutoID
     private Long id;
 	/**
 	 * 收款id

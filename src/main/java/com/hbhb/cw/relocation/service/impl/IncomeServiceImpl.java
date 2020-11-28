@@ -2,14 +2,19 @@ package com.hbhb.cw.relocation.service.impl;
 
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.hbhb.core.utils.DateUtil;
+import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
 import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
+import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
+import com.hbhb.cw.relocation.mapper.InvoiceMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationIncomeDetail;
+import com.hbhb.cw.relocation.model.RelocationInvoice;
+import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.service.IncomeService;
@@ -59,17 +64,22 @@ IncomeServiceImpl implements IncomeService {
     @Resource
     private ProjectMapper relocationProjectMapper;
 
+    @Resource
+    private InvoiceMapper invoiceMapper;
+
     @Override
     public void judgeFileName(String fileName) {
         int i = fileName.lastIndexOf(".");
         String name = fileName.substring(i);
-        if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue().equals(name))) {
+        if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue()
+            .equals(name))) {
             throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
         }
     }
 
     @Override
-    public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize, IncomeReqVO cond, Integer userId) {
+    public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize,
+        IncomeReqVO cond, Integer userId) {
         List<Unit> unitList = unitApiExp.getAllUnitList();
         UnitTopVO parentUnit = unitApiExp.getTopUnit();
         List<Integer> unitIds = new ArrayList<>();
@@ -78,7 +88,8 @@ IncomeServiceImpl implements IncomeService {
                 unitIds.add(unit.getId());
             }
         }
-        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        Map<Integer, String> unitMap = unitList.stream()
+            .collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         cond.setUnitIds(unitIds);
         setConditionDetail(cond, userId);
         PageRequest<IncomeResVO> request = DefaultPageRequest.of(pageNum, pageSize);
@@ -93,9 +104,11 @@ IncomeServiceImpl implements IncomeService {
             } else if ("3".equals(category)) {
                 relocationIncomeResVO.setCategory("代建");
             }
-            BigDecimal monthAmount = relocationIncomeMapper.getMonthAmount(relocationIncomeResVO.getId(), DateUtil.getCurrentMonth());
+            BigDecimal monthAmount = relocationIncomeMapper
+                .getMonthAmount(relocationIncomeResVO.getId(), DateUtil.getCurrentMonth());
             relocationIncomeResVO.setMonthAmount(monthAmount);
-            relocationIncomeResVO.setUnit(unitMap.get(Integer.valueOf(relocationIncomeResVO.getUnit())));
+            relocationIncomeResVO
+                .setUnit(unitMap.get(Integer.valueOf(relocationIncomeResVO.getUnit())));
             if ("1".equals(relocationIncomeResVO.getIsReceived())) {
                 relocationIncomeResVO.setIsReceived(IsReceived.RECEIVED.value());
             } else {
@@ -131,48 +144,60 @@ IncomeServiceImpl implements IncomeService {
         incomeDetailMapper.insert(detail);
         RelocationIncome relocationIncome = relocationIncomeMapper.single(incomeId);
 
-        // todo 此处应该使用备注格式字段去反查，而不是发票编号
-        Long pid = relocationIncomeMapper.selectProject(relocationIncome.getInvoiceNum());
+        //  此处应该使用备注格式字段去反查，而不是发票编号
+        //Long pid = relocationIncomeMapper.selectProject(relocationIncome.getInvoiceNum());
+        // 查询发票  是否同步收款金额 是否同步收据数据
+        RelocationInvoice relocationInvoice = new RelocationInvoice();
+        relocationInvoice.setInvoiceNumber(relocationIncome.getInvoiceNum());
+        RelocationInvoice invoice = invoiceMapper.single(relocationInvoice);
+        // 获取收款类型
         Integer paymentType = relocationIncome.getPaymentType();
-//        if (pid == null) {
-//            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_NOT_PROJECT);
-//        } else {
-//            RelocationProject project = relocationProjectMapper.single(pid);
-//            BigDecimal anticipatePayment = project.getAnticipatePayment();
-//            BigDecimal finalPayment = project.getFinalPayment();
-//            RelocationProject relocationProject = new RelocationProject();
-//            // 同步修改项目信息表数据
-//            if (paymentType == 1) {
-//                relocationProject.setAnticipatePayment(anticipatePayment.add(amount));
-//            } else {
-//                relocationProject.setFinalPayment(finalPayment.add(amount));
-//            }
-//            relocationProjectMapper.updateTemplateById(relocationProject);
-//        }
+        // todo 无法匹配故不再同步项目信息
+        /*if (pid == null) {
+            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_NOT_PROJECT);
+        } else {
+            RelocationProject project = relocationProjectMapper.single(pid);
+            BigDecimal anticipatePayment = project.getAnticipatePayment();
+            BigDecimal finalPayment = project.getFinalPayment();
+            RelocationProject relocationProject = new RelocationProject();
+            // 同步修改项目信息表数据
+            if (paymentType == 1) {
+                relocationProject.setAnticipatePayment(anticipatePayment.add(amount));
+            } else {
+                relocationProject.setFinalPayment(finalPayment.add(amount));
+            }
+            relocationProjectMapper.updateTemplateById(relocationProject);
+        }*/
         //未收减少
         RelocationIncome single = relocationIncomeMapper.single(incomeId);
         RelocationIncome income = new RelocationIncome();
         income.setId(incomeId);
-        income.setUnreceived(single.getUnreceived().subtract(amount));
+        BigDecimal subtractRe = single.getUnreceived().subtract(amount);
+        income.setUnreceived(subtractRe);
+        if (subtractRe.compareTo(new BigDecimal("0.0")) < 0) {
+            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_AMOUNT_ERROR);
+        }
+        //已收增加
         income.setReceived(single.getReceived().add(amount));
         relocationIncomeMapper.updateTemplateById(income);
-        //已收增加
-        RelocationIncome single1 = relocationIncomeMapper.single(incomeId);
-        BigDecimal receivable = single1.getReceivable();
-        BigDecimal unreceived = single1.getUnreceived();
-        relocationIncome.setReceived(receivable.subtract(unreceived));
-        relocationIncomeMapper.updateTemplateById(single1);
+        // 判断更新后的收款状态
+        RelocationIncome income1 = relocationIncomeMapper.single(incomeId);
+        BigDecimal receivable = income1.getReceivable();
+        BigDecimal unreceived = income1.getUnreceived();
+        BigDecimal received = relocationIncome.getReceived();
+        //relocationIncome.setReceived(receivable.subtract(unreceived));
+        //relocationIncomeMapper.updateTemplateById(single1);
+        //RelocationIncome income1 = new RelocationIncome();
+        //income1.setId(incomeId);
         //已收完的情况 3
-        RelocationIncome income1 = new RelocationIncome();
-        income1.setId(incomeId);
-        if (relocationIncome.getReceived().compareTo(relocationIncome.getReceivable()) == 0
-                && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) == 0) {
+        if (received.compareTo(receivable) == 0
+            && unreceived.compareTo(new BigDecimal("0")) == 0) {
             income1.setIsReceived(3);
             relocationIncomeMapper.updateTemplateById(income1);
         }
-        //未收完 2
-        if (relocationIncome.getReceived().compareTo(relocationIncome.getReceivable()) < 0
-                && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
+        //部分回款 2
+        if (received.compareTo(receivable) < 0
+            && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
             income1.setIsReceived(2);
             relocationIncomeMapper.updateTemplateById(income1);
         }
@@ -183,43 +208,62 @@ IncomeServiceImpl implements IncomeService {
     public void addSaveRelocationInvoice(List<IncomeImportVO> dataList) {
         // 转换单位
         List<Unit> list = unitApiExp.getAllUnitList();
-        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getShortName, Unit::getId));
+        Map<String, Integer> unitMap = list.stream()
+            .collect(Collectors.toMap(Unit::getShortName, Unit::getId));
         List<RelocationIncome> incomes = new ArrayList<>();
         for (IncomeImportVO importVO : dataList) {
             RelocationIncome relocationIncome = new RelocationIncome();
             // 1 迁改 2 搬迁 3 代建
-            relocationIncome.setCategory("迁改".equals(importVO.getCategory()) ? 1 : "搬迁".equals(importVO.getCategory()) ? 2 : 3);
-            relocationIncome.setUnitId(unitMap.get(importVO.getUnit()) == null ? 11 : unitMap.get(importVO.getUnit()));
+            relocationIncome.setCategory("迁改".equals(importVO.getCategory()) ? 1
+                : "搬迁".equals(importVO.getCategory()) ? 2 : 3);
+            relocationIncome.setUnitId(
+                unitMap.get(importVO.getUnit()) == null ? 11 : unitMap.get(importVO.getUnit()));
             relocationIncome.setSupplier(importVO.getSupplier());
             relocationIncome.setContractNum(importVO.getContractNum());
             relocationIncome.setContractName(importVO.getContractName());
             relocationIncome.setStartTime(DateUtil.string3DateYMD(importVO.getStartTime()));
-            relocationIncome.setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
+            relocationIncome
+                .setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
             relocationIncome.setContractAmount(stringToBigDecimal(importVO.getContractAmount()));
             relocationIncome.setInvoiceTime(DateUtil.string3DateYMD(importVO.getInvoiceTime()));
             relocationIncome.setInvoiceNum(importVO.getInvoiceNum());
             relocationIncome.setInvoiceType(importVO.getInvoiceType());
             relocationIncome.setAmount(stringToBigDecimal(importVO.getAmount()));
             relocationIncome.setTax(stringToBigDecimal(importVO.getTax()));
-            relocationIncome.setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
+            relocationIncome
+                .setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
             relocationIncome.setConstructionName(importVO.getConstructionName());
-            // 1 预付款 2 尾款  3 决算款
-            relocationIncome.setPaymentType(1);
-            // 1 未收款 2 未收完  3 已收完
-            relocationIncome.setIsReceived("未收款".equals(importVO.getCategory().trim()) ? 1 : 2);
+            // 1 预付款   2 决算款
+            relocationIncome.setPaymentType(
+                "预付款".equals(importVO.getPaymentType()) ? 1 : 2);
+            // 1 未收款 2 部分回款  3 已收款
+            relocationIncome.setIsReceived("未收款".equals(importVO.getCategory()) ? 1
+                : "部分回款".equals(importVO.getCategory()) ? 2 : 3);
             relocationIncome.setAging(importVO.getAging());
             relocationIncome.setReceivable(stringToBigDecimal(importVO.getReceivable()));
             relocationIncome.setReceived(stringToBigDecimal(importVO.getReceived()));
             relocationIncome.setUnreceived(stringToBigDecimal(importVO.getUnreceived()));
-            incomes.add(relocationIncome);
+            //incomes.add(relocationIncome);
+            //插入收款信息
+            relocationIncomeMapper.insert(relocationIncome);
+            //插入收款下的收款详情
+            RelocationIncomeDetail incomeDetail = new RelocationIncomeDetail();
+            incomeDetail.setIncomeId(relocationIncome.getId());
+            incomeDetail.setCreateTime(DateUtil.getCurrentDate());
+            incomeDetail.setPayee(importVO.getPayee());
+            incomeDetail.setReceiptNum(importVO.getReceiptNum());
+            incomeDetail.setAmount(new BigDecimal(importVO.getMonthAmount()));
+            incomeDetail.setPayMonth(DateUtil.getCurrentMonth());
+            incomeDetailMapper.insert(incomeDetail);
         }
-        relocationIncomeMapper.insertBatch(incomes);
+        //relocationIncomeMapper.insertBatch(incomes);
     }
 
     @Override
     public List<IncomeExportVO> selectExportListByCondition(IncomeReqVO vo, Integer userId) {
         setConditionDetail(vo, userId);
-        List<IncomeExportVO> relocationIncomeExportVos = relocationIncomeMapper.selectExportList(vo);
+        List<IncomeExportVO> relocationIncomeExportVos = relocationIncomeMapper
+            .selectExportList(vo);
         for (int i = 0; i < relocationIncomeExportVos.size(); i++) {
             IncomeExportVO relocationIncomeExportVO = relocationIncomeExportVos.get(i);
             String category = relocationIncomeExportVO.getCategory();
@@ -243,10 +287,10 @@ IncomeServiceImpl implements IncomeService {
                     relocationIncomeExportVO.setIsReceived("未收款");
                     break;
                 case "2":
-                    relocationIncomeExportVO.setIsReceived("收款中");
+                    relocationIncomeExportVO.setIsReceived("部分回款");
                     break;
                 case "3":
-                    relocationIncomeExportVO.setIsReceived("已收完");
+                    relocationIncomeExportVO.setIsReceived("已收款");
                     break;
                 default:
                     relocationIncomeExportVO.setIsReceived("");
@@ -279,7 +323,6 @@ IncomeServiceImpl implements IncomeService {
         if (!"admin".equals(user.getUserName())) {
             cond.setUnitId(user.getUnitId());
         }
-
         if (!StringUtils.isEmpty(cond.getStartTimeFrom())) {
             cond.setStartTimeFrom(cond.getStartTimeFrom() + " 00:00:00");
         }
