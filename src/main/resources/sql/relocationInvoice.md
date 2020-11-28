@@ -229,3 +229,16 @@ selectInvoiceRemake
 ```sql
 select remake  from relocation_invoice
 ```
+selectInvoiceRemake
+===
+```sql
+select invoice_number  from relocation_invoice
+```
+
+selectListByNumber
+===
+```sql
+select count(*)
+from relocation_invoice
+where invoice_number = #{invoiceNumber}
+```
