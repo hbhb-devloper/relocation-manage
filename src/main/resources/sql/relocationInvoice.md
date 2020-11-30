@@ -229,7 +229,7 @@ selectInvoiceRemake
 ```sql
 select remake  from relocation_invoice
 ```
-selectInvoiceRemake
+selectInvoiceNumber
 ===
 ```sql
 select invoice_number  from relocation_invoice

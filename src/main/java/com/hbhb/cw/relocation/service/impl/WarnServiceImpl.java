@@ -116,7 +116,7 @@ public class WarnServiceImpl implements WarnService {
         List<WarnResVO> warnResVO = projectMapper.selectProjectWarn();
         List<RelocationWarn> list = new ArrayList<>();
         warnResVO.forEach(item -> list.add(RelocationWarn.builder()
-//                .projectId(item.getProjectId())
+                .projectId(item.getProjectId())
                 .projectNum(item.getProjectNum())
                 .anticipatePayment(new BigDecimal(item.getAnticipatePayment()))
                 .constructionUnit(item.getConstructionUnit())
@@ -127,7 +127,7 @@ public class WarnServiceImpl implements WarnService {
                 .unitId(item.getUnitId())
                 .isReceived(false)
                 .state(true)
-//                .compensationSate(item.getCompensationSate())
+                .compensationSate(item.getCompensationSate())
                 .build()));
         // 每隔一个月执行一次api向预警信息表里提供一次数据
         warnMapper.insertBatch(list);

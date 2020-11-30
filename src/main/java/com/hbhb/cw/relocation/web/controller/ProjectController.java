@@ -55,7 +55,7 @@ public class ProjectController implements RelocationProjectApi {
         projectService.judgeFileName(file.getOriginalFilename());
         try {
             EasyExcel.read(file.getInputStream(), ProjectImportVO.class,
-                    new ProjectListener(projectService)).sheet().doRead();
+                    new ProjectListener(projectService)).sheet().headRowNumber(2).doRead();
         } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
             throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR);
@@ -77,7 +77,6 @@ public class ProjectController implements RelocationProjectApi {
 
     @Operation(summary = "修改迁改项目信息")
     @PutMapping("")
-
     public void updateProject(@RequestBody ProjectResVO projectResVO, User user) {
         projectService.updateRelocationProject(projectResVO, user);
     }

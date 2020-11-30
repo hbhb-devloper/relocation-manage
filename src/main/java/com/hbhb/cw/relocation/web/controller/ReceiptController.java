@@ -74,7 +74,7 @@ public class ReceiptController {
         long begin = System.currentTimeMillis();
         try {
             EasyExcel.read(file.getInputStream(), ReceiptImportVO.class,
-                    new ReceiptListener(receiptService)).sheet().doRead();
+                    new ReceiptListener(receiptService)).sheet().headRowNumber(2).doRead();
         } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
             throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_IMPORT_ERROR);

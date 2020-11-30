@@ -2,7 +2,6 @@ package com.hbhb.cw.relocation.web.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +10,6 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class WarnResVO implements Serializable {
     private static final long serialVersionUID = -82461158691671865L;
 
@@ -52,5 +50,7 @@ public class WarnResVO implements Serializable {
 
     @Schema(description = "未全额回款合同历时")
     private Integer contractDuration;
+
+    private Long userId;
 
 }
