@@ -2,6 +2,7 @@ package com.hbhb.cw.relocation.web.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,10 +11,14 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class WarnResVO implements Serializable {
     private static final long serialVersionUID = -82461158691671865L;
 
     private Long id;
+
+    @Schema(description = "项目id")
+    private Long projectId;
 
     @Schema(description = "项目编号")
     private String projectNum;
@@ -36,8 +41,11 @@ public class WarnResVO implements Serializable {
     @Schema(description = "预付款到账金额")
     private String anticipatePayment;
 
-    @Schema(description = "是否已经收款")
+    @Schema(description = "收款情况")
     private String isReceived;
+
+    @Schema(description = "补偿状态")
+    private Integer compensationSate;
 
     @Schema(description = "决算款到账金额（元）")
     private String finalPayment;

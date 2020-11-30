@@ -14,7 +14,6 @@ import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationIncomeDetail;
 import com.hbhb.cw.relocation.model.RelocationInvoice;
-import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.service.IncomeService;
@@ -72,14 +71,14 @@ IncomeServiceImpl implements IncomeService {
         int i = fileName.lastIndexOf(".");
         String name = fileName.substring(i);
         if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue()
-            .equals(name))) {
+                .equals(name))) {
             throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
         }
     }
 
     @Override
     public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize,
-        IncomeReqVO cond, Integer userId) {
+                                                 IncomeReqVO cond, Integer userId) {
         List<Unit> unitList = unitApiExp.getAllUnitList();
         UnitTopVO parentUnit = unitApiExp.getTopUnit();
         List<Integer> unitIds = new ArrayList<>();
@@ -89,7 +88,7 @@ IncomeServiceImpl implements IncomeService {
             }
         }
         Map<Integer, String> unitMap = unitList.stream()
-            .collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+                .collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         cond.setUnitIds(unitIds);
         setConditionDetail(cond, userId);
         PageRequest<IncomeResVO> request = DefaultPageRequest.of(pageNum, pageSize);
@@ -105,10 +104,10 @@ IncomeServiceImpl implements IncomeService {
                 relocationIncomeResVO.setCategory("代建");
             }
             BigDecimal monthAmount = relocationIncomeMapper
-                .getMonthAmount(relocationIncomeResVO.getId(), DateUtil.getCurrentMonth());
+                    .getMonthAmount(relocationIncomeResVO.getId(), DateUtil.getCurrentMonth());
             relocationIncomeResVO.setMonthAmount(monthAmount);
             relocationIncomeResVO
-                .setUnit(unitMap.get(Integer.valueOf(relocationIncomeResVO.getUnit())));
+                    .setUnit(unitMap.get(Integer.valueOf(relocationIncomeResVO.getUnit())));
             if ("1".equals(relocationIncomeResVO.getIsReceived())) {
                 relocationIncomeResVO.setIsReceived(IsReceived.RECEIVED.value());
             } else {
@@ -191,13 +190,13 @@ IncomeServiceImpl implements IncomeService {
         //income1.setId(incomeId);
         //已收完的情况 3
         if (received.compareTo(receivable) == 0
-            && unreceived.compareTo(new BigDecimal("0")) == 0) {
+                && unreceived.compareTo(new BigDecimal("0")) == 0) {
             income1.setIsReceived(3);
             relocationIncomeMapper.updateTemplateById(income1);
         }
         //部分回款 2
         if (received.compareTo(receivable) < 0
-            && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
+                && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
             income1.setIsReceived(2);
             relocationIncomeMapper.updateTemplateById(income1);
         }
@@ -209,21 +208,21 @@ IncomeServiceImpl implements IncomeService {
         // 转换单位
         List<Unit> list = unitApiExp.getAllUnitList();
         Map<String, Integer> unitMap = list.stream()
-            .collect(Collectors.toMap(Unit::getShortName, Unit::getId));
+                .collect(Collectors.toMap(Unit::getShortName, Unit::getId));
         List<RelocationIncome> incomes = new ArrayList<>();
         for (IncomeImportVO importVO : dataList) {
             RelocationIncome relocationIncome = new RelocationIncome();
             // 1 迁改 2 搬迁 3 代建
             relocationIncome.setCategory("迁改".equals(importVO.getCategory()) ? 1
-                : "搬迁".equals(importVO.getCategory()) ? 2 : 3);
+                    : "搬迁".equals(importVO.getCategory()) ? 2 : 3);
             relocationIncome.setUnitId(
-                unitMap.get(importVO.getUnit()) == null ? 11 : unitMap.get(importVO.getUnit()));
+                    unitMap.get(importVO.getUnit()) == null ? 11 : unitMap.get(importVO.getUnit()));
             relocationIncome.setSupplier(importVO.getSupplier());
             relocationIncome.setContractNum(importVO.getContractNum());
             relocationIncome.setContractName(importVO.getContractName());
             relocationIncome.setStartTime(DateUtil.string3DateYMD(importVO.getStartTime()));
             relocationIncome
-                .setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
+                    .setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
             relocationIncome.setContractAmount(stringToBigDecimal(importVO.getContractAmount()));
             relocationIncome.setInvoiceTime(DateUtil.string3DateYMD(importVO.getInvoiceTime()));
             relocationIncome.setInvoiceNum(importVO.getInvoiceNum());
@@ -231,14 +230,14 @@ IncomeServiceImpl implements IncomeService {
             relocationIncome.setAmount(stringToBigDecimal(importVO.getAmount()));
             relocationIncome.setTax(stringToBigDecimal(importVO.getTax()));
             relocationIncome
-                .setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
+                    .setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
             relocationIncome.setConstructionName(importVO.getConstructionName());
             // 1 预付款   2 决算款
             relocationIncome.setPaymentType(
-                "预付款".equals(importVO.getPaymentType()) ? 1 : 2);
-            // 1 未收款 2 部分回款  3 已收款
-            relocationIncome.setIsReceived("未收款".equals(importVO.getCategory()) ? 1
-                : "部分回款".equals(importVO.getCategory()) ? 2 : 3);
+                    "预付款".equals(importVO.getPaymentType()) ? 1 : 2);
+            // 10-已收款 20-未收款 30-部分回款
+            relocationIncome.setIsReceived(IsReceived.NOT_RECEIVED.value().equals(importVO.getCategory()) ? IsReceived.NOT_RECEIVED.key()
+                    : IsReceived.PART_RECEIVED.value().equals(importVO.getCategory()) ? IsReceived.PART_RECEIVED.key() : IsReceived.RECEIVED.key());
             relocationIncome.setAging(importVO.getAging());
             relocationIncome.setReceivable(stringToBigDecimal(importVO.getReceivable()));
             relocationIncome.setReceived(stringToBigDecimal(importVO.getReceived()));
@@ -263,7 +262,7 @@ IncomeServiceImpl implements IncomeService {
     public List<IncomeExportVO> selectExportListByCondition(IncomeReqVO vo, Integer userId) {
         setConditionDetail(vo, userId);
         List<IncomeExportVO> relocationIncomeExportVos = relocationIncomeMapper
-            .selectExportList(vo);
+                .selectExportList(vo);
         for (int i = 0; i < relocationIncomeExportVos.size(); i++) {
             IncomeExportVO relocationIncomeExportVO = relocationIncomeExportVos.get(i);
             String category = relocationIncomeExportVO.getCategory();
@@ -283,14 +282,14 @@ IncomeServiceImpl implements IncomeService {
             }
             String isReceived = relocationIncomeExportVO.getIsReceived();
             switch (isReceived) {
-                case "1":
-                    relocationIncomeExportVO.setIsReceived("未收款");
+                case "20":
+                    relocationIncomeExportVO.setIsReceived(IsReceived.NOT_RECEIVED.value());
                     break;
-                case "2":
-                    relocationIncomeExportVO.setIsReceived("部分回款");
+                case "30":
+                    relocationIncomeExportVO.setIsReceived(IsReceived.PART_RECEIVED.value());
                     break;
-                case "3":
-                    relocationIncomeExportVO.setIsReceived("已收款");
+                case "10":
+                    relocationIncomeExportVO.setIsReceived(IsReceived.RECEIVED.value());
                     break;
                 default:
                     relocationIncomeExportVO.setIsReceived("");

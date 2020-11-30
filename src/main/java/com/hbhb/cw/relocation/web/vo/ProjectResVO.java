@@ -102,6 +102,9 @@ public class ProjectResVO implements Serializable {
     @Schema(description = "补偿金额")
     private String compensationAmount;
 
+    @Schema(description = "赔补总额")
+    private String totalCompensationAmount;
+
     @Schema(description = "预付款应付金额（元）")
     private String anticipatePayable;
 

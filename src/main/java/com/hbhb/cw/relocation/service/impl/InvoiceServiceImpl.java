@@ -10,7 +10,6 @@ import com.hbhb.cw.relocation.mapper.InvoiceMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationInvoice;
-import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.service.InvoiceService;
@@ -30,11 +29,8 @@ import org.springframework.util.StringUtils;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -123,8 +119,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Transactional(rollbackFor = Exception.class)
     public void addSaveRelocationInvoice(List<InvoiceImportVO> dataList) {
         List<ProjectInfoVO> projectInfo = relocationInvoiceMapper.getProjectInfo();
-        Map<String, Long> projectMap = projectInfo.stream()
-            .collect(Collectors.toMap(ProjectInfoVO::getInfo, ProjectInfoVO::getId));
+        // todo map中可能出现重复的key导致报错
+//        Map<String, Long> projectMap = projectInfo.stream()
+//            .collect(Collectors.toMap(ProjectInfoVO::getInfo, ProjectInfoVO::getId));
         // TODO 发票匹配验证 本年度不做匹配
         // 查找发票备注格式
         List<String> remakeList = relocationInvoiceMapper.selectInvoiceRemake();
@@ -132,7 +129,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         // 转换单位
         List<Unit> list = unitApiExp.getAllUnitList();
         Map<String, Integer> unitMap = list.stream()
-            .collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
+                .collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
         List<RelocationInvoice> invoiceList = new ArrayList<>();
         List<RelocationIncome> incomeList = new ArrayList<>();
         long count = dataList.stream().distinct().count();

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @author wangxiaogang
@@ -12,12 +13,10 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class WarnCountVO implements Serializable {
-    private static final long serialVersionUID = -1124249820824938345L;
+public class ProjectSelectVO implements Serializable {
+    private static final long serialVersionUID = 8716582677047370236L;
 
-    private Integer unitId;
+    private String num;
 
-    private Integer count;
-
-    private Integer compensationSate;
+    private BigDecimal account;
 }

@@ -34,4 +34,8 @@ public class RelocationWarn {
 
     private Boolean state;
 
+//    private Long projectId;
+
+//    private Integer compensationSate;
+
 }

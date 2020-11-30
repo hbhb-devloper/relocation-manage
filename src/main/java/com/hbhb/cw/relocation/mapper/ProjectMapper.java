@@ -7,9 +7,7 @@ import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.beetl.sql.mapper.annotation.SqlResource;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author dxk
@@ -28,13 +26,13 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     List<AmountVO> selectCompensationAmount(List<String> list);
 
-    Map<String, BigDecimal> selectSumConstructionBudget(List<String> contractNumNewList);
+    List<ProjectSelectVO> selectSumConstructionBudget(List<String> contractNumNewList);
 
     void updateBatch(List<AmountVO> relocation);
 
     List<RelocationProject> selectProject();
 
-    Map<String, BigDecimal> selectSumCompensationAmount();
+    List<ProjectSelectVO> selectSumCompensationAmount();
 
     List<String> selectProjectNumByProjectNum(List<String> list);
 

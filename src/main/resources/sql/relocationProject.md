@@ -149,9 +149,8 @@ FROM (
 selectProjectWarn
 ===
  ```sql
-    select project_num        as projectNum,
-           u.unit_name        as unitName,
-           rp.id               as unitId,
+    select project_num        as projectNum,    
+           rp.unit_id               as unitId,
            construction_unit  as constructionUnit,
            opposite_unit      as oppositeUnit,
            rp.contract_num    as contractNum,
@@ -160,9 +159,8 @@ selectProjectWarn
            final_payment      as finalPayment,
            contract_duration  as contractDuration
     from relocation_project rp
-             left join unit u on rp.unit_id = u.id
              left join relocation_income ri on ri.contract_num = rp.contract_num
-    where contract_duration mod 3 = 0 and compensation_sate = !80
+    where contract_duration mod 2 = 0 and compensation_sate = 30 or 70 and contract_duration != 0
 ```   
 selectCompensationAmount
 ===
@@ -180,8 +178,9 @@ where contract_num in (
 selectSumCompensationAmount
 ===
   ```sql
-        select contract_num  as contractNum, sum(compensation_amount) as compensationAmount
+        select contract_num  as num, sum(compensation_amount) as account
         from relocation_project
+        where contract_num  is not null and contract_num !=''
         group by contract_num
   ```
 selectSumConstructionBudget
@@ -224,23 +223,7 @@ selectProjectNumByProjectNum
       -- @}
       )
  ```
-selectProjectWarn
-===
- ```sql
-    select project_num        as projectNum,
-           rp.unit_id              as unitId,
-           construction_unit  as constructionUnit,
-           opposite_unit      as oppositeUnit,
-           rp.contract_num    as contractNum,
-           anticipate_payment as anticipatePayment,
-           final_payment      as finalPayment,
-           contract_duration  as contractDuration
-    from relocation_project rp
-    where contract_duration mod 3 = 0
-      and compensation_sate != 80
-      and compensation_sate != 10
-      and contract_duration != 0;
-```  
+
 selectProjectStatementListByUnitId
 ===
 ```sql
@@ -315,10 +298,9 @@ selectProjectWarnCount
     select unit_id as unitId,
            count(id)  as count
     from relocation_project rp
-    where contract_duration mod 3 = 0
-      and contract_duration != 0
-      and compensation_sate != 80
-      and compensation_sate != 10
+    where contract_duration mod 2 = 0 
+    and compensation_sate = 30 or 70
+    and contract_duration != 0
     group by unit_id;
 ```
 

@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.lang.Integer.parseInt;
+
 /**
  * @author hyk
  * @since 2020-10-9
@@ -51,7 +53,7 @@ public class FinanceServiceImpl implements FinanceService {
         PageRequest<FinanceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         setUnitId(cond, userId);
         PageResult<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond, request);
-        Map<String, String> isReceived = getIsReceived();
+        Map<Integer, String> isReceived = getIsReceived();
 
         List<Unit> unitList = unitApi.getAllUnitList();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
@@ -59,7 +61,7 @@ public class FinanceServiceImpl implements FinanceService {
         financeResVos.getList().forEach(item -> {
             //网银打款、现金转账，开具发票收据
             item.setPayType("网银打款");
-            item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
+            item.setIsAllReceived(isReceived.get(parseInt(item.getIsAllReceived())));
             item.setUnit(unitMap.get(item.getUnitId()));
         });
 
@@ -74,13 +76,13 @@ public class FinanceServiceImpl implements FinanceService {
             cond.setYear(currentYear);
         }
         List<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond);
-        Map<String, String> isReceived = getIsReceived();
+        Map<Integer, String> isReceived = getIsReceived();
         List<Unit> unitList = unitApi.getAllUnitList();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         financeResVos.forEach(item -> {
             //网银打款、现金转账，开具发票收据
             item.setPayType("网银打款");
-            item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
+            item.setIsAllReceived(isReceived.get(parseInt(item.getIsAllReceived())));
             item.setUnit(unitMap.get(item.getUnitId()));
         });
         return financeResVos;
@@ -94,10 +96,11 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
 
-    private Map<String, String> getIsReceived() {
-        Map<String, String> receivedMap = new HashMap<>();
-        receivedMap.put(IsReceived.RECEIVED_CODE.value(), IsReceived.RECEIVED.value());
-        receivedMap.put(IsReceived.NOT_RECEIVED_CODE.value(), IsReceived.NOT_RECEIVED.value());
+    private Map<Integer, String> getIsReceived() {
+        Map<Integer, String> receivedMap = new HashMap<>();
+        receivedMap.put(IsReceived.RECEIVED.key(), IsReceived.RECEIVED.value());
+        receivedMap.put(IsReceived.NOT_RECEIVED.key(), IsReceived.NOT_RECEIVED.value());
+        receivedMap.put(IsReceived.PART_RECEIVED.key(), IsReceived.PART_RECEIVED.value());
         return receivedMap;
     }
 }

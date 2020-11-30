@@ -2,14 +2,17 @@ package com.hbhb.cw.relocation.service.impl;
 
 
 import com.hbhb.core.bean.BeanConverter;
-import com.hbhb.cw.messagehub.vo.MailVO;
 import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.mapper.FileMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.mapper.WarnMapper;
 import com.hbhb.cw.relocation.model.RelocationFile;
 import com.hbhb.cw.relocation.model.RelocationWarn;
-import com.hbhb.cw.relocation.rpc.*;
+import com.hbhb.cw.relocation.rpc.FileApiExp;
+import com.hbhb.cw.relocation.rpc.FlowApiExp;
+import com.hbhb.cw.relocation.rpc.SysUserApiExp;
+import com.hbhb.cw.relocation.rpc.UnitApiExp;
+import com.hbhb.cw.relocation.service.MailService;
 import com.hbhb.cw.relocation.service.WarnService;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.model.File;
@@ -28,6 +31,8 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.lang.Integer.parseInt;
 
 /**
  * @author wangxiaogang
@@ -58,7 +63,7 @@ public class WarnServiceImpl implements WarnService {
     private FlowApiExp flowApi;
 
     @Resource
-    private MailApiExp mailApi;
+    private MailService mailService;
 
 
     @Override
@@ -72,9 +77,9 @@ public class WarnServiceImpl implements WarnService {
         Map<Integer, String> unitMap = getUnit();
         // 组装单位，状态
         List<WarnResVO> warnResVo = warnMapper.selectProjectWarnByCond(reqVO);
-        Map<String, String> isReceived = getIsReceived();
+        Map<Integer, String> isReceived = getIsReceived();
         warnResVo.forEach(item -> {
-            item.setIsReceived(isReceived.get(item.getIsReceived()));
+            item.setIsReceived(isReceived.get(parseInt(item.getIsReceived())));
             item.setUnitName(unitMap.get(item.getUnitId()));
         });
         return warnResVo;
@@ -85,10 +90,10 @@ public class WarnServiceImpl implements WarnService {
         List<WarnResVO> list = warnMapper.selectProjectWarnByCond(cond);
         List<Unit> unitList = unitApi.getAllUnitList();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
-        Map<String, String> isReceived = getIsReceived();
+        Map<Integer, String> isReceived = getIsReceived();
         list.forEach(item -> {
             item.setUnitName(unitMap.get(item.getUnitId()));
-            item.setIsReceived(isReceived.get(item.getIsReceived()));
+            item.setIsReceived(isReceived.get(parseInt(item.getIsReceived())));
         });
         return BeanConverter.copyBeanList(list, WarnExportVO.class);
     }
@@ -111,7 +116,7 @@ public class WarnServiceImpl implements WarnService {
         List<WarnResVO> warnResVO = projectMapper.selectProjectWarn();
         List<RelocationWarn> list = new ArrayList<>();
         warnResVO.forEach(item -> list.add(RelocationWarn.builder()
-                .unitId(item.getUnitId())
+//                .projectId(item.getProjectId())
                 .projectNum(item.getProjectNum())
                 .anticipatePayment(new BigDecimal(item.getAnticipatePayment()))
                 .constructionUnit(item.getConstructionUnit())
@@ -122,11 +127,12 @@ public class WarnServiceImpl implements WarnService {
                 .unitId(item.getUnitId())
                 .isReceived(false)
                 .state(true)
+//                .compensationSate(item.getCompensationSate())
                 .build()));
         // 每隔一个月执行一次api向预警信息表里提供一次数据
         warnMapper.insertBatch(list);
-        // todo 完善推送
-        // 1.按照单位进行统计预警统计信息
+        // todo 完善推送  分两种情况开票未回款预警、合同到期未回款预警
+        // 1.按照单位进行统计开票未回款预警、
         List<WarnCountVO> warnList = projectMapper.selectProjectWarnCount();
         Map<Integer, Integer> warnMap = warnList.stream().collect(Collectors.toMap(WarnCountVO::getUnitId, WarnCountVO::getCount));
         // 2.按照统计数据向每个单位负责人推送邮件信息
@@ -139,12 +145,7 @@ public class WarnServiceImpl implements WarnService {
             // 向每个单位负责人推送邮件
             for (UserVO userVO : userList) {
                 if (unitId.equals(userVO.getUnitId())) {
-                    mailApi.postMail(MailVO.builder()
-                            .content(count.toString())
-                            //  邮箱
-                            .receiver("1515689038@qq.com")
-                            .title(userVO.getNickName())
-                            .build());
+                    mailService.postMail("1515689038@qq.com", userVO.getNickName(), count.toString());
                 }
             }
         }
@@ -175,8 +176,6 @@ public class WarnServiceImpl implements WarnService {
                     .fileName(item.getFileName())
                     .filepath(item.getFilePath())
                     .build()));
-
-
             return fileVo;
         }
         return null;
@@ -192,9 +191,9 @@ public class WarnServiceImpl implements WarnService {
             cond.setUnitId(userById.getUnitId());
             PageRequest<WarnResVO> request = DefaultPageRequest.of(pageNum, pageSize);
             PageResult<WarnResVO> warnResVo = warnMapper.selectWarnListByCond(cond, request);
-            Map<String, String> isReceived = getIsReceived();
+            Map<Integer, String> isReceived = getIsReceived();
             warnResVo.getList().forEach(item -> {
-                item.setIsReceived(isReceived.get(item.getIsReceived()));
+                item.setIsReceived(isReceived.get(parseInt(item.getIsReceived())));
                 item.setUnitName(unitMap.get(item.getUnitId()));
             });
             return warnResVo;
@@ -202,10 +201,11 @@ public class WarnServiceImpl implements WarnService {
         return null;
     }
 
-    private Map<String, String> getIsReceived() {
-        Map<String, String> receivedMap = new HashMap<>();
-        receivedMap.put(IsReceived.RECEIVED_CODE.value(), IsReceived.RECEIVED.value());
-        receivedMap.put(IsReceived.NOT_RECEIVED_CODE.value(), IsReceived.NOT_RECEIVED.value());
+    private Map<Integer, String> getIsReceived() {
+        Map<Integer, String> receivedMap = new HashMap<>();
+        receivedMap.put(IsReceived.RECEIVED.key(), IsReceived.RECEIVED.value());
+        receivedMap.put(IsReceived.NOT_RECEIVED.key(), IsReceived.NOT_RECEIVED.value());
+        receivedMap.put(IsReceived.PART_RECEIVED.key(), IsReceived.RECEIVED.value());
         return receivedMap;
     }
 
