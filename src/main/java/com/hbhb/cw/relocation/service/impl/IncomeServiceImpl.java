@@ -236,8 +236,11 @@ IncomeServiceImpl implements IncomeService {
             relocationIncome.setPaymentType(
                     "预付款".equals(importVO.getPaymentType()) ? 1 : 2);
             // 10-已收款 20-未收款 30-部分回款
-            relocationIncome.setIsReceived(IsReceived.NOT_RECEIVED.value().equals(importVO.getCategory()) ? IsReceived.NOT_RECEIVED.key()
-                    : IsReceived.PART_RECEIVED.value().equals(importVO.getCategory()) ? IsReceived.PART_RECEIVED.key() : IsReceived.RECEIVED.key());
+            relocationIncome.setIsReceived(
+                IsReceived.NOT_RECEIVED.value().equals(importVO.getCategory())
+                    ? IsReceived.NOT_RECEIVED.key()
+                    : IsReceived.PART_RECEIVED.value().equals(importVO.getCategory())
+                        ? IsReceived.PART_RECEIVED.key() : IsReceived.RECEIVED.key());
             relocationIncome.setAging(importVO.getAging());
             relocationIncome.setReceivable(stringToBigDecimal(importVO.getReceivable()));
             relocationIncome.setReceived(stringToBigDecimal(importVO.getReceived()));

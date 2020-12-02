@@ -1,6 +1,7 @@
 package com.hbhb.cw.relocation.web.vo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,66 +22,81 @@ public class InvoiceImportVO implements Serializable {
     @ExcelProperty(value = "序号", index = 0)
     private String number;
 
-    @ExcelProperty(value = "地市", index = 1)
-    private String district;
+    @ExcelProperty(value = "类别", index = 1)
+    private String category;
 
-    @ExcelProperty(value = "县市", index = 2)
-    private String unitId;
+    @ExcelProperty(value = "经办单位", index = 2)
+    private String unit;
 
-    @ExcelProperty(value = "发票代码", index = 3)
-    private String invoiceCode;
+    @ExcelProperty(value = "迁改收款责任人", index = 3)
+    private String payee;
 
-    @ExcelProperty(value = "发票号码", index = 4)
-    private String invoiceNumber;
+    @ExcelProperty(value = "供应商", index = 4)
+    private String supplier;
 
-    @ExcelProperty(value = "业务类型", index = 5)
-    private String businessType;
+    @ExcelProperty(value = "合同编号", index = 5)
+    private String contractNum;
 
-    @ExcelProperty(value = "发票类型", index = 6)
-    private String invoiceType;
+    @ExcelProperty(value = "合同名称", index = 6)
+    private String contractName;
 
-    @ExcelProperty(value = "购方税号", index = 7)
-    private String buyerTax;
+    @ExcelProperty(value = "起始时间", index = 7)
+    private String startTime;
 
-    @ExcelProperty(value = "购方名称", index = 8)
-    private String buyerName;
+    @ExcelProperty(value = "合截止时间", index = 8)
+    private String contractDeadline;
 
-    @ExcelProperty(value = "开票项目", index = 9)
-    private String invoiceProject;
+    @ExcelProperty(value = "合同金额", index = 9)
+    private String contractAmount;
 
     @ExcelProperty(value = "开票日期", index = 10)
     private String invoiceTime;
 
-    @ExcelProperty(value = "金额", index = 11)
+    @ExcelProperty(value = "发票号码", index = 11)
+    private String invoiceNumber;
+
+    @ExcelProperty(value = "发票类型", index = 12)
+    private String invoiceType;
+
+    @ExcelProperty(value = "价款", index = 13)
     private String amount;
 
-    @ExcelProperty(value = "税率", index = 12)
-    private String taxRate;
-
-    @ExcelProperty(value = "税额", index = 13)
+    @ExcelProperty(value = "税额", index = 14)
     private String taxAmount;
 
-    @ExcelProperty(value = "价税合计", index = 14)
+    @ExcelProperty(value = "价税合计", index = 15)
     private String taxIncludeAmount;
 
-    @ExcelProperty(value = "备注", index = 15)
+    @ExcelProperty(value = "工程名", index = 16)
+    private String constructionName;
+
+    @ExcelProperty(value = "收款情况", index = 17)
+    private String isReceived;
+
+    @ExcelProperty(value = "账龄分类", index = 18)
+    private String amountType;
+
+    @ExcelProperty(value = "账龄（月）", index = 19)
+    private Integer aging;
+
+    @ExcelProperty(value = "计提编号", index = 20)
+    private String accrualNumber;
+
+    @ExcelProperty(value = "收款编号", index = 21)
+    private String receiptNum;
+
+    @ExcelProperty(value = "账期", index = 22)
+    private Integer paymentDay;
+
+    @ExcelProperty(value = "备注", index = 23)
     private String remake;
 
-    @ExcelProperty(value = "申请人", index = 16)
-    private String applicant;
+    @ExcelProperty(value = "应收", index = 24)
+    private String receivable;
 
-    @ExcelProperty(value = "开票人", index = 17)
-    private String issuer;
+    @ExcelProperty(value = "已收", index = 25)
+    private String received;
 
-    @ExcelProperty(value = "票据状态", index = 18)
-    private String state;
-
-    @ExcelProperty(value = "是否为自定义菜单开票", index = 19)
-    private String isImport;
-
-    @ExcelProperty(value = "客户经理", index = 20)
-    private String manager;
-
-    @ExcelProperty(value = "备注修改列：（统一格式）合同号；区县；款项性质；项目信息", index = 21)
-    private String newRemake;
+    @ExcelProperty(value = "未收", index = 26)
+    private String unreceived;
 }

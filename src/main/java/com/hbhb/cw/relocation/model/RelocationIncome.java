@@ -17,6 +17,7 @@ import org.beetl.sql.annotation.entity.AutoID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RelocationIncome implements Serializable {
+
     private static final long serialVersionUID = 4860108395368299254L;
     /**
      * id
@@ -115,4 +116,13 @@ public class RelocationIncome implements Serializable {
      * 收款人
      */
     private String payee;
+
+    /**
+     * 账龄分类
+     */
+    private String amountType;
+    /**
+     * 计提编号
+     */
+    private String accrualNumber;
 }

@@ -70,6 +70,13 @@ public class InvoiceResVO implements Serializable {
     private String isImport;
     @Schema(description = "客户经理")
     private String manager;
-
+    @Schema(description = "收款状态")
+    private String amountStatus;
+    @Schema(description = "应收")
+    private BigDecimal receivable;
+    @Schema(description = "已收")
+    private BigDecimal received;
+    @Schema(description = "未收")
+    private BigDecimal unreceived;
 
 }
