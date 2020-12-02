@@ -65,4 +65,12 @@ public interface InvoiceService {
      * @return
      */
     List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO vo, Integer userId);
+
+    /**
+     * 跟据发票编号查看发票详情
+     *
+     * @param invoiceNum 发票编号
+     * @return 发票详情
+     */
+    RelocationInvoice getInvoice(String invoiceNum);
 }

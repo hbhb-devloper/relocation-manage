@@ -146,9 +146,9 @@ FROM (
             -- @}
   
 ```
-selectProjectWarn
+selectProjectFinalWarn
 ===
- ```sql
+```sql
     select project_num        as projectNum,    
            rp.unit_id               as unitId,
            construction_unit  as constructionUnit,
@@ -165,7 +165,8 @@ selectProjectWarn
 selectCompensationAmount
 ===
 ```sql
-select contract_num        as contractNum,
+select id                  as id ,
+       contract_num        as contractNum,
        compensation_amount as compensationAmount,
        construction_budget as constructionBudget
 from relocation_project
@@ -177,16 +178,16 @@ where contract_num in (
  ```
 selectSumCompensationAmount
 ===
-  ```sql
+ ```sql
         select contract_num  as num, sum(compensation_amount) as account
         from relocation_project
         where contract_num  is not null and contract_num !=''
         group by contract_num
-  ```
+ ```
 selectSumConstructionBudget
 ===
-  ```sql
-    select contract_num, sum(construction_budget)
+ ```sql
+    select contract_num as num, sum(construction_budget) as account
     from relocation_project
     where contract_num in (
     -- @for(item in list){
@@ -194,17 +195,17 @@ selectSumConstructionBudget
     -- @}
     )
     group by contract_num;
-  ```
+ ```
 selectProject
 ===
-  ```sql
+```sql
         select id, contract_duration 
         from relocation_project
         where compensation_sate not in (10,80,0)
-  ```
+```
 updateBatch
 ===
-   ```sql
+```sql
    -- @for(item in list){
             update relocation_project set
                 contract_num = #{item.contractNum},
@@ -212,17 +213,17 @@ updateBatch
                 construction_budget = #{item.constructionBudget}          
             where id = #{item.id}
     -- @}
- ```
+```
 selectProjectNumByProjectNum
 ===
-   ```sql
+```sql
         select project_num from relocation_project
         where compensation_sate = 80  and project_num in (
       -- @for(item in list){
          #{item}
       -- @}
       )
- ```
+```
 
 selectProjectStatementListByUnitId
 ===

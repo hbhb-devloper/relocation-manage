@@ -242,3 +242,33 @@ select count(*)
 from relocation_invoice
 where invoice_number = #{invoiceNumber}
 ```
+
+selectInvoiceByInvoiceNum
+===
+```sql
+    select
+        ri.id,
+        ri.district           districtId,
+        ri.unit_id            unitId,
+        ri.invoice_code       invoiceCode,
+        ri.invoice_number     invoiceNumber,
+        ri.invoice_site       invoiceSite,
+        ri.business_type      businessType,
+        ri.invoice_type       invoiceType,
+        ri.buyer_tax          buyerTax,
+        ri.buyer_name         buyerName,
+        ri.invoice_project    invoiceProject,
+        ri.invoice_time       invoiceTime,
+        ri.amount,
+        ri.tax_rate           taxRate,
+        ri.tax_amount         taxAmount,
+        ri.tax_include_amount taxIncludeAmount,
+        ri.remake,
+        ri.applicant,
+        ri.issuer,
+        ri.state,
+        ri.is_import          isImport,
+        ri.manager
+    from relocation_invoice ri
+        where ri.invoice_number  = #{invoiceNum}
+```

@@ -21,4 +21,5 @@ public interface ReceiptMapper extends BaseMapper<RelocationReceipt> {
 
     List<String> selectReceiptNum();
 
+    ReceiptResVO selectReceiptByReceiptNum(String receiptNum);
 }

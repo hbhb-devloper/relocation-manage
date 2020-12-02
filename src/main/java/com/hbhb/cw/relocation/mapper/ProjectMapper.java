@@ -26,9 +26,8 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     List<AmountVO> selectCompensationAmount(List<String> list);
 
-    List<ProjectSelectVO> selectSumConstructionBudget(List<String> contractNumNewList);
+    List<ProjectSelectVO> selectSumConstructionBudget(List<String> list);
 
-    void updateBatch(List<AmountVO> relocation);
 
     List<RelocationProject> selectProject();
 
@@ -36,7 +35,7 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     List<String> selectProjectNumByProjectNum(List<String> list);
 
-    List<WarnResVO> selectProjectWarn();
+    List<WarnResVO> selectProjectFinalWarn();
 
     List<StatementResVO> selectProjectStatementListByUnitId(Integer unitId);
 

@@ -14,6 +14,7 @@ import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationIncomeDetail;
 import com.hbhb.cw.relocation.model.RelocationInvoice;
+import com.hbhb.cw.relocation.rpc.SysDictApiExp;
 import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.service.IncomeService;
@@ -21,7 +22,10 @@ import com.hbhb.cw.relocation.web.vo.IncomeExportVO;
 import com.hbhb.cw.relocation.web.vo.IncomeImportVO;
 import com.hbhb.cw.relocation.web.vo.IncomeReqVO;
 import com.hbhb.cw.relocation.web.vo.IncomeResVO;
+import com.hbhb.cw.systemcenter.enums.DictCode;
+import com.hbhb.cw.systemcenter.enums.TypeCode;
 import com.hbhb.cw.systemcenter.model.Unit;
+import com.hbhb.cw.systemcenter.vo.DictVO;
 import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +53,7 @@ public class
 IncomeServiceImpl implements IncomeService {
 
     @Resource
-    private IncomeMapper relocationIncomeMapper;
+    private IncomeMapper incomeMapper;
 
     @Resource
     private IncomeDetailMapper incomeDetailMapper;
@@ -59,6 +63,9 @@ IncomeServiceImpl implements IncomeService {
 
     @Resource
     private SysUserApiExp sysUserApiExp;
+
+    @Resource
+    private SysDictApiExp dictApi;
 
     @Resource
     private ProjectMapper relocationProjectMapper;
@@ -79,7 +86,7 @@ IncomeServiceImpl implements IncomeService {
     @Override
     public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize,
                                                  IncomeReqVO cond, Integer userId) {
-        List<Unit> unitList = unitApiExp.getAllUnitList();
+        List<Unit> unitList = unitApiExp.getAllUnit();
         UnitTopVO parentUnit = unitApiExp.getTopUnit();
         List<Integer> unitIds = new ArrayList<>();
         for (Unit unit : unitList) {
@@ -87,31 +94,31 @@ IncomeServiceImpl implements IncomeService {
                 unitIds.add(unit.getId());
             }
         }
-        Map<Integer, String> unitMap = unitList.stream()
-                .collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         cond.setUnitIds(unitIds);
         setConditionDetail(cond, userId);
         PageRequest<IncomeResVO> request = DefaultPageRequest.of(pageNum, pageSize);
-        PageResult<IncomeResVO> incomeList = relocationIncomeMapper.getIncomeList(cond, request);
+        PageResult<IncomeResVO> incomeList = incomeMapper.getIncomeList(cond, request);
         List<IncomeResVO> list = incomeList.getList();
-        for (IncomeResVO relocationIncomeResVO : list) {
-            String category = relocationIncomeResVO.getCategory();
+        Map<String, String> typeMap = getInvoiceType();
+        for (IncomeResVO incomeResVO : list) {
+            String category = incomeResVO.getCategory();
             if ("1".equals(category)) {
-                relocationIncomeResVO.setCategory("迁改");
+                incomeResVO.setCategory("迁改");
             } else if ("2".equals(category)) {
-                relocationIncomeResVO.setCategory("搬迁");
+                incomeResVO.setCategory("搬迁");
             } else if ("3".equals(category)) {
-                relocationIncomeResVO.setCategory("代建");
+                incomeResVO.setCategory("代建");
             }
-            BigDecimal monthAmount = relocationIncomeMapper
-                    .getMonthAmount(relocationIncomeResVO.getId(), DateUtil.getCurrentMonth());
-            relocationIncomeResVO.setMonthAmount(monthAmount);
-            relocationIncomeResVO
-                    .setUnit(unitMap.get(Integer.valueOf(relocationIncomeResVO.getUnit())));
-            if ("1".equals(relocationIncomeResVO.getIsReceived())) {
-                relocationIncomeResVO.setIsReceived(IsReceived.RECEIVED.value());
+            //  拼装收款发票类型
+            incomeResVO.setInvoiceType(typeMap.get(incomeResVO.getInvoiceType()));
+            BigDecimal monthAmount = incomeMapper.getMonthAmount(incomeResVO.getId(), DateUtil.getCurrentMonth());
+            incomeResVO.setMonthAmount(monthAmount);
+            incomeResVO.setUnit(unitMap.get(Integer.valueOf(incomeResVO.getUnit())));
+            if ("1".equals(incomeResVO.getIsReceived())) {
+                incomeResVO.setIsReceived(IsReceived.RECEIVED.value());
             } else {
-                relocationIncomeResVO.setIsReceived(IsReceived.NOT_RECEIVED.value());
+                incomeResVO.setIsReceived(IsReceived.NOT_RECEIVED.value());
             }
         }
         return incomeList;
@@ -120,7 +127,7 @@ IncomeServiceImpl implements IncomeService {
     @Override
     public List<RelocationIncomeDetail> getIncomeDetail(Long id, Integer isNeed) {
         String currentMonth = DateUtil.getCurrentMonth();
-        return relocationIncomeMapper.selectDetailById(id, isNeed, currentMonth);
+        return incomeMapper.selectDetailById(id, isNeed, currentMonth);
     }
 
     @Override
@@ -134,17 +141,17 @@ IncomeServiceImpl implements IncomeService {
         String currentMonth = DateUtil.getCurrentMonth();
         detail.setPayMonth(currentMonth);
         detail.setPayMonth(detail.getPayMonth().replace("-", ""));
-        UserInfo user = sysUserApiExp.getUserById(userId);
+        UserInfo user = sysUserApiExp.getUserInfoById(userId);
         String nickName = user.getNickName();
         BigDecimal amount = detail.getAmount();
         Long incomeId = detail.getIncomeId();
         detail.setPayee(nickName);
         detail.setCreateTime(DateUtil.getCurrentDate());
         incomeDetailMapper.insert(detail);
-        RelocationIncome relocationIncome = relocationIncomeMapper.single(incomeId);
+        RelocationIncome relocationIncome = incomeMapper.single(incomeId);
 
         //  此处应该使用备注格式字段去反查，而不是发票编号
-        //Long pid = relocationIncomeMapper.selectProject(relocationIncome.getInvoiceNum());
+        //Long pid = incomeMapper.selectProject(relocationIncome.getInvoiceNum());
         // 查询发票  是否同步收款金额 是否同步收据数据
         RelocationInvoice relocationInvoice = new RelocationInvoice();
         relocationInvoice.setInvoiceNumber(relocationIncome.getInvoiceNum());
@@ -168,7 +175,7 @@ IncomeServiceImpl implements IncomeService {
             relocationProjectMapper.updateTemplateById(relocationProject);
         }*/
         //未收减少
-        RelocationIncome single = relocationIncomeMapper.single(incomeId);
+        RelocationIncome single = incomeMapper.single(incomeId);
         RelocationIncome income = new RelocationIncome();
         income.setId(incomeId);
         BigDecimal subtractRe = single.getUnreceived().subtract(amount);
@@ -178,27 +185,26 @@ IncomeServiceImpl implements IncomeService {
         }
         //已收增加
         income.setReceived(single.getReceived().add(amount));
-        relocationIncomeMapper.updateTemplateById(income);
+        incomeMapper.updateTemplateById(income);
         // 判断更新后的收款状态
-        RelocationIncome income1 = relocationIncomeMapper.single(incomeId);
+        RelocationIncome income1 = incomeMapper.single(incomeId);
         BigDecimal receivable = income1.getReceivable();
         BigDecimal unreceived = income1.getUnreceived();
         BigDecimal received = relocationIncome.getReceived();
         //relocationIncome.setReceived(receivable.subtract(unreceived));
-        //relocationIncomeMapper.updateTemplateById(single1);
+        //incomeMapper.updateTemplateById(single1);
         //RelocationIncome income1 = new RelocationIncome();
         //income1.setId(incomeId);
         //已收完的情况 3
-        if (received.compareTo(receivable) == 0
-                && unreceived.compareTo(new BigDecimal("0")) == 0) {
+        if (received.compareTo(receivable) == 0 && unreceived.compareTo(new BigDecimal("0")) == 0) {
             income1.setIsReceived(3);
-            relocationIncomeMapper.updateTemplateById(income1);
+            incomeMapper.updateTemplateById(income1);
         }
         //部分回款 2
         if (received.compareTo(receivable) < 0
                 && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
             income1.setIsReceived(2);
-            relocationIncomeMapper.updateTemplateById(income1);
+            incomeMapper.updateTemplateById(income1);
         }
     }
 
@@ -206,51 +212,53 @@ IncomeServiceImpl implements IncomeService {
     @Transactional(rollbackFor = Exception.class)
     public void addSaveRelocationInvoice(List<IncomeImportVO> dataList) {
         // 转换单位
-        List<Unit> list = unitApiExp.getAllUnitList();
-        Map<String, Integer> unitMap = list.stream()
-                .collect(Collectors.toMap(Unit::getShortName, Unit::getId));
+        List<Unit> list = unitApiExp.getAllUnit();
+        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getShortName, Unit::getId));
         List<RelocationIncome> incomes = new ArrayList<>();
+        Map<String, String> invoiceTypeMap = getInvoiceType();
         for (IncomeImportVO importVO : dataList) {
-            RelocationIncome relocationIncome = new RelocationIncome();
+            RelocationIncome income = new RelocationIncome();
             // 1 迁改 2 搬迁 3 代建
-            relocationIncome.setCategory("迁改".equals(importVO.getCategory()) ? 1
-                    : "搬迁".equals(importVO.getCategory()) ? 2 : 3);
-            relocationIncome.setUnitId(
-                    unitMap.get(importVO.getUnit()) == null ? 11 : unitMap.get(importVO.getUnit()));
-            relocationIncome.setSupplier(importVO.getSupplier());
-            relocationIncome.setContractNum(importVO.getContractNum());
-            relocationIncome.setContractName(importVO.getContractName());
-            relocationIncome.setStartTime(DateUtil.string3DateYMD(importVO.getStartTime()));
-            relocationIncome
-                    .setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
-            relocationIncome.setContractAmount(stringToBigDecimal(importVO.getContractAmount()));
-            relocationIncome.setInvoiceTime(DateUtil.string3DateYMD(importVO.getInvoiceTime()));
-            relocationIncome.setInvoiceNum(importVO.getInvoiceNum());
-            relocationIncome.setInvoiceType(importVO.getInvoiceType());
-            relocationIncome.setAmount(stringToBigDecimal(importVO.getAmount()));
-            relocationIncome.setTax(stringToBigDecimal(importVO.getTax()));
-            relocationIncome
-                    .setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
-            relocationIncome.setConstructionName(importVO.getConstructionName());
+            income.setCategory("迁改".equals(importVO.getCategory()) ? 1 : "搬迁".equals(importVO.getCategory()) ? 2 : 3);
+            income.setUnitId(unitMap.get(importVO.getUnit()) == null ? 11 : unitMap.get(importVO.getUnit()));
+            income.setSupplier(importVO.getSupplier());
+            income.setContractNum(importVO.getContractNum());
+            income.setContractName(importVO.getContractName());
+            income.setStartTime(DateUtil.string3DateYMD(importVO.getStartTime()));
+            income.setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
+            income.setContractAmount(stringToBigDecimal(importVO.getContractAmount()));
+            income.setInvoiceTime(DateUtil.string3DateYMD(importVO.getInvoiceTime()));
+            income.setInvoiceNum(importVO.getInvoiceNum());
+            income.setInvoiceType(Integer.valueOf(String.valueOf(invoiceTypeMap.get(importVO.getInvoiceType()) != null
+                    ? invoiceTypeMap.get(importVO.getInvoiceType()) : 0)));
+            income.setAmount(stringToBigDecimal(importVO.getAmount()));
+            income.setTax(stringToBigDecimal(importVO.getTax()));
+            income.setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
+            income.setConstructionName(importVO.getConstructionName());
             // 1 预付款   2 决算款
-            relocationIncome.setPaymentType(
-                    "预付款".equals(importVO.getPaymentType()) ? 1 : 2);
+            income.setPaymentType("预付款".equals(importVO.getPaymentType()) ? 1 : 2);
             // 10-已收款 20-未收款 30-部分回款
-            relocationIncome.setIsReceived(
-                IsReceived.NOT_RECEIVED.value().equals(importVO.getCategory())
-                    ? IsReceived.NOT_RECEIVED.key()
-                    : IsReceived.PART_RECEIVED.value().equals(importVO.getCategory())
-                        ? IsReceived.PART_RECEIVED.key() : IsReceived.RECEIVED.key());
-            relocationIncome.setAging(importVO.getAging());
-            relocationIncome.setReceivable(stringToBigDecimal(importVO.getReceivable()));
-            relocationIncome.setReceived(stringToBigDecimal(importVO.getReceived()));
-            relocationIncome.setUnreceived(stringToBigDecimal(importVO.getUnreceived()));
+            income.setIsReceived(IsReceived.NOT_RECEIVED.value().equals(importVO.getCategory()) ? IsReceived.NOT_RECEIVED.key()
+                    : IsReceived.PART_RECEIVED.value().equals(importVO.getCategory()) ? IsReceived.PART_RECEIVED.key() : IsReceived.RECEIVED.key());
+            income.setAging(importVO.getAging());
+            income.setReceivable(stringToBigDecimal(importVO.getReceivable()));
+            income.setReceived(stringToBigDecimal(importVO.getReceived()));
+            income.setUnreceived(stringToBigDecimal(importVO.getUnreceived()));
+            income.setIsReceived(
+                    IsReceived.NOT_RECEIVED.value().equals(importVO.getCategory())
+                            ? IsReceived.NOT_RECEIVED.key()
+                            : IsReceived.PART_RECEIVED.value().equals(importVO.getCategory())
+                            ? IsReceived.PART_RECEIVED.key() : IsReceived.RECEIVED.key());
+            income.setAging(importVO.getAging());
+            income.setReceivable(stringToBigDecimal(importVO.getReceivable()));
+            income.setReceived(stringToBigDecimal(importVO.getReceived()));
+            income.setUnreceived(stringToBigDecimal(importVO.getUnreceived()));
             //incomes.add(relocationIncome);
             //插入收款信息
-            relocationIncomeMapper.insert(relocationIncome);
+            incomeMapper.insert(income);
             //插入收款下的收款详情
             RelocationIncomeDetail incomeDetail = new RelocationIncomeDetail();
-            incomeDetail.setIncomeId(relocationIncome.getId());
+            incomeDetail.setIncomeId(income.getId());
             incomeDetail.setCreateTime(DateUtil.getCurrentDate());
             incomeDetail.setPayee(importVO.getPayee());
             incomeDetail.setReceiptNum(importVO.getReceiptNum());
@@ -258,13 +266,13 @@ IncomeServiceImpl implements IncomeService {
             incomeDetail.setPayMonth(DateUtil.getCurrentMonth());
             incomeDetailMapper.insert(incomeDetail);
         }
-        //relocationIncomeMapper.insertBatch(incomes);
+        //incomeMapper.insertBatch(incomes);
     }
 
     @Override
     public List<IncomeExportVO> selectExportListByCondition(IncomeReqVO vo, Integer userId) {
         setConditionDetail(vo, userId);
-        List<IncomeExportVO> relocationIncomeExportVos = relocationIncomeMapper
+        List<IncomeExportVO> relocationIncomeExportVos = incomeMapper
                 .selectExportList(vo);
         for (int i = 0; i < relocationIncomeExportVos.size(); i++) {
             IncomeExportVO relocationIncomeExportVO = relocationIncomeExportVos.get(i);
@@ -321,7 +329,7 @@ IncomeServiceImpl implements IncomeService {
 
 
     private void setConditionDetail(IncomeReqVO cond, Integer userId) {
-        UserInfo user = sysUserApiExp.getUserById(userId);
+        UserInfo user = sysUserApiExp.getUserInfoById(userId);
         if (!"admin".equals(user.getUserName())) {
             cond.setUnitId(user.getUnitId());
         }
@@ -331,5 +339,10 @@ IncomeServiceImpl implements IncomeService {
         if (!StringUtils.isEmpty(cond.getStartTimeTo())) {
             cond.setStartTimeTo(cond.getStartTimeTo() + " 23:59:59");
         }
+    }
+
+    private Map<String, String> getInvoiceType() {
+        List<DictVO> compensationSateList = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
+        return compensationSateList.stream().collect(Collectors.toMap(DictVO::getValue, DictVO::getLabel));
     }
 }

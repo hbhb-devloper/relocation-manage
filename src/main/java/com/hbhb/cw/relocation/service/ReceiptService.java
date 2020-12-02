@@ -49,4 +49,9 @@ public interface ReceiptService {
      * 根据id删除收据信息
      */
     void deleteReceipt(Long id);
+
+    /**
+     * 跟据收据编号查询收据详情
+     */
+    ReceiptResVO getReceipt(String receiptNum);
 }

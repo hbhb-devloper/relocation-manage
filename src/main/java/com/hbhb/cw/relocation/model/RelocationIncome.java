@@ -1,13 +1,13 @@
 package com.hbhb.cw.relocation.model;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.beetl.sql.annotation.entity.AutoID;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * @author dxk
@@ -67,7 +67,7 @@ public class RelocationIncome implements Serializable {
     /**
      * 发票类型
      */
-    private String invoiceType;
+    private Integer invoiceType;
     /**
      * 价款
      */

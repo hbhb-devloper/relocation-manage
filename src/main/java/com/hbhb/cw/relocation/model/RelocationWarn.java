@@ -38,4 +38,6 @@ public class RelocationWarn {
 
     private Integer compensationSate;
 
+    private Integer type;
+
 }

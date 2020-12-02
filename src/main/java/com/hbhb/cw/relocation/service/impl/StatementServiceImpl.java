@@ -39,7 +39,7 @@ public class StatementServiceImpl implements StatementService {
         }
         PageRequest<ProjectResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<StatementResVO> statementResVO = projectMapper.selectProjectStatementByUnitId(unitId, request);
-        List<Unit> unitList = unitApi.getAllUnitList();
+        List<Unit> unitList = unitApi.getAllUnit();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         statementResVO.getList().forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
         return statementResVO;
@@ -52,7 +52,7 @@ public class StatementServiceImpl implements StatementService {
             unitId = null;
         }
         List<StatementResVO> statementList = projectMapper.selectProjectStatementListByUnitId(unitId);
-        List<Unit> unitList = unitApi.getAllUnitList();
+        List<Unit> unitList = unitApi.getAllUnit();
         Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
         statementList.forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
         return BeanConverter.copyBeanList(statementList, StatementExportVO.class);

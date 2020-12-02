@@ -104,4 +104,10 @@ public class InvoiceController {
         ExcelUtil.export2Web(response, fileName, "迁改发票清单", InvoiceExportResVO.class,
                 invoiceExportRes);
     }
+
+    @Operation(summary = "跟据收据编号查看收据详情")
+    @GetMapping("/info")
+    private void getInvoice(String InvoiceNum) {
+        invoiceService.getInvoice(InvoiceNum);
+    }
 }

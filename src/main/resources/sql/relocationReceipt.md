@@ -77,3 +77,23 @@ selectReceiptNum
 select receipt_num from relocation_receipt
 group by receipt_num
 ```
+
+selectReceiptByReceiptNum
+===
+```sql
+      select 
+            rr.id               as id ,
+             receipt_num         as receiptNum, 
+             category            as category,
+             unit_id             as unitId,
+             compensation_amount as compensationAmount,
+             payment_amount      as paymentAmount,
+             contract_name       as contractName,
+             contract_num        as contractNum,
+             payment_desc        as paymentDesc,
+             receipt_amount      as receiptAmount,
+             receipt_time        as receiptTime,
+             remake              as remake
+      from relocation_receipt rr
+where receipt_num = #{receiptNum}
+```

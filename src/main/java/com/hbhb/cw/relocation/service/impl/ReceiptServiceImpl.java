@@ -2,9 +2,12 @@ package com.hbhb.cw.relocation.service.impl;
 
 import com.hbhb.core.bean.BeanConverter;
 import com.hbhb.core.utils.DateUtil;
+import com.hbhb.cw.relocation.enums.InvoiceType;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.cw.relocation.exception.RelocationException;
+import com.hbhb.cw.relocation.mapper.IncomeMapper;
 import com.hbhb.cw.relocation.mapper.ReceiptMapper;
+import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationReceipt;
 import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.service.ProjectService;
@@ -40,18 +43,16 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class ReceiptServiceImpl implements ReceiptService {
-
-
     @Resource
     private ReceiptMapper receiptMapper;
-
     @Resource
     private ProjectService projectService;
-
     @Resource
     private UnitApi unitApi;
     @Resource
     private SysUserApiExp userAip;
+    @Resource
+    private IncomeMapper incomeMapper;
 
     @Override
     public PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize, Integer userId) {
@@ -60,7 +61,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             cond.setUnitId(null);
         }
         // 判断用户单位
-        UserInfo user = userAip.getUserById(userId);
+        UserInfo user = userAip.getUserInfoById(userId);
         if (!user.getUnitId().equals(parentUnit.getHangzhou())) {
             cond.setUnitId(user.getUnitId());
         }
@@ -124,7 +125,59 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .unitId(unitMap.get(item.getUnit()))
                 .build()));
         receiptMapper.insertBatch(receiptList);
+        // 新增收款信息
+        List<RelocationIncome> income = setRelocationIncome(receiptList);
+        incomeMapper.insertBatch(income);
+    }
 
+    private List<RelocationIncome> setRelocationIncome(List<RelocationReceipt> receiptList) {
+        List<RelocationIncome> list = new ArrayList<>();
+        for (RelocationReceipt receipt : receiptList) {
+            RelocationIncome income = new RelocationIncome();
+            income.setCategory(1);
+            //经办单位(单位id)
+            income.setUnitId(receipt.getUnitId());
+            //合同编号
+            income.setContractNum(receipt.getContractNum());
+            //合同名称
+            income.setContractName(receipt.getContractName());
+            // 供应商
+            // income.setSupplier();
+            // 起始时间
+            // income.setStartTime();
+            // 合同截止时间
+            // income.setContractDeadline();
+            // 合同金额
+            // income.setContractAmount();
+            // 工程名
+            // income.setConstructionName();
+            // 款项类型
+            // income.setPaymentType(receipt.getRemake().split(";")[2]);
+            // 账龄
+            // income.setAging();
+            // 开收据时间
+            income.setInvoiceTime(receipt.getReceiptTime());
+            // 发票号码
+            income.setInvoiceNum(receipt.getReceiptNum());
+            // 发票类型
+            income.setInvoiceType(InvoiceType.RECEIPT.key());
+            // 价款
+            income.setAmount(receipt.getReceiptAmount());
+            //税合计
+            income.setTaxIncludeAmount(receipt.getReceiptAmount());
+            // 收款情况（0-未收款、1-已收款）
+            income.setIsReceived(0);
+            // 应收
+            income.setReceivable(receipt.getReceiptAmount());
+            // 已收
+            income.setReceived(receipt.getPaymentAmount());
+            // 未收
+            income.setUnreceived(receipt.getCompensationAmount().subtract(receipt.getPaymentAmount()));
+            // 收款人
+            income.setPayee(receipt.getPayee());
+            list.add(income);
+        }
+        return list;
     }
 
     @Override
@@ -134,7 +187,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             vo.setUnitId(null);
         }
         // 判断用户单位
-        UserInfo user = userAip.getUserById(userId);
+        UserInfo user = userAip.getUserInfoById(userId);
         if (!user.getUnitId().equals(parentUnit.getHangzhou())) {
             vo.setUnitId(user.getUnitId());
         }
@@ -182,6 +235,11 @@ public class ReceiptServiceImpl implements ReceiptService {
         receiptMapper.deleteById(id);
     }
 
+    @Override
+    public ReceiptResVO getReceipt(String receiptNum) {
+        return receiptMapper.selectReceiptByReceiptNum(receiptNum);
+    }
+
     private RelocationReceipt setReceipt(ReceiptResVO receiptResVO) {
         RelocationReceipt receipt = new RelocationReceipt();
         BeanUtils.copyProperties(receiptResVO, receipt);
@@ -197,6 +255,8 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     private List<Unit> getUnitList() {
-        return unitApi.getAllUnitList();
+        return unitApi.getAllUnit();
     }
+
+
 }

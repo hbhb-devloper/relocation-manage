@@ -91,4 +91,11 @@ public class ReceiptController {
         String fileName = ExcelUtil.encodingFileName(request, "签报列表");
         ExcelUtil.export2Web(response, fileName, fileName, ReceiptExportVO.class, list);
     }
+
+    @Operation(summary = "跟据收据编号查看收据详情")
+    @GetMapping("/info")
+    private void getReceipt(String receiptNum) {
+        receiptService.getReceipt(receiptNum);
+    }
+
 }

@@ -67,4 +67,9 @@ public class RelocationReceipt implements Serializable {
      * 收据编号
      */
     private String receiptNum;
+
+    /**
+     * 收款人
+     */
+    private String payee;
 }
