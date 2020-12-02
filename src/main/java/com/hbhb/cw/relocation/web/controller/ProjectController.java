@@ -118,7 +118,7 @@ public class ProjectController implements RelocationProjectApi {
     public void upload(@RequestPart(required = false, value = "file") MultipartFile file) {
         Boolean a = projectService.judgeContractNum(file);
         if (a) {
-            FileVO files = fileApi.uploadFile(file, FileType.RELOCATION_CONTRACT_FILE.value());
+            FileVO files = fileApi.upload(file, FileType.RELOCATION_CONTRACT_FILE.value());
             projectService.updateContractFileId(files);
         } else {
             throw new RelocationException(RelocationErrorCode.RELOCATION_CONTRACT_ERROR, file.getOriginalFilename() + "未匹配导入失败");
