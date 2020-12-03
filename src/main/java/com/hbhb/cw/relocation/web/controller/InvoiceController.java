@@ -102,7 +102,7 @@ public class InvoiceController {
         List<InvoiceExportResVO> invoiceExportRes = null;
         String fileName = ExcelUtil.encodingFileName(request, "迁改发票数据表");
         ExcelUtil.export2Web(response, fileName, "迁改发票清单", InvoiceExportResVO.class,
-                invoiceExportRes);
+                null);
     }
 
     @Operation(summary = "跟据收据编号查看收据详情")

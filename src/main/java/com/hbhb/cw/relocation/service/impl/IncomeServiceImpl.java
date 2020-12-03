@@ -146,31 +146,6 @@ IncomeServiceImpl implements IncomeService {
         detail.setCreateTime(DateUtil.getCurrentDate());
         incomeDetailMapper.insert(detail);
         RelocationIncome relocationIncome = incomeMapper.single(incomeId);
-
-        //  此处应该使用备注格式字段去反查，而不是发票编号
-        //Long pid = incomeMapper.selectProject(relocationIncome.getInvoiceNum());
-        // 查询发票  是否同步收款金额 是否同步收据数据
-        RelocationInvoice relocationInvoice = new RelocationInvoice();
-        relocationInvoice.setInvoiceNumber(relocationIncome.getInvoiceNum());
-        RelocationInvoice invoice = invoiceMapper.single(relocationInvoice);
-        // 获取收款类型
-        Integer paymentType = relocationIncome.getPaymentType();
-        // todo 无法匹配故不再同步项目信息
-        /*if (pid == null) {
-            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_NOT_PROJECT);
-        } else {
-            RelocationProject project = relocationProjectMapper.single(pid);
-            BigDecimal anticipatePayment = project.getAnticipatePayment();
-            BigDecimal finalPayment = project.getFinalPayment();
-            RelocationProject relocationProject = new RelocationProject();
-            // 同步修改项目信息表数据
-            if (paymentType == 1) {
-                relocationProject.setAnticipatePayment(anticipatePayment.add(amount));
-            } else {
-                relocationProject.setFinalPayment(finalPayment.add(amount));
-            }
-            relocationProjectMapper.updateTemplateById(relocationProject);
-        }*/
         //未收减少
         RelocationIncome single = incomeMapper.single(incomeId);
         RelocationIncome income = new RelocationIncome();
@@ -187,11 +162,7 @@ IncomeServiceImpl implements IncomeService {
         RelocationIncome income1 = incomeMapper.single(incomeId);
         BigDecimal receivable = income1.getReceivable();
         BigDecimal unreceived = income1.getUnreceived();
-        BigDecimal received = relocationIncome.getReceived();
-        //relocationIncome.setReceived(receivable.subtract(unreceived));
-        //incomeMapper.updateTemplateById(single1);
-        //RelocationIncome income1 = new RelocationIncome();
-        //income1.setId(incomeId);
+        BigDecimal received = income1.getReceived();
         //已收完的情况 3
         if (received.compareTo(receivable) == 0 && unreceived.compareTo(new BigDecimal("0")) == 0) {
             income1.setIsReceived(3);
@@ -199,7 +170,7 @@ IncomeServiceImpl implements IncomeService {
         }
         //部分回款 2
         if (received.compareTo(receivable) < 0
-                && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
+            && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
             income1.setIsReceived(2);
             incomeMapper.updateTemplateById(income1);
         }
@@ -225,6 +196,8 @@ IncomeServiceImpl implements IncomeService {
             income.setContractAmount(stringToBigDecimal(importVO.getContractAmount()));
             income.setInvoiceTime(DateUtil.string3DateYMD(importVO.getInvoiceTime()));
             income.setInvoiceNum(importVO.getInvoiceNum());
+            income.setInvoiceType(Integer.valueOf(String.valueOf(invoiceTypeMap.get(importVO.getInvoiceType()) != null
+                ? invoiceTypeMap.get(importVO.getInvoiceType()) : 0)));
             income.setInvoiceType(Integer.valueOf(invoiceTypeMap.get(importVO.getInvoiceType())));
             income.setAmount(stringToBigDecimal(importVO.getAmount()));
             income.setTax(stringToBigDecimal(importVO.getTax()));
@@ -239,31 +212,24 @@ IncomeServiceImpl implements IncomeService {
             income.setReceivable(stringToBigDecimal(importVO.getReceivable()));
             income.setReceived(stringToBigDecimal(importVO.getReceived()));
             income.setUnreceived(stringToBigDecimal(importVO.getUnreceived()));
-            income.setIsReceived(
-                    IsReceived.NOT_RECEIVED.value().equals(importVO.getCategory())
-                            ? IsReceived.NOT_RECEIVED.key()
-                            : IsReceived.PART_RECEIVED.value().equals(importVO.getCategory())
-                            ? IsReceived.PART_RECEIVED.key() : IsReceived.RECEIVED.key());
             income.setAging(importVO.getAging());
             income.setReceivable(stringToBigDecimal(importVO.getReceivable()));
             income.setReceived(stringToBigDecimal(importVO.getReceived()));
             income.setUnreceived(stringToBigDecimal(importVO.getUnreceived()));
-            //incomes.add(relocationIncome);
-            // 插入收款信息
+            //插入收款信息
             incomeMapper.insert(income);
-            // 插入收款下的收款详情
-            RelocationIncomeDetail incomeDetail = new RelocationIncomeDetail();
+            //插入收款下的收款详情
             if (!isEmpty(importVO.getReceiptNum())) {
+                RelocationIncomeDetail incomeDetail = new RelocationIncomeDetail();
                 incomeDetail.setIncomeId(income.getId());
                 incomeDetail.setCreateTime(DateUtil.getCurrentDate());
                 incomeDetail.setPayee(importVO.getPayee());
                 incomeDetail.setReceiptNum(importVO.getReceiptNum());
-                incomeDetail.setAmount(stringToBigDecimal(importVO.getAmount()));
+                incomeDetail.setAmount(stringToBigDecimal(importVO.getMonthAmount()));
                 incomeDetail.setPayMonth(DateUtil.getCurrentMonth());
                 incomeDetailMapper.insert(incomeDetail);
             }
         }
-        //incomeMapper.insertBatch(incomes);
     }
 
     @Override

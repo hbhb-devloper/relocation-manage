@@ -48,4 +48,5 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
  List<WarnResVO> selectProjectStartWarn();
 
+    RelocationProject selectOneByContractNum(String contractNum);
 }

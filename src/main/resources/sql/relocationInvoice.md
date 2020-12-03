@@ -24,9 +24,15 @@ selectListByCondition
         ri.issuer,
         ri.state,
         ri.is_import          isImport,
-        ri.manager
+        ri.manager,
+        rii.is_received       amountStatus,
+        rii.receivable        receivable,
+        rii.received          received,
+        rii.unreceived        unreceived
         -- @}
     from relocation_invoice ri
+         left join relocation_income rii
+         on ri.invoice_number = rii.invoice_num
         -- @where(){
             -- @if(cond.unitId == 429){
                 and ri.district in (#{cond.unitIds})

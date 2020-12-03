@@ -426,6 +426,25 @@ select id
 from relocation_project
 where contract_num =#{contractNum}        
 ```
+
+selectOneByContractNum
+===
+```sql
+select 
+    id                      as id,
+    unit_id                 as unitId,
+    project_name            as projectName,
+    project_num             as projectNum,
+    contract_num            as contractNum,
+    contract_type           as contractType,
+    contract_name           as contractName,
+    plan_start_time         as planStartTime,
+    plan_end_time           as planEndTime,
+    compensation_amount     as compensationAmount
+from relocation_project
+where contract_num = #{contractNum} 
+group by contract_num 
+```
 selectProjectStartWarn
 ===
 ```sql
