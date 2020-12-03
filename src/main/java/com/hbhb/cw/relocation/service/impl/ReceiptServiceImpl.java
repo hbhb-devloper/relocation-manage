@@ -10,14 +10,19 @@ import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.mapper.ReceiptMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationReceipt;
-import com.hbhb.cw.relocation.rpc.SysUserApiExp;
+import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.ProjectService;
 import com.hbhb.cw.relocation.service.ReceiptService;
-import com.hbhb.cw.relocation.web.vo.*;
+import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
+import com.hbhb.cw.relocation.web.vo.ProjectResVO;
+import com.hbhb.cw.relocation.web.vo.ReceiptExportVO;
+import com.hbhb.cw.relocation.web.vo.ReceiptImportVO;
+import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
+import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
 import com.hbhb.cw.systemcenter.api.UnitApi;
 import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
-import lombok.extern.slf4j.Slf4j;
+
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
@@ -25,10 +30,17 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author wangxiaogang
@@ -45,7 +57,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Resource
     private UnitApi unitApi;
     @Resource
-    private SysUserApiExp userAip;
+    private UserApiExp userAip;
     @Resource
     private IncomeMapper incomeMapper;
 

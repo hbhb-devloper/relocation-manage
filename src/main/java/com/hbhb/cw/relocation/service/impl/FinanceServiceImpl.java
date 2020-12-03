@@ -4,23 +4,26 @@ package com.hbhb.cw.relocation.service.impl;
 import com.hbhb.core.utils.DateUtil;
 import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.mapper.FinanceMapper;
-import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
+import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.FinanceService;
 import com.hbhb.cw.relocation.web.vo.FinanceReqVO;
 import com.hbhb.cw.relocation.web.vo.FinanceResVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
-import lombok.extern.slf4j.Slf4j;
+
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 import static java.lang.Integer.parseInt;
 
@@ -36,7 +39,7 @@ public class FinanceServiceImpl implements FinanceService {
     private FinanceMapper financeMapper;
 
     @Resource
-    private SysUserApiExp userApi;
+    private UserApiExp userApi;
 
     @Resource
     private UnitApiExp unitApi;

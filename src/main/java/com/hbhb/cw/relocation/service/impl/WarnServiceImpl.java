@@ -10,25 +10,35 @@ import com.hbhb.cw.relocation.model.RelocationFile;
 import com.hbhb.cw.relocation.model.RelocationWarn;
 import com.hbhb.cw.relocation.rpc.FileApiExp;
 import com.hbhb.cw.relocation.rpc.FlowApiExp;
-import com.hbhb.cw.relocation.rpc.SysUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
+import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.MailService;
 import com.hbhb.cw.relocation.service.WarnService;
-import com.hbhb.cw.relocation.web.vo.*;
+import com.hbhb.cw.relocation.web.vo.WarnCountVO;
+import com.hbhb.cw.relocation.web.vo.WarnExportVO;
+import com.hbhb.cw.relocation.web.vo.WarnFileResVO;
+import com.hbhb.cw.relocation.web.vo.WarnReqVO;
+import com.hbhb.cw.relocation.web.vo.WarnResVO;
 import com.hbhb.cw.systemcenter.model.File;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
-import lombok.extern.slf4j.Slf4j;
+
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 import static java.lang.Integer.parseInt;
 
@@ -55,7 +65,7 @@ public class WarnServiceImpl implements WarnService {
     private UnitApiExp unitApi;
 
     @Resource
-    private SysUserApiExp userApi;
+    private UserApiExp userApi;
 
     @Resource
     private FlowApiExp flowApi;
@@ -169,10 +179,8 @@ public class WarnServiceImpl implements WarnService {
     }
 
     @Override
-    public void addWarnFile(WarnFileVO fileVO) {
-        RelocationFile file = new RelocationFile();
-        BeanUtils.copyProperties(fileVO, file);
-        fileMapper.insert(file);
+    public void addWarnFile(RelocationFile relocationFile) {
+        fileMapper.insert(relocationFile);
     }
 
     @Override

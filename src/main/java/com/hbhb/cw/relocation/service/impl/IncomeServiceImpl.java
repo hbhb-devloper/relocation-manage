@@ -13,10 +13,9 @@ import com.hbhb.cw.relocation.mapper.InvoiceMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationIncomeDetail;
-import com.hbhb.cw.relocation.model.RelocationInvoice;
-import com.hbhb.cw.relocation.rpc.SysDictApiExp;
-import com.hbhb.cw.relocation.rpc.SysUserApiExp;
+import com.hbhb.cw.relocation.rpc.DictApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
+import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.IncomeService;
 import com.hbhb.cw.relocation.web.vo.IncomeExportVO;
 import com.hbhb.cw.relocation.web.vo.IncomeImportVO;
@@ -27,19 +26,22 @@ import com.hbhb.cw.systemcenter.enums.TypeCode;
 import com.hbhb.cw.systemcenter.vo.DictVO;
 import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
-import lombok.extern.slf4j.Slf4j;
+
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 import static org.springframework.util.StringUtils.isEmpty;
 
@@ -62,10 +64,10 @@ IncomeServiceImpl implements IncomeService {
     private UnitApiExp unitApiExp;
 
     @Resource
-    private SysUserApiExp userApi;
+    private UserApiExp userApi;
 
     @Resource
-    private SysDictApiExp dictApi;
+    private DictApiExp dictApi;
 
     @Resource
     private ProjectMapper relocationProjectMapper;

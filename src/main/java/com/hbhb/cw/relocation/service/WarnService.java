@@ -1,7 +1,12 @@
 package com.hbhb.cw.relocation.service;
 
 
-import com.hbhb.cw.relocation.web.vo.*;
+import com.hbhb.cw.relocation.model.RelocationFile;
+import com.hbhb.cw.relocation.web.vo.WarnExportVO;
+import com.hbhb.cw.relocation.web.vo.WarnFileResVO;
+import com.hbhb.cw.relocation.web.vo.WarnReqVO;
+import com.hbhb.cw.relocation.web.vo.WarnResVO;
+
 import org.beetl.sql.core.page.PageResult;
 
 import java.util.List;
@@ -25,9 +30,8 @@ public interface WarnService {
 
     /**
      * 新增预警附件
-     * @param fileVO 附件
      */
-    void addWarnFile(WarnFileVO fileVO);
+    void addWarnFile(RelocationFile relocationFile);
 
     /**
      * 跟据用户id统计预警数量

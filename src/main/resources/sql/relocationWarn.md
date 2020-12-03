@@ -40,7 +40,7 @@ selectProjectNum
 
 updateSateByProjectNum
 ===
-  ```sql
+```sql
      update relocation_warn
      set state = 0
  -- @for(item in list)             

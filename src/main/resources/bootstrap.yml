@@ -48,8 +48,8 @@ host:
   proxy: 47.96.83.55
 
 port:
-  default: 10071
-  dev: 10010
+  default: 10042
+  dev: 10028
   test: 10011
   prd: 10018
 
@@ -59,7 +59,7 @@ feign-url:
 
 # 服务提供方实例名称
 provider:
-  system-center: system-center-dev
+  system-center: system-center-@env@
   flow-center: flow-center-@env@
 
 
@@ -70,6 +70,7 @@ spring:
   cloud:
     consul:
       host: consul.yeexun.com.cn
+      #      host: 47.96.83.55
       discovery:
         #        prefer-ip-address: true
         instance-id: ${spring.application.name}-${server.port}-${spring.cloud.client.ip-address}
@@ -84,7 +85,7 @@ spring:
   profiles: dev
   cloud:
     consul:
-      host: consul.yeexun.com.cn
+      host: ${host.docker0}
       discovery:
         instance-id: ${spring.application.name}-${port.dev}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
@@ -98,7 +99,7 @@ spring:
   profiles: test
   cloud:
     consul:
-      host: consul.yeexun.com.cn
+      host: ${host.docker0}
       discovery:
         instance-id: ${spring.application.name}-${port.test}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}

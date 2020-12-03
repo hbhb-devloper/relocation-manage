@@ -2,7 +2,12 @@ package com.hbhb.cw.relocation.service.impl;
 
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.hbhb.core.utils.DateUtil;
-import com.hbhb.cw.relocation.enums.*;
+import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
+import com.hbhb.cw.relocation.enums.InvoiceSate;
+import com.hbhb.cw.relocation.enums.InvoiceType;
+import com.hbhb.cw.relocation.enums.IsReceived;
+import com.hbhb.cw.relocation.enums.RelocationErrorCode;
+import com.hbhb.cw.relocation.enums.State;
 import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
@@ -12,19 +17,20 @@ import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationIncomeDetail;
 import com.hbhb.cw.relocation.model.RelocationInvoice;
-import com.hbhb.cw.relocation.model.RelocationProject;
-import com.hbhb.cw.relocation.rpc.SysDictApiExp;
-import com.hbhb.cw.relocation.rpc.SysUserApiExp;
+import com.hbhb.cw.relocation.rpc.DictApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
+import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.InvoiceService;
-import com.hbhb.cw.relocation.web.vo.*;
+import com.hbhb.cw.relocation.web.vo.InvoiceExportResVO;
+import com.hbhb.cw.relocation.web.vo.InvoiceImportVO;
+import com.hbhb.cw.relocation.web.vo.InvoiceReqVO;
+import com.hbhb.cw.relocation.web.vo.InvoiceResVO;
 import com.hbhb.cw.systemcenter.enums.DictCode;
 import com.hbhb.cw.systemcenter.enums.TypeCode;
 import com.hbhb.cw.systemcenter.vo.DictVO;
 import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
-import java.util.Arrays;
-import lombok.extern.slf4j.Slf4j;
+
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
@@ -33,12 +39,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author xiaokang
@@ -52,7 +61,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private InvoiceMapper invoiceMapper;
 
     @Resource
-    private SysUserApiExp sysUserApiExp;
+    private UserApiExp userApiExp;
 
     @Resource
     private UnitApiExp unitApiExp;
@@ -61,7 +70,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private IncomeMapper incomeMapper;
 
     @Resource
-    private SysDictApiExp dictApi;
+    private DictApiExp dictApi;
 
     @Resource
     private IncomeDetailMapper detailMapper;
@@ -258,7 +267,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
 
     private void setConditionDetail(InvoiceReqVO cond, Integer userId) {
-        UserInfo user = sysUserApiExp.getUserInfoById(userId);
+        UserInfo user = userApiExp.getUserInfoById(userId);
         if (!"admin".equals(user.getUserName())) {
             cond.setUnitId(user.getUnitId());
         }
