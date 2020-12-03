@@ -16,7 +16,6 @@ import com.hbhb.cw.relocation.service.MailService;
 import com.hbhb.cw.relocation.service.WarnService;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.model.File;
-import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -73,7 +72,7 @@ public class WarnServiceImpl implements WarnService {
         } else {
             reqVO.setUnitId(user.getUnitId());
         }
-        Map<Integer, String> unitMap = getUnit();
+        Map<Integer, String> unitMap = unitApi.getUnitMapByName();
         // 组装单位，状态
         List<WarnResVO> warnResVo = warnMapper.selectProjectWarnByCond(reqVO);
         Map<Integer, String> isReceived = getIsReceived();
@@ -87,8 +86,7 @@ public class WarnServiceImpl implements WarnService {
     @Override
     public List<WarnExportVO> export(WarnReqVO cond) {
         List<WarnResVO> list = warnMapper.selectProjectWarnByCond(cond);
-        List<Unit> unitList = unitApi.getAllUnit();
-        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        Map<Integer, String> unitMap = unitApi.getUnitMapByName();
         Map<Integer, String> isReceived = getIsReceived();
         list.forEach(item -> {
             item.setUnitName(unitMap.get(item.getUnitId()));
@@ -203,7 +201,7 @@ public class WarnServiceImpl implements WarnService {
         // 判断该用户是否具有流程角色
         List<Integer> userIds = flowApi.getFlowRoleUserList("迁改预警负责人");
         if (userIds.contains(userId)) {
-            Map<Integer, String> unitMap = getUnit();
+            Map<Integer, String> unitMap = unitApi.getUnitMapByName();
             UserInfo userById = userApi.getUserInfoById(userId);
             cond.setUnitId(userById.getUnitId());
             PageRequest<WarnResVO> request = DefaultPageRequest.of(pageNum, pageSize);
@@ -226,8 +224,4 @@ public class WarnServiceImpl implements WarnService {
         return receivedMap;
     }
 
-    private Map<Integer, String> getUnit() {
-        List<Unit> unitList = unitApi.getAllUnit();
-        return unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
-    }
 }

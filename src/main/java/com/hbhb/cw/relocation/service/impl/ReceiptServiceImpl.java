@@ -15,7 +15,6 @@ import com.hbhb.cw.relocation.service.ProjectService;
 import com.hbhb.cw.relocation.service.ReceiptService;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.api.UnitApi;
-import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,6 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 /**
  * @author wangxiaogang
@@ -64,8 +62,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<ReceiptResVO> receiptRes = receiptMapper.selectReceiptByCond(cond, request);
-        List<Unit> unitList = getUnitList();
-        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        Map<Integer, String> unitMap = unitApi.getUnitMapByName();
         receiptRes.getList().forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
         return receiptRes;
     }
@@ -74,9 +71,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Transactional(rollbackFor = Exception.class)
     public synchronized void addSaveRelocationReceipt(List<ReceiptImportVO> dataList) {
         List<String> msg = new CopyOnWriteArrayList<>();
-        List<Unit> list = getUnitList();
-        Map<String, Integer> unitMap = list.stream()
-                .collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
+        Map<String, Integer> unitMap = unitApi.getUnitMapById();
         List<RelocationReceipt> receiptList = new ArrayList<>();
         // 验证导入合同编号是否存在
         List<String> contractNumList = projectService.getContractNumList();
@@ -193,8 +188,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
 
         List<ReceiptResVO> list = receiptMapper.selectReceiptListByCond(vo);
-        List<Unit> unitList = getUnitList();
-        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+
+        Map<Integer, String> unitMap = unitApi.getUnitMapByName();
         list.forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
         return BeanConverter.copyBeanList(list, ReceiptExportVO.class);
     }
@@ -224,8 +219,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         String unitName = arrList.get(1);
         // 3-项目名称
         String projectName = arrList.get(3);
-        List<Unit> unitList = getUnitList();
-        Map<String, Integer> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
+        Map<String, Integer> unitMap = unitApi.getUnitMapById();
         Integer unitId = unitMap.get(unitName);
         ProjectReqVO projectVo = new ProjectReqVO();
         projectVo.setUnitId(unitId);
@@ -279,10 +273,6 @@ public class ReceiptServiceImpl implements ReceiptService {
         // 开收据时间
         receipt.setReceiptTime(DateUtil.string2DateYMD(receiptResVO.getReceiptTime()));
         return receipt;
-    }
-
-    private List<Unit> getUnitList() {
-        return unitApi.getAllUnit();
     }
 
 

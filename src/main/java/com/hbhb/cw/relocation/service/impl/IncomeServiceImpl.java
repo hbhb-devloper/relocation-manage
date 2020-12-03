@@ -24,7 +24,6 @@ import com.hbhb.cw.relocation.web.vo.IncomeReqVO;
 import com.hbhb.cw.relocation.web.vo.IncomeResVO;
 import com.hbhb.cw.systemcenter.enums.DictCode;
 import com.hbhb.cw.systemcenter.enums.TypeCode;
-import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.DictVO;
 import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
@@ -87,15 +86,12 @@ IncomeServiceImpl implements IncomeService {
     @Override
     public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize,
                                                  IncomeReqVO cond, Integer userId) {
-        List<Unit> unitList = unitApiExp.getAllUnit();
         UnitTopVO parentUnit = unitApiExp.getTopUnit();
         List<Integer> unitIds = new ArrayList<>();
-        for (Unit unit : unitList) {
-            if (parentUnit.getBenbu().equals(cond.getUnitId())) {
-                unitIds.add(unit.getId());
-            }
+        if (parentUnit.getBenbu().equals(cond.getUnitId())) {
+            unitIds = unitApiExp.getSubUnit(parentUnit.getBenbu());
         }
-        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        Map<Integer, String> unitMap = unitApiExp.getUnitMapByName();
         cond.setUnitIds(unitIds);
         setConditionDetail(cond, userId);
         PageRequest<IncomeResVO> request = DefaultPageRequest.of(pageNum, pageSize);
@@ -213,8 +209,7 @@ IncomeServiceImpl implements IncomeService {
     @Transactional(rollbackFor = Exception.class)
     public void addSaveRelocationInvoice(List<IncomeImportVO> dataList) {
         // 转换单位
-        List<Unit> list = unitApiExp.getAllUnit();
-        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
+        Map<String, Integer> unitMap = unitApiExp.getUnitMapById();
         List<RelocationIncome> incomes = new ArrayList<>();
         Map<String, String> invoiceTypeMap = getInvoiceType();
         for (IncomeImportVO importVO : dataList) {

@@ -16,7 +16,6 @@ import com.hbhb.cw.relocation.service.InvoiceService;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.enums.DictCode;
 import com.hbhb.cw.systemcenter.enums.TypeCode;
-import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.DictVO;
 import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
@@ -65,18 +64,17 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public PageResult<InvoiceResVO> getInvoiceList(Integer pageNum, Integer pageSize,
                                                    InvoiceReqVO cond, Integer userId) {
-        List<Unit> unitList = unitApiExp.getAllUnit();
+
         UnitTopVO parentUnit = unitApiExp.getTopUnit();
         List<Integer> unitIds = new ArrayList<>();
-        for (Unit unit : unitList) {
-            if (parentUnit.getBenbu().equals(cond.getUnitId())) {
-                unitIds.add(unit.getId());
-            }
+
+        if (parentUnit.getBenbu().equals(cond.getUnitId())) {
+            unitIds = unitApiExp.getSubUnit(parentUnit.getBenbu());
         }
         cond.setUnitIds(unitIds);
         PageRequest<InvoiceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<InvoiceResVO> invoiceResVo = invoiceMapper.selectListByCondition(cond, request);
-        Map<Integer, String> unitMap = unitList.stream().collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        Map<Integer, String> unitMap = unitApiExp.getUnitMapByName();
 
         // 获取发票类型字典
         List<DictVO> type = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
@@ -138,8 +136,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         //List<String> remakeList = relocationInvoiceMapper.selectInvoiceRemake();
         List<String> invoiceNumber = invoiceMapper.selectInvoiceNumber();
         // 转换单位
-        List<Unit> list = unitApiExp.getAllUnit();
-        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
+        Map<String, Integer> unitMap = unitApiExp.getUnitMapById();
         // 获取发票类型字典
         List<DictVO> type = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
         Map<String, String> typeMap = type.stream().collect(Collectors.toMap(DictVO::getValue, DictVO::getLabel));
@@ -258,10 +255,8 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO vo, Integer userId) {
         setConditionDetail(vo, userId);
-        List<Unit> unitList = unitApiExp.getAllUnit();
         List<InvoiceExportResVO> exportResVos = invoiceMapper.selectExportListByCondition(vo);
-        Map<Integer, String> unitMap = unitList.stream()
-                .collect(Collectors.toMap(Unit::getId, Unit::getUnitName));
+        Map<Integer, String> unitMap = unitApiExp.getUnitMapByName();
         exportResVos.forEach(item -> {
             item.setInvoiceType(State.ONE.value().equals(item.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value()
                     : InvoiceType.SPECIAL_INVOICE.value());
