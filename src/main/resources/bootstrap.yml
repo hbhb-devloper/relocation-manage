@@ -89,8 +89,8 @@ spring:
       discovery:
         instance-id: ${spring.application.name}-${port.dev}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
-        health-check-url: http://${host.proxy}:${port.dev}/actuator/health
-        hostname: ${host.proxy}
+        health-check-url: http://${host.docker0}:${port.dev}/actuator/health
+        hostname: ${host.docker0}
         port: ${port.dev}
 
 ################### 测试环境配置 ###################
@@ -103,8 +103,8 @@ spring:
       discovery:
         instance-id: ${spring.application.name}-${port.test}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
-        health-check-url: http://${host.proxy}:${port.test}/actuator/health
-        hostname: ${host.proxy}
+        health-check-url: http://${host.docker0}:${port.test}/actuator/health
+        hostname: ${host.docker0}
         port: ${port.test}
 
 ################### 正式环境配置 ###################
