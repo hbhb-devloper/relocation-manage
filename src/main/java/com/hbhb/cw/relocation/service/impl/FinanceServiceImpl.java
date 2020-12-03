@@ -36,7 +36,7 @@ public class FinanceServiceImpl implements FinanceService {
     private FinanceMapper financeMapper;
 
     @Resource
-    private SysUserApiExp sysUserApiExp;
+    private SysUserApiExp userApi;
 
     @Resource
     private UnitApiExp unitApi;
@@ -52,7 +52,7 @@ public class FinanceServiceImpl implements FinanceService {
         setUnitId(cond, userId);
         PageResult<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond, request);
         Map<Integer, String> isReceived = getIsReceived();
-        Map<Integer, String> unitMap = unitApi.getUnitMapByName();
+        Map<Integer, String> unitMap = unitApi.getUnitMapById();
         // 组装理赔方式、收款状态、县市
         financeResVos.getList().forEach(item -> {
             //网银打款、现金转账，开具发票收据
@@ -73,7 +73,7 @@ public class FinanceServiceImpl implements FinanceService {
         }
         List<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond);
         Map<Integer, String> isReceived = getIsReceived();
-        Map<Integer, String> unitMap = unitApi.getUnitMapByName();
+        Map<Integer, String> unitMap = unitApi.getUnitMapById();
         financeResVos.forEach(item -> {
             //网银打款、现金转账，开具发票收据
             item.setPayType("网银打款");
@@ -84,8 +84,8 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
     private void setUnitId(FinanceReqVO cond, Integer userId) {
-        UserInfo user = sysUserApiExp.getUserInfoById(userId);
-        if (!"admin".equals(user.getUserName())) {
+        UserInfo user = userApi.getUserInfoById(userId);
+        if (userApi.isAdmin(userId)) {
             cond.setUnitId(user.getUnitId());
         }
     }

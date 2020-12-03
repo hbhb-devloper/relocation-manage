@@ -67,12 +67,12 @@ public class WarnServiceImpl implements WarnService {
     @Override
     public List<WarnResVO> getWarn(WarnReqVO reqVO, Integer userId) {
         UserInfo user = userApi.getUserInfoById(userId);
-        if ("admin".equals(user.getUserName())) {
+        if (userApi.isAdmin(userId)) {
             reqVO.setUnitId(null);
         } else {
             reqVO.setUnitId(user.getUnitId());
         }
-        Map<Integer, String> unitMap = unitApi.getUnitMapByName();
+        Map<Integer, String> unitMap = unitApi.getUnitMapById();
         // 组装单位，状态
         List<WarnResVO> warnResVo = warnMapper.selectProjectWarnByCond(reqVO);
         Map<Integer, String> isReceived = getIsReceived();
@@ -86,7 +86,7 @@ public class WarnServiceImpl implements WarnService {
     @Override
     public List<WarnExportVO> export(WarnReqVO cond) {
         List<WarnResVO> list = warnMapper.selectProjectWarnByCond(cond);
-        Map<Integer, String> unitMap = unitApi.getUnitMapByName();
+        Map<Integer, String> unitMap = unitApi.getUnitMapById();
         Map<Integer, String> isReceived = getIsReceived();
         list.forEach(item -> {
             item.setUnitName(unitMap.get(item.getUnitId()));
@@ -201,7 +201,7 @@ public class WarnServiceImpl implements WarnService {
         // 判断该用户是否具有流程角色
         List<Integer> userIds = flowApi.getFlowRoleUserList("迁改预警负责人");
         if (userIds.contains(userId)) {
-            Map<Integer, String> unitMap = unitApi.getUnitMapByName();
+            Map<Integer, String> unitMap = unitApi.getUnitMapById();
             UserInfo userById = userApi.getUserInfoById(userId);
             cond.setUnitId(userById.getUnitId());
             PageRequest<WarnResVO> request = DefaultPageRequest.of(pageNum, pageSize);

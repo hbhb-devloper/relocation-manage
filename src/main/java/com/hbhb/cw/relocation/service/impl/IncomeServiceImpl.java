@@ -62,7 +62,7 @@ IncomeServiceImpl implements IncomeService {
     private UnitApiExp unitApiExp;
 
     @Resource
-    private SysUserApiExp sysUserApiExp;
+    private SysUserApiExp userApi;
 
     @Resource
     private SysDictApiExp dictApi;
@@ -91,7 +91,7 @@ IncomeServiceImpl implements IncomeService {
         if (parentUnit.getBenbu().equals(cond.getUnitId())) {
             unitIds = unitApiExp.getSubUnit(parentUnit.getBenbu());
         }
-        Map<Integer, String> unitMap = unitApiExp.getUnitMapByName();
+        Map<Integer, String> unitMap = unitApiExp.getUnitMapById();
         cond.setUnitIds(unitIds);
         setConditionDetail(cond, userId);
         PageRequest<IncomeResVO> request = DefaultPageRequest.of(pageNum, pageSize);
@@ -138,7 +138,7 @@ IncomeServiceImpl implements IncomeService {
         String currentMonth = DateUtil.getCurrentMonth();
         detail.setPayMonth(currentMonth);
         detail.setPayMonth(detail.getPayMonth().replace("-", ""));
-        UserInfo user = sysUserApiExp.getUserInfoById(userId);
+        UserInfo user = userApi.getUserInfoById(userId);
         String nickName = user.getNickName();
         BigDecimal amount = detail.getAmount();
         Long incomeId = detail.getIncomeId();
@@ -209,7 +209,7 @@ IncomeServiceImpl implements IncomeService {
     @Transactional(rollbackFor = Exception.class)
     public void addSaveRelocationInvoice(List<IncomeImportVO> dataList) {
         // 转换单位
-        Map<String, Integer> unitMap = unitApiExp.getUnitMapById();
+        Map<String, Integer> unitMap = unitApiExp.getUnitMapByName();
         List<RelocationIncome> incomes = new ArrayList<>();
         Map<String, String> invoiceTypeMap = getInvoiceType();
         for (IncomeImportVO importVO : dataList) {
@@ -326,8 +326,8 @@ IncomeServiceImpl implements IncomeService {
 
 
     private void setConditionDetail(IncomeReqVO cond, Integer userId) {
-        UserInfo user = sysUserApiExp.getUserInfoById(userId);
-        if (!"admin".equals(user.getUserName())) {
+        UserInfo user = userApi.getUserInfoById(userId);
+        if (userApi.isAdmin(userId)) {
             cond.setUnitId(user.getUnitId());
         }
         if (!isEmpty(cond.getStartTimeFrom())) {

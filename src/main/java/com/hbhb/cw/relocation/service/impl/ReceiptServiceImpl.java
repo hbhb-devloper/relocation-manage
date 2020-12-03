@@ -62,7 +62,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<ReceiptResVO> receiptRes = receiptMapper.selectReceiptByCond(cond, request);
-        Map<Integer, String> unitMap = unitApi.getUnitMapByName();
+        Map<Integer, String> unitMap = unitApi.getUnitMapById();
         receiptRes.getList().forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
         return receiptRes;
     }
@@ -71,7 +71,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Transactional(rollbackFor = Exception.class)
     public synchronized void addSaveRelocationReceipt(List<ReceiptImportVO> dataList) {
         List<String> msg = new CopyOnWriteArrayList<>();
-        Map<String, Integer> unitMap = unitApi.getUnitMapById();
+        Map<String, Integer> unitMap = unitApi.getUnitMapByName();
         List<RelocationReceipt> receiptList = new ArrayList<>();
         // 验证导入合同编号是否存在
         List<String> contractNumList = projectService.getContractNumList();
@@ -189,7 +189,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         List<ReceiptResVO> list = receiptMapper.selectReceiptListByCond(vo);
 
-        Map<Integer, String> unitMap = unitApi.getUnitMapByName();
+        Map<Integer, String> unitMap = unitApi.getUnitMapById();
         list.forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
         return BeanConverter.copyBeanList(list, ReceiptExportVO.class);
     }
@@ -219,7 +219,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         String unitName = arrList.get(1);
         // 3-项目名称
         String projectName = arrList.get(3);
-        Map<String, Integer> unitMap = unitApi.getUnitMapById();
+        Map<String, Integer> unitMap = unitApi.getUnitMapByName();
         Integer unitId = unitMap.get(unitName);
         ProjectReqVO projectVo = new ProjectReqVO();
         projectVo.setUnitId(unitId);
