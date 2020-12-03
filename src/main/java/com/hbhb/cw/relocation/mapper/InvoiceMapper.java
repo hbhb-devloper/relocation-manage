@@ -25,8 +25,6 @@ public interface InvoiceMapper extends BaseMapper<RelocationInvoice> {
 
     Long selectPidByCondition(String contractNum, Integer unitId, String pinfo);
 
-    List<String> selectInvoiceRemake();
-
     Integer selectListByNumber(String invoiceNumber);
 
     List<String> selectInvoiceNumber();

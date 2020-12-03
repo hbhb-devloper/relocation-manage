@@ -42,4 +42,6 @@ public class ReceiptResVO implements Serializable {
     private String receiptTime;
     @Schema(description = "备注格式")
     private String remake;
+    @Schema(description = "供应商")
+    private String supplier;
 }

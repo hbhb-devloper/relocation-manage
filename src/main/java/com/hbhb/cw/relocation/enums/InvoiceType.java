@@ -7,7 +7,7 @@ package com.hbhb.cw.relocation.enums;
 public enum InvoiceType {
 
     /**
-     * 增值税普票
+     * 增值税普通发票
      */
     PLAIN_INVOICE(10, "增值税普通发票"),
 
@@ -29,7 +29,11 @@ public enum InvoiceType {
     /**
      * 收据
      */
-    RECEIPT(50, "收据");
+    RECEIPT(50, "收据"),
+    /**
+     * 增值税普票
+     */
+    PLAIN_INVOICE_ORDINARY(60, "增值税普票");
 
 
     private final Integer key;

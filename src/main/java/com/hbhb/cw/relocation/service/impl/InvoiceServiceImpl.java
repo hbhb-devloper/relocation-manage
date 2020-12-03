@@ -80,10 +80,10 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         // 获取发票类型字典
         List<DictVO> type = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
-        Map<String, String> typeMap = type.stream().collect(Collectors.toMap(DictVO::getLabel, DictVO::getValue));
+        Map<String, String> typeMap = type.stream().collect(Collectors.toMap(DictVO::getValue, DictVO::getLabel));
         invoiceResVo.getList().forEach(item -> {
             // 转换发票类型
-            item.setInvoiceTypeLabel(typeMap.get(item.getInvoiceType().toString()));
+            item.setInvoiceType(typeMap.get(item.getInvoiceType()));
             item.setIsImport(State.ONE.value().equals(item.getState()) ? State.YES.value() : State.NO.value());
             // 转换单位
             item.setUnit(unitMap.get(item.getUnitId()));
@@ -203,7 +203,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             //客户经理空
             //relocationInvoice.setManager(invoiceImport.getManager());
 
-            //==============添加 收款信息==================
+            // ==============添加 收款信息==================
             BeanUtils.copyProperties(invoiceImport, income);
             //类别 todo 字典
             income.setCategory("迁改".equals(invoiceImport.getCategory()) ? 1
@@ -295,7 +295,6 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private RelocationInvoice translation(InvoiceResVO invoiceVo) {
         RelocationInvoice invoice = new RelocationInvoice();
-        // 转换单位
         BeanUtils.copyProperties(invoiceVo, invoice);
         invoice.setInvoiceTime(DateUtil.string2DateYMD(invoiceVo.getInvoiceTime()));
         invoice.setState(Integer.valueOf(invoiceVo.getState()));

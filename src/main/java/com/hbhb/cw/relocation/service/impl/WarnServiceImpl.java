@@ -111,9 +111,26 @@ public class WarnServiceImpl implements WarnService {
                 warnMapper.updateSateByProjectNum(projectNum);
             }
         }
+        List<RelocationWarn> list = new ArrayList<>();
+        // 开票未回款预警
+        List<WarnResVO> warnResVoList = projectMapper.selectProjectStartWarn();
+        warnResVoList.forEach(item -> list.add(RelocationWarn.builder()
+                .projectId(item.getProjectId())
+                .projectNum(item.getProjectNum())
+                .anticipatePayment(new BigDecimal(item.getAnticipatePayment()))
+                .constructionUnit(item.getConstructionUnit())
+                .contractDuration(item.getContractDuration())
+                .contractNum(item.getContractNum())
+                .finalPayment(new BigDecimal(item.getFinalPayment()))
+                .oppositeUnit(item.getOppositeUnit())
+                .unitId(item.getUnitId())
+                .isReceived(false)
+                .state(true)
+                .compensationSate(item.getCompensationSate())
+                .type(0)
+                .build()));
         // 新增预警信息 1-合同到期未回款预警
         List<WarnResVO> warnResVO = projectMapper.selectProjectFinalWarn();
-        List<RelocationWarn> list = new ArrayList<>();
         warnResVO.forEach(item -> list.add(RelocationWarn.builder()
                 .projectId(item.getProjectId())
                 .projectNum(item.getProjectNum())
@@ -149,7 +166,7 @@ public class WarnServiceImpl implements WarnService {
                 }
             }
         }
-
+        // 3.按照单位进行统计合同到期未回款预警
 
     }
 

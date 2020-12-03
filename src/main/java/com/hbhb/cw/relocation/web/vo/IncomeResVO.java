@@ -1,12 +1,13 @@
 package com.hbhb.cw.relocation.web.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.Serializable;
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.beetl.sql.annotation.entity.AutoID;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @author xiaokang
@@ -43,6 +44,8 @@ public class IncomeResVO implements Serializable {
     private String invoiceNum;
     @Schema(description = "发票类型")
     private String invoiceType;
+    @Schema(description = "发票类型值")
+    private Integer invoiceTypeLabel;
     @Schema(description = "价款")
     private BigDecimal amount;
     @Schema(description = "税额")

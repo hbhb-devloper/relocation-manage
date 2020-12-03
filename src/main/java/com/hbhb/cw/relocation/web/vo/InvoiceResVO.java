@@ -39,7 +39,7 @@ public class InvoiceResVO implements Serializable {
     @Schema(description = "业务类型")
     private String businessType;
     @Schema(description = "发票类型")
-    private Integer invoiceType;
+    private String invoiceType;
     @Schema(description = "发票类型")
     private String invoiceTypeLabel;
     @Schema(description = "购方税号")

@@ -16,18 +16,19 @@ import java.util.List;
 @SqlResource("relocationProject")
 public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
-    PageResult<ProjectResVO> selectProjectByCond(ProjectReqVO cond, PageRequest<ProjectResVO> request);
+ List<ProjectResVO> selectProjectByCondList(ProjectReqVO cond);
 
-    List<String> selectProjectNum();
+ PageResult<ProjectResVO> selectProjectByCond(ProjectReqVO cond, PageRequest<ProjectResVO> request);
 
-    List<String> selectContractNumList();
+ List<String> selectProjectNum();
 
-    PageResult<StatementResVO> selectProjectStatementByUnitId(Integer unitId, PageRequest<ProjectResVO> request);
+ List<String> selectContractNumList();
 
-    List<AmountVO> selectCompensationAmount(List<String> list);
+ PageResult<StatementResVO> selectProjectStatementByUnitId(Integer unitId, PageRequest<ProjectResVO> request);
+
+ List<AmountVO> selectCompensationAmount(List<String> list);
 
     List<ProjectSelectVO> selectSumConstructionBudget(List<String> list);
-
 
     List<RelocationProject> selectProject();
 
@@ -35,18 +36,16 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     List<String> selectProjectNumByProjectNum(List<String> list);
 
-    List<WarnResVO> selectProjectFinalWarn();
+ List<WarnResVO> selectProjectFinalWarn();
 
-    List<StatementResVO> selectProjectStatementListByUnitId(Integer unitId);
+ List<StatementResVO> selectProjectStatementListByUnitId(Integer unitId);
 
-    List<WarnCountVO> selectProjectWarnCount();
+ List<WarnCountVO> selectProjectWarnCount();
 
-    void deleteBatch(List<Long> list);
+ ProjectResVO selectProjectById(Long id);
 
-    List<Long> selectNotCorrelationId();
+ List<Long> selectProjectIdByContractNum(String contractNum);
 
-    ProjectResVO selectProjectById(Long id);
-
-    List<Long> selectProjectIdByContractNum(String contractNum);
+ List<WarnResVO> selectProjectStartWarn();
 
 }

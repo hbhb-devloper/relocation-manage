@@ -15,6 +15,7 @@ select
     invoice_time invoiceTime,
     invoice_num invoiceNum,
     invoice_type invoiceType,
+    invoice_type invoiceTypeLabel,
     amount,
     tax,
     tax_include_amount taxIncludeAmount,

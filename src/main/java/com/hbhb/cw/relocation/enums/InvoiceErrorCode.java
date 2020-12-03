@@ -20,6 +20,7 @@ public enum InvoiceErrorCode {
     RELOCATION_INCOME_AMOUNT_ERROR("80008", "relocation.income.amount.error"),
     RELOCATION_INCOME_NUMBER_EXIST("80009", "relocation.income.number.exist"),
     RELOCATION_INCOME_EXCEL_EXIST("80010", "relocation.income.excel.exist"),
+    RELOCATION_RECEIPT_REMAKE_ERROR("80011", "relocation.receipt.remake.error")
     ;
 
     private String code;

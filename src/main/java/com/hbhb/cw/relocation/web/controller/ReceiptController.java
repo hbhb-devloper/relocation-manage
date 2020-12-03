@@ -94,8 +94,8 @@ public class ReceiptController {
 
     @Operation(summary = "跟据收据编号查看收据详情")
     @GetMapping("/info")
-    private void getReceipt(String receiptNum) {
-        receiptService.getReceipt(receiptNum);
+    public ReceiptResVO getReceipt(String receiptNum) {
+        return receiptService.getReceipt(receiptNum);
     }
 
 }

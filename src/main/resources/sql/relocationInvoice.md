@@ -80,7 +80,6 @@ getInvoiceDetailById
     from relocation_invoice ri
         where ri.id = #{id}
 ```
-
 updateByPrimaryKey
 ===
 ```sql
@@ -158,14 +157,12 @@ updateByPrimaryKey
     -- @}
         where id = #{cond.id}
 ```
-
 getProjectInfo
 ===
 ```sql
     SELECT CONCAT(contract_num, unit_id, project_name) info,
     id FROM relocation_project
 ```
-
 selectExportListByCondition
 ===
 ```sql
@@ -223,18 +220,11 @@ selectPidByCondition
         and contract_num = #{contractNum}
         and project_name = #{pinfo}
 ```
-
-selectInvoiceRemake
-===
-```sql
-select remake  from relocation_invoice
-```
 selectInvoiceNumber
 ===
 ```sql
 select invoice_number  from relocation_invoice
 ```
-
 selectListByNumber
 ===
 ```sql
@@ -242,7 +232,6 @@ select count(*)
 from relocation_invoice
 where invoice_number = #{invoiceNumber}
 ```
-
 selectInvoiceByInvoiceNum
 ===
 ```sql

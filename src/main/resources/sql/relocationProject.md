@@ -64,6 +64,70 @@ selectProjectByCond
      -- @}
             order by contract_num
 ```
+selectProjectByCondList
+===
+```sql
+          select
+                rp.id                   as id,
+                unit_id                 as unitId,
+                project_name            as projectName,
+                project_num             as projectNum,
+                project_type            as projectType,
+                project_year            as projectYear,
+                project_month           as projectMonth,
+                eoms_repair_num         as eomsRepairNum,
+                eoms_cut_num            as eomsCutNum,
+                plan_start_time         as planStartTime,
+                plan_end_time           as planEndTime,
+                actual_end_time         as actualEndTime,
+                network_hierarchy       as networkHierarchy,
+                construction_budget     as constructionBudget,
+                construction_cost       as constructionCost,
+                construction_audit_cost as constructionAuditCost,
+                construction_unit       as constructionUnit,
+                material_budget         as materialBudget,
+                material_cost           as materialCost,
+                opposite_unit           as oppositeUnit,
+                opposite_contacts       as oppositeContacts,
+                opposite_contacts_num   as oppositeContactsNum,
+                has_compensation        as hasCompensation,
+                compensation_type       as compensationType,
+                compensation_amount     as compensationAmount,
+                compensation_sate       as compensationSate,
+                compensation_remake     as compensationRemake,
+                contract_num            as contractNum,
+                contract_type           as contractType,
+                contract_name           as contractName,
+                contract_duration       as contractDuration,
+                is_initiative           as isInitiative,
+                anticipate_payable      as anticipatePayable,
+                anticipate_payment      as anticipatePayment,
+                final_payment           as finalPayment,
+                cause                   as cause,
+                file_id                as fileId
+          from relocation_project rp
+    -- @where(){
+            -- @if(!isEmpty(cond.contractNum)){
+                and contract_num like concat('%', #{cond.contractNum},'%')
+            -- @}
+            -- @if(!isEmpty(cond.unitId)){
+                and unit_id=#{cond.unitId}
+            -- @}
+            -- @if(!isEmpty(cond.projectNum)){
+                and project_num  like concat('%', #{cond.projectNum},'%')
+            -- @}
+            -- @if(!isEmpty(cond.compensationSate)){
+                and compensation_sate = #{cond.compensationSate}
+            -- @}
+            -- @if(!isEmpty(cond.contractDuration)){
+                and contract_duration = #{cond.contractDuration}
+            -- @}                                  	   
+            -- @if(!isEmpty(cond.projectName)){
+                and project_name like concat('%', #{cond.projectName},'%')
+            -- @}
+     -- @}
+            order by contract_num
+```
 selectProjectNum    
 ===
 ```sql
@@ -150,20 +214,19 @@ selectProjectFinalWarn
 ===
 ```sql
     select project_num        as projectNum,    
-           rp.unit_id               as unitId,
+           rp.unit_id         as unitId,
            construction_unit  as constructionUnit,
            opposite_unit      as oppositeUnit,
            rp.contract_num    as contractNum,
            anticipate_payment as anticipatePayment,
-           ri.is_received     as isReceived,
            final_payment      as finalPayment,
            contract_duration  as contractDuration
     from relocation_project rp
-             left join relocation_income ri on ri.contract_num = rp.contract_num
-    where contract_duration mod 2 = 0 and compensation_sate = 30 or 70 and contract_duration != 0
+    where contract_duration mod 2 = 0 and compensation_sate != 10 or 80 and contract_duration != 0 
+    and actual_end_time is not null
 ```   
 selectCompensationAmount
-===
+===  
 ```sql
 select id                  as id ,
        contract_num        as contractNum,
@@ -202,6 +265,7 @@ selectProject
         select id, contract_duration 
         from relocation_project
         where compensation_sate not in (10,80,0)
+        and actual_end_time is not null 
 ```
 updateBatch
 ===
@@ -224,7 +288,6 @@ selectProjectNumByProjectNum
       -- @}
       )
 ```
-
 selectProjectStatementListByUnitId
 ===
 ```sql
@@ -304,8 +367,6 @@ selectProjectWarnCount
     and contract_duration != 0
     group by unit_id;
 ```
-
-
 selectNotCorrelationId
 ===
 ```sql
@@ -315,18 +376,6 @@ where id not in (select project_id from relocation_warn)
   and id not in (select project_id from relocation_invoice)
   and id not in (select project_id from relocation_receipt)
 ```
-
-deleteBatch
-===
-```sql
-delete from relocation_project
-where id in(
--- @for(item in list){
-#{item}
--- @}
-)
-```
-
 selectProjectById
 ===
 ```sql
@@ -376,4 +425,21 @@ selectProjectIdByContractNum
 select id
 from relocation_project
 where contract_num =#{contractNum}        
+```
+selectProjectStartWarn
+===
+```sql
+select project_num        as projectNum,
+       rp.unit_id         as unitId,
+       construction_unit  as constructionUnit,
+       opposite_unit      as oppositeUnit,
+       rp.contract_num    as contractNum,
+       anticipate_payment as anticipatePayment,
+       final_payment      as finalPayment,
+       contract_duration  as contractDuration
+from relocation_project rp       
+where contract_duration mod 2 = 0 and compensation_sate != 10
+    or 80 and contract_duration != 0
+    and actual_end_time is not null
+    and rp.contract_num in (select ri.contract_num from relocation_income ri where ri.unreceived != 0)
 ```

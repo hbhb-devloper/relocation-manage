@@ -34,7 +34,6 @@ import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -42,6 +41,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.springframework.util.StringUtils.isEmpty;
 
 /**
  * @author hyk
@@ -213,7 +214,7 @@ IncomeServiceImpl implements IncomeService {
     public void addSaveRelocationInvoice(List<IncomeImportVO> dataList) {
         // 转换单位
         List<Unit> list = unitApiExp.getAllUnit();
-        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getShortName, Unit::getId));
+        Map<String, Integer> unitMap = list.stream().collect(Collectors.toMap(Unit::getUnitName, Unit::getId));
         List<RelocationIncome> incomes = new ArrayList<>();
         Map<String, String> invoiceTypeMap = getInvoiceType();
         for (IncomeImportVO importVO : dataList) {
@@ -229,8 +230,7 @@ IncomeServiceImpl implements IncomeService {
             income.setContractAmount(stringToBigDecimal(importVO.getContractAmount()));
             income.setInvoiceTime(DateUtil.string3DateYMD(importVO.getInvoiceTime()));
             income.setInvoiceNum(importVO.getInvoiceNum());
-            income.setInvoiceType(Integer.valueOf(String.valueOf(invoiceTypeMap.get(importVO.getInvoiceType()) != null
-                    ? invoiceTypeMap.get(importVO.getInvoiceType()) : 0)));
+            income.setInvoiceType(Integer.valueOf(invoiceTypeMap.get(importVO.getInvoiceType())));
             income.setAmount(stringToBigDecimal(importVO.getAmount()));
             income.setTax(stringToBigDecimal(importVO.getTax()));
             income.setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
@@ -254,17 +254,19 @@ IncomeServiceImpl implements IncomeService {
             income.setReceived(stringToBigDecimal(importVO.getReceived()));
             income.setUnreceived(stringToBigDecimal(importVO.getUnreceived()));
             //incomes.add(relocationIncome);
-            //插入收款信息
+            // 插入收款信息
             incomeMapper.insert(income);
-            //插入收款下的收款详情
+            // 插入收款下的收款详情
             RelocationIncomeDetail incomeDetail = new RelocationIncomeDetail();
-            incomeDetail.setIncomeId(income.getId());
-            incomeDetail.setCreateTime(DateUtil.getCurrentDate());
-            incomeDetail.setPayee(importVO.getPayee());
-            incomeDetail.setReceiptNum(importVO.getReceiptNum());
-            incomeDetail.setAmount(new BigDecimal(importVO.getMonthAmount()));
-            incomeDetail.setPayMonth(DateUtil.getCurrentMonth());
-            incomeDetailMapper.insert(incomeDetail);
+            if (!isEmpty(importVO.getReceiptNum())) {
+                incomeDetail.setIncomeId(income.getId());
+                incomeDetail.setCreateTime(DateUtil.getCurrentDate());
+                incomeDetail.setPayee(importVO.getPayee());
+                incomeDetail.setReceiptNum(importVO.getReceiptNum());
+                incomeDetail.setAmount(stringToBigDecimal(importVO.getAmount()));
+                incomeDetail.setPayMonth(DateUtil.getCurrentMonth());
+                incomeDetailMapper.insert(incomeDetail);
+            }
         }
         //incomeMapper.insertBatch(incomes);
     }
@@ -313,11 +315,11 @@ IncomeServiceImpl implements IncomeService {
     }
 
     public BigDecimal stringToBigDecimal(String str) {
-        if (!StringUtils.isEmpty(str)) {
+        if (!isEmpty(str)) {
+            str = str.replace("   ", "");
             str = str.trim();
-            str = str.replace(" ", "");
         }
-        if (StringUtils.isEmpty(str)) {
+        if (isEmpty(str)) {
             str = "0";
         } else if (str.contains("，")) {
             str = str.replace("，", "");
@@ -333,16 +335,16 @@ IncomeServiceImpl implements IncomeService {
         if (!"admin".equals(user.getUserName())) {
             cond.setUnitId(user.getUnitId());
         }
-        if (!StringUtils.isEmpty(cond.getStartTimeFrom())) {
+        if (!isEmpty(cond.getStartTimeFrom())) {
             cond.setStartTimeFrom(cond.getStartTimeFrom() + " 00:00:00");
         }
-        if (!StringUtils.isEmpty(cond.getStartTimeTo())) {
+        if (!isEmpty(cond.getStartTimeTo())) {
             cond.setStartTimeTo(cond.getStartTimeTo() + " 23:59:59");
         }
     }
 
     private Map<String, String> getInvoiceType() {
         List<DictVO> compensationSateList = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
-        return compensationSateList.stream().collect(Collectors.toMap(DictVO::getValue, DictVO::getLabel));
+        return compensationSateList.stream().collect(Collectors.toMap(DictVO::getLabel, DictVO::getValue));
     }
 }

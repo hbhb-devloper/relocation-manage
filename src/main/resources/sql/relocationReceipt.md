@@ -13,7 +13,8 @@ selectReceiptListByCond
              payment_desc        as paymentDesc,
              receipt_amount      as receiptAmount,
              receipt_time        as receiptTime,
-             remake              as remake
+             remake              as remake,
+             supplier            as supplier
       from relocation_receipt rr
      -- @where(){
        -- @if(!isEmpty(cond.unitId)){
@@ -49,7 +50,8 @@ selectReceiptByCond
              payment_desc        as paymentDesc,
              receipt_amount      as receiptAmount,
              receipt_time        as receiptTime,
-             remake              as remake
+             remake              as remake,
+             supplier            as supplier
     -- @}
       from relocation_receipt rr
      -- @where(){
@@ -93,7 +95,8 @@ selectReceiptByReceiptNum
              payment_desc        as paymentDesc,
              receipt_amount      as receiptAmount,
              receipt_time        as receiptTime,
-             remake              as remake
+             remake              as remake,
+             supplier            as supplier
       from relocation_receipt rr
 where receipt_num = #{receiptNum}
 ```
