@@ -2,12 +2,7 @@ package com.hbhb.cw.relocation.service.impl;
 
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.hbhb.core.utils.DateUtil;
-import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
-import com.hbhb.cw.relocation.enums.InvoiceSate;
-import com.hbhb.cw.relocation.enums.InvoiceType;
-import com.hbhb.cw.relocation.enums.IsReceived;
-import com.hbhb.cw.relocation.enums.RelocationErrorCode;
-import com.hbhb.cw.relocation.enums.State;
+import com.hbhb.cw.relocation.enums.*;
 import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
@@ -30,7 +25,7 @@ import com.hbhb.cw.systemcenter.enums.TypeCode;
 import com.hbhb.cw.systemcenter.vo.DictVO;
 import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
-
+import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
@@ -39,15 +34,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author xiaokang
@@ -156,7 +148,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void addSaveRelocationInvoice(List<InvoiceImportVO> dataList) {
         List<String> invoiceNumber = invoiceMapper.selectInvoiceNumber();
         // 转换单位
-        Map<String, Integer> unitMap = unitApiExp.getUnitMapByName();
+        Map<String, Integer> unitMap = unitApiExp.getUnitMapByUnitName();
         // 获取发票类型字典
         List<DictVO> type = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
         Map<String, String> typeMap = type.stream().collect(Collectors.toMap(DictVO::getValue, DictVO::getLabel));

@@ -13,16 +13,11 @@ import com.hbhb.cw.relocation.model.RelocationReceipt;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.ProjectService;
 import com.hbhb.cw.relocation.service.ReceiptService;
-import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
-import com.hbhb.cw.relocation.web.vo.ProjectResVO;
-import com.hbhb.cw.relocation.web.vo.ReceiptExportVO;
-import com.hbhb.cw.relocation.web.vo.ReceiptImportVO;
-import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
-import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
+import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.api.UnitApi;
 import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
-
+import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
@@ -30,17 +25,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import javax.annotation.Resource;
-
-import lombok.extern.slf4j.Slf4j;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author wangxiaogang
@@ -83,7 +71,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Transactional(rollbackFor = Exception.class)
     public synchronized void addSaveRelocationReceipt(List<ReceiptImportVO> dataList) {
         List<String> msg = new CopyOnWriteArrayList<>();
-        Map<String, Integer> unitMap = unitApi.getUnitMapByName();
+        Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
         List<RelocationReceipt> receiptList = new ArrayList<>();
         // 验证导入合同编号是否存在
         List<String> contractNumList = projectService.getContractNumList();
@@ -231,7 +219,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         String unitName = arrList.get(1);
         // 3-项目名称
         String projectName = arrList.get(3);
-        Map<String, Integer> unitMap = unitApi.getUnitMapByName();
+        Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
         Integer unitId = unitMap.get(unitName);
         ProjectReqVO projectVo = new ProjectReqVO();
         projectVo.setUnitId(unitId);

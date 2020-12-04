@@ -97,7 +97,7 @@ public class InvoiceController {
     }
 
     @Operation(summary = "迁改管理发票模板导出")
-    @PostMapping("/exportTemplate")
+    @PostMapping("/export/template")
     public void exportInvoiceTemplate(HttpServletRequest request, HttpServletResponse response) {
         List<InvoiceExportResVO> invoiceExportRes = null;
         String fileName = ExcelUtil.encodingFileName(request, "迁改发票数据表");

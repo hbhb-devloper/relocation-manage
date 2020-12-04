@@ -110,7 +110,7 @@ public class ProjectController implements RelocationProjectApi {
         List<Object> list = new ArrayList<>();
         String fileName = ExcelUtil.encodingFileName(request, "迁改基础信息导入模板");
         ExcelUtil.export2WebWithTemplate(response, fileName, "基础信息导入模板",
-                fileApi.getFileTemplatePath() + File.separator + "迁改基础信息导入模板.xlsx", list);
+                fileApi.getTemplatePath() + File.separator + "迁改基础信息导入模板.xlsx", list);
     }
 
     @Operation(summary = "上传合同")

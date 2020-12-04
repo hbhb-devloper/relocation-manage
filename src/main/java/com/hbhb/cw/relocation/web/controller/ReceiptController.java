@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.hbhb.core.utils.ExcelUtil;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.cw.relocation.exception.RelocationException;
+import com.hbhb.cw.relocation.rpc.FileApiExp;
 import com.hbhb.cw.relocation.service.ReceiptService;
 import com.hbhb.cw.relocation.service.listener.ReceiptListener;
 import com.hbhb.cw.relocation.web.vo.ReceiptExportVO;
@@ -23,7 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,6 +41,9 @@ public class ReceiptController {
 
     @Resource
     private ReceiptService receiptService;
+
+    @Resource
+    private FileApiExp fileApi;
 
     @Operation(summary = "迁改收据查询台账列表")
     @GetMapping("/list")
@@ -98,4 +104,12 @@ public class ReceiptController {
         return receiptService.getReceipt(receiptNum);
     }
 
+    @Operation(summary = "基础项目信息模板导出")
+    @PostMapping("/export/template")
+    public void getReceiptTemplate(HttpServletRequest request, HttpServletResponse response) {
+        List<Object> list = new ArrayList<>();
+        String fileName = ExcelUtil.encodingFileName(request, "迁改收据信息导入模板");
+        ExcelUtil.export2WebWithTemplate(response, fileName, "收据信息导入模板",
+                fileApi.getTemplatePath() + File.separator + "迁改收据信息导入模板.xlsx", list);
+    }
 }

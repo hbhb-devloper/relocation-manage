@@ -26,22 +26,19 @@ import com.hbhb.cw.systemcenter.enums.TypeCode;
 import com.hbhb.cw.systemcenter.vo.DictVO;
 import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
-
+import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
-
-import lombok.extern.slf4j.Slf4j;
 
 import static org.springframework.util.StringUtils.isEmpty;
 
@@ -182,7 +179,7 @@ IncomeServiceImpl implements IncomeService {
     @Transactional(rollbackFor = Exception.class)
     public void addSaveRelocationInvoice(List<IncomeImportVO> dataList) {
         // 转换单位
-        Map<String, Integer> unitMap = unitApiExp.getUnitMapByName();
+        Map<String, Integer> unitMap = unitApiExp.getUnitMapByUnitName();
         List<RelocationIncome> incomes = new ArrayList<>();
         Map<String, String> invoiceTypeMap = getInvoiceType();
         for (IncomeImportVO importVO : dataList) {

@@ -135,9 +135,9 @@ updateIncomeReceived
 selectExportList
 ===
 ```sql
-    select
+    ri.id,
     category,
-    u.short_name unit,
+    unit_id unit,
     supplier,
     contract_num contractNum,
     contract_name contractName,
@@ -147,20 +147,21 @@ selectExportList
     invoice_time invoiceTime,
     invoice_num invoiceNum,
     invoice_type invoiceType,
+    invoice_type invoiceTypeLabel,
     amount,
     tax,
     tax_include_amount taxIncludeAmount,
     construction_name constructionName,
+    payment_type paymentType,
     is_received isReceived,
     aging,
     receivable,
     received,
     unreceived
     from relocation_income ri
-    left join unit u on ri.unit_id = u.id
     -- @where(){
       -- @if(cond.unitId == 429){
-        and ri.unit_id in (SELECT id FROM unit WHERE parent_id = 429)
+          and ri.unit_id in (#{cond.unitIds})
       -- @}
       -- @if(isNotEmpty(cond.unitId) && cond.unitId != 11 && cond.unitId != 429){
         and ri.unit_id = #{cond.unitId}

@@ -62,12 +62,12 @@ public class FinanceController {
     public void exportIncome(HttpServletRequest request, HttpServletResponse response,
                              @Parameter(description = "接收参数实体") @RequestBody FinanceReqVO cond,
                              @Parameter(hidden = true) @UserId Integer userId) {
-        String path = fileApi.getFileTemplatePath();
+        String path = fileApi.getTemplatePath();
 
         List<FinanceResVO> list = financeService.selectExportListByCondition(cond, userId);
         String fileName = ExcelUtil.encodingFileName(request, "涉财报表导出模板");
         log.info("模板路径：" + path + fileName);
         ExcelUtil.export2WebWithTemplate(response, fileName, "财务导出报表",
-                fileApi.getFileTemplatePath() + File.separator + "涉财报表导出模板.xlsx", list);
+                fileApi.getTemplatePath() + File.separator + "涉财报表导出模板.xlsx", list);
     }
 }

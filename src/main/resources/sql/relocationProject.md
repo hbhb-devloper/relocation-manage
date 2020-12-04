@@ -233,11 +233,7 @@ select id                  as id ,
        compensation_amount as compensationAmount,
        construction_budget as constructionBudget
 from relocation_project
-where contract_num in (
-  -- @for(item in list){
-     #{item}
-  -- @}
-    )
+where contract_num in (#{join(list)})
  ```
 selectSumCompensationAmount
 ===
@@ -252,11 +248,7 @@ selectSumConstructionBudget
  ```sql
     select contract_num as num, sum(construction_budget) as account
     from relocation_project
-    where contract_num in (
-    -- @for(item in list){
-        #{item} 
-    -- @}
-    )
+    where contract_num in (#{join(list)})
     group by contract_num;
  ```
 selectProject
@@ -282,11 +274,7 @@ selectProjectNumByProjectNum
 ===
 ```sql
         select project_num from relocation_project
-        where compensation_sate = 80  and project_num in (
-      -- @for(item in list){
-         #{item}
-      -- @}
-      )
+        where compensation_sate = 80  and project_num in (#{join(list)})
 ```
 selectProjectStatementListByUnitId
 ===
@@ -457,7 +445,7 @@ select project_num        as projectNum,
        final_payment      as finalPayment,
        contract_duration  as contractDuration
 from relocation_project rp       
-where contract_duration mod 2 = 0 and compensation_sate != 10
+where compensation_sate != 10
     or 80 and contract_duration != 0
     and actual_end_time is not null
     and rp.contract_num in (select ri.contract_num from relocation_income ri where ri.unreceived != 0)
