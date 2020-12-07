@@ -42,10 +42,8 @@ updateSateByProjectNum
 ===
 ```sql
      update relocation_warn
-     set state = 0
- -- @for(item in list)             
-     where project_num = #{item.label}
-      -- @}
+     set state = 0          
+     where project_num in (#{join(list)})
  ```
 
 selectWarnCountByUnitId

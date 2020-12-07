@@ -16,17 +16,17 @@ import java.util.List;
 @SqlResource("relocationProject")
 public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
- List<ProjectResVO> selectProjectByCondList(ProjectReqVO cond);
+    List<ProjectResVO> selectProjectByCondList(ProjectReqVO cond);
 
- PageResult<ProjectResVO> selectProjectByCond(ProjectReqVO cond, PageRequest<ProjectResVO> request);
+    PageResult<ProjectResVO> selectProjectByCond(ProjectReqVO cond, PageRequest<ProjectResVO> request);
 
- List<String> selectProjectNum();
+    List<String> selectProjectNum();
 
- List<String> selectContractNumList();
+    List<String> selectContractNumList();
 
- PageResult<StatementResVO> selectProjectStatementByUnitId(Integer unitId, PageRequest<ProjectResVO> request);
+    PageResult<StatementResVO> selectProjectStatementByUnitId(Integer unitId, PageRequest<ProjectResVO> request);
 
- List<AmountVO> selectCompensationAmount(List<String> list);
+    List<AmountVO> selectCompensationAmount(List<String> list);
 
     List<ProjectSelectVO> selectSumConstructionBudget(List<String> list);
 
@@ -36,17 +36,20 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     List<String> selectProjectNumByProjectNum(List<String> list);
 
- List<WarnResVO> selectProjectFinalWarn();
+    List<StatementResVO> selectProjectStatementListByUnitId(Integer unitId);
 
- List<StatementResVO> selectProjectStatementListByUnitId(Integer unitId);
+    List<WarnResVO> selectProjectStartWarn();
 
- List<WarnCountVO> selectProjectWarnCount();
+    List<WarnCountVO> selectProjectStartWarnCount();
 
- ProjectResVO selectProjectById(Long id);
+    List<WarnResVO> selectProjectFinalWarn();
 
- List<Long> selectProjectIdByContractNum(String contractNum);
+    List<WarnCountVO> selectProjectFinalWarnCount();
 
- List<WarnResVO> selectProjectStartWarn();
+    ProjectResVO selectProjectById(Long id);
+
+    List<Long> selectProjectIdByContractNum(String contractNum);
+
 
     RelocationProject selectOneByContractNum(String contractNum);
 }

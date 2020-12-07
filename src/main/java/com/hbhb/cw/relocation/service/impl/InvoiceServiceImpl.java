@@ -53,10 +53,10 @@ public class InvoiceServiceImpl implements InvoiceService {
     private InvoiceMapper invoiceMapper;
 
     @Resource
-    private UserApiExp userApiExp;
+    private UserApiExp userApi;
 
     @Resource
-    private UnitApiExp unitApiExp;
+    private UnitApiExp unitApi;
 
     @Resource
     private IncomeMapper incomeMapper;
@@ -72,17 +72,17 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public PageResult<InvoiceResVO> getInvoiceList(Integer pageNum, Integer pageSize,
-        InvoiceReqVO cond, Integer userId) {
-        UnitTopVO parentUnit = unitApiExp.getTopUnit();
+                                                   InvoiceReqVO cond, Integer userId) {
+        UnitTopVO parentUnit = unitApi.getTopUnit();
         List<Integer> unitIds = new ArrayList<>();
 
         if (parentUnit.getBenbu().equals(cond.getUnitId())) {
-            unitIds = unitApiExp.getSubUnit(parentUnit.getBenbu());
+            unitIds = unitApi.getSubUnit(parentUnit.getBenbu());
         }
         cond.setUnitIds(unitIds);
         PageRequest<InvoiceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<InvoiceResVO> invoiceResVo = invoiceMapper.selectListByCondition(cond, request);
-        Map<Integer, String> unitMap = unitApiExp.getUnitMapById();
+        Map<Integer, String> unitMap = unitApi.getUnitMapById();
 
         // 获取发票类型字典
         List<DictVO> type = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
@@ -96,9 +96,9 @@ public class InvoiceServiceImpl implements InvoiceService {
             // 转换区域
             item.setDistrict(unitMap.get(item.getDistrictId()));
             item.setAmountStatus(IsReceived.NOT_RECEIVED.key().equals(item.getAmountStatus())
-                ? IsReceived.NOT_RECEIVED.value()
-                : IsReceived.PART_RECEIVED.key().equals(item.getAmountStatus())
-                ? IsReceived.PART_RECEIVED.value() : IsReceived.RECEIVED.value());
+                    ? IsReceived.NOT_RECEIVED.value()
+                    : IsReceived.PART_RECEIVED.key().equals(item.getAmountStatus())
+                    ? IsReceived.PART_RECEIVED.value() : IsReceived.RECEIVED.value());
         });
         return invoiceResVo;
     }
@@ -137,7 +137,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         int i = fileName.lastIndexOf(".");
         String name = fileName.substring(i);
         if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue()
-            .equals(name))) {
+                .equals(name))) {
             throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
         }
     }
@@ -148,7 +148,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void addSaveRelocationInvoice(List<InvoiceImportVO> dataList) {
         List<String> invoiceNumber = invoiceMapper.selectInvoiceNumber();
         // 转换单位
-        Map<String, Integer> unitMap = unitApiExp.getUnitMapByUnitName();
+        Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
         // 获取发票类型字典
         List<DictVO> type = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
         Map<String, String> typeMap = type.stream().collect(Collectors.toMap(DictVO::getValue, DictVO::getLabel));
@@ -165,7 +165,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             boolean contains = invoiceNumber.contains(invoiceImport.getInvoiceNumber());
             if (contains) {
                 msg.add("在excel表中第" + i + "行，数据编号为:" + invoiceImport.getNumber()
-                    + "已存在发票表中\n");
+                        + "已存在发票表中\n");
             }
             RelocationInvoice invoice = new RelocationInvoice();
             RelocationIncome income = new RelocationIncome();
@@ -194,11 +194,11 @@ public class InvoiceServiceImpl implements InvoiceService {
             BeanUtils.copyProperties(invoiceImport, income);
             income.setReceivable(new BigDecimal(invoiceImport.getReceivable()));
             income.setReceived(new BigDecimal(invoiceImport.getReceived() == null ? "0.0" :
-                invoiceImport.getReceived()));
+                    invoiceImport.getReceived()));
             income.setUnreceived(new BigDecimal(invoiceImport.getUnreceived() == null ? "0.0" :
-                invoiceImport.getUnreceived()));
+                    invoiceImport.getUnreceived()));
             income.setCategory("迁改".equals(invoiceImport.getCategory()) ? 1
-                : "搬迁".equals(invoiceImport.getCategory()) ? 2 : 3);
+                    : "搬迁".equals(invoiceImport.getCategory()) ? 2 : 3);
             income.setUnitId(unitMap.get(invoiceImport.getUnit()));
             //合同起始时间
             income.setStartTime(DateUtil.string3DateYMD(invoiceImport.getStartTime()));
@@ -208,9 +208,9 @@ public class InvoiceServiceImpl implements InvoiceService {
             income.setInvoiceTime(DateUtil.string3DateYMD(invoiceImport.getInvoiceTime()));
             // 10-已收款 20-未收款 30-部分回款
             income.setIsReceived(IsReceived.NOT_RECEIVED.value().equals(invoiceImport.getCategory())
-                ? IsReceived.NOT_RECEIVED.key()
-                : IsReceived.PART_RECEIVED.value().equals(invoiceImport.getCategory())
-                ? IsReceived.PART_RECEIVED.key() : IsReceived.RECEIVED.key());
+                    ? IsReceived.NOT_RECEIVED.key()
+                    : IsReceived.PART_RECEIVED.value().equals(invoiceImport.getCategory())
+                    ? IsReceived.PART_RECEIVED.key() : IsReceived.RECEIVED.key());
             //发票号码
             income.setInvoiceNum(invoiceImport.getInvoiceNumber());
             //税额
@@ -239,7 +239,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO vo, Integer userId) {
         setConditionDetail(vo, userId);
         List<InvoiceExportResVO> exportResVos = invoiceMapper.selectExportListByCondition(vo);
-        Map<Integer, String> unitMap = unitApiExp.getUnitMapById();
+        Map<Integer, String> unitMap = unitApi.getUnitMapById();
         exportResVos.forEach(item -> {
             item.setInvoiceType(State.ONE.value().equals(item.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value()
                     : InvoiceType.SPECIAL_INVOICE.value());
@@ -259,8 +259,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 
 
     private void setConditionDetail(InvoiceReqVO cond, Integer userId) {
-        UserInfo user = userApiExp.getUserInfoById(userId);
-        if (!"admin".equals(user.getUserName())) {
+        UserInfo user = userApi.getUserInfoById(userId);
+        if (userApi.isAdmin(userId)) {
             cond.setUnitId(user.getUnitId());
         }
         if (!StringUtils.isEmpty(cond.getInvoiceTimeFrom())) {
@@ -311,7 +311,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         income.setInvoiceTime(relocationInvoice.getInvoiceTime());
         income.setInvoiceNum(relocationInvoice.getInvoiceNumber());
         income.setInvoiceType(relocationInvoice.getInvoiceType() == 1 ? InvoiceType.ELECTRONIC_PLAIN_INVOICE.key()
-            : InvoiceType.ELECTRONIC_SPECIAL_INVOICE.key());
+                : InvoiceType.ELECTRONIC_SPECIAL_INVOICE.key());
         income.setAmount(relocationInvoice.getAmount());
         income.setTax(relocationInvoice.getTaxAmount());
         income.setTaxIncludeAmount(relocationInvoice.getTaxIncludeAmount());

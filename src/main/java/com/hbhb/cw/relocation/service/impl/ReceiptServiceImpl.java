@@ -257,8 +257,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public ReceiptResVO getReceipt(String receiptNum) {
-        ReceiptResVO receiptResVO = receiptMapper.selectReceiptByReceiptNum(receiptNum);
-        return receiptResVO;
+        return receiptMapper.selectReceiptByReceiptNum(receiptNum);
     }
 
     private RelocationReceipt setReceipt(ReceiptResVO receiptResVO) {

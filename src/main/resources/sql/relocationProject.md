@@ -209,22 +209,7 @@ FROM (
                 -- @}
             -- @}
   
-```
-selectProjectFinalWarn
-===
-```sql
-    select project_num        as projectNum,    
-           rp.unit_id         as unitId,
-           construction_unit  as constructionUnit,
-           opposite_unit      as oppositeUnit,
-           rp.contract_num    as contractNum,
-           anticipate_payment as anticipatePayment,
-           final_payment      as finalPayment,
-           contract_duration  as contractDuration
-    from relocation_project rp
-    where contract_duration mod 2 = 0 and compensation_sate != 10 or 80 and contract_duration != 0 
-    and actual_end_time is not null
-```   
+```  
 selectCompensationAmount
 ===  
 ```sql
@@ -344,15 +329,60 @@ SELECT *FROM (
             -- @}
   
 ``` 
-selectProjectWarnCount
+selectProjectStartWarn
+===
+```sql
+select rp.id                 as projectId,
+       rp.project_num        as projectNum,
+       rp.unit_id            as unitId,
+       rp.construction_unit  as constructionUnit,
+       rp.opposite_unit      as oppositeUnit,
+       rp.contract_num       as contractNum,
+       rp.anticipate_payment as anticipatePayment,
+       rp.final_payment      as finalPayment,
+       rp.contract_duration  as contractDuration,
+       rp.compensation_sate       as compensationSate
+from relocation_income ri
+         left join relocation_project rp on ri.contract_num = rp.contract_num
+where ri.received != 0 and rp.project_num is not null;
+```
+selectProjectStartWarnCount
+===
+```sql
+    select rp.unit_id   as unitId,
+           count(rp.id) as count
+    from relocation_income ri
+             left join relocation_project rp on ri.contract_num = rp.contract_num
+    where ri.received != 0
+      and rp.project_num is not null;
+```
+selectProjectFinalWarn
+===
+```sql
+    select id                 as projectId,
+           project_num        as projectNum,    
+           rp.unit_id         as unitId,
+           construction_unit  as constructionUnit,
+           opposite_unit      as oppositeUnit,
+           rp.contract_num    as contractNum,
+           anticipate_payment as anticipatePayment,
+           final_payment      as finalPayment,
+           contract_duration  as contractDuration,
+           compensation_sate       as compensationSate
+    from relocation_project rp
+    where contract_duration mod 2 = 0 and compensation_sate != 10 or 80 and contract_duration != 0 
+    and actual_end_time is not null
+``` 
+selectProjectFinalWarnCount
 ===
 ```sql
     select unit_id as unitId,
            count(id)  as count
     from relocation_project rp
-    where contract_duration mod 2 = 0 
-    and compensation_sate = 30 or 70
-    and contract_duration != 0
+    where 
+    contract_duration mod 2 = 0 
+    and compensation_sate != 10 or 80 
+    and contract_duration != 0 
     group by unit_id;
 ```
 selectNotCorrelationId
@@ -428,25 +458,8 @@ select
     contract_name           as contractName,
     plan_start_time         as planStartTime,
     plan_end_time           as planEndTime,
-    compensation_amount     as compensationAmount
+    compensation_amount     as compensationAmount,
 from relocation_project
 where contract_num = #{contractNum} 
 group by contract_num 
-```
-selectProjectStartWarn
-===
-```sql
-select project_num        as projectNum,
-       rp.unit_id         as unitId,
-       construction_unit  as constructionUnit,
-       opposite_unit      as oppositeUnit,
-       rp.contract_num    as contractNum,
-       anticipate_payment as anticipatePayment,
-       final_payment      as finalPayment,
-       contract_duration  as contractDuration
-from relocation_project rp       
-where compensation_sate != 10
-    or 80 and contract_duration != 0
-    and actual_end_time is not null
-    and rp.contract_num in (select ri.contract_num from relocation_income ri where ri.unreceived != 0)
 ```

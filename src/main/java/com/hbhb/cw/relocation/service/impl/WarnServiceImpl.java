@@ -145,26 +145,39 @@ public class WarnServiceImpl implements WarnService {
                 .build()));
         // 每隔一个月执行一次api向预警信息表里提供一次数据
         warnMapper.insertBatch(list);
-        // todo 完善推送  分两种情况开票未回款预警、合同到期未回款预警
         // 1.按照单位进行统计开票未回款预警、
-        List<WarnCountVO> warnList = projectMapper.selectProjectWarnCount();
-        Map<Integer, Integer> warnMap = warnList.stream().collect(Collectors.toMap(WarnCountVO::getUnitId, WarnCountVO::getCount));
+        List<WarnCountVO> warnStartList = projectMapper.selectProjectStartWarnCount();
+        Map<Integer, Integer> warnStartMap = warnStartList.stream().collect(Collectors.toMap(WarnCountVO::getUnitId, WarnCountVO::getCount));
         // 2.按照统计数据向每个单位负责人推送邮件信息
         List<Integer> userIdList = flowApi.getFlowRoleUserList("迁改预警负责人");
         List<UserInfo> userList = userApi.getUserInfoBatch(userIdList);
-        Set<Integer> keys = warnMap.keySet();
+        Set<Integer> keys = warnStartMap.keySet();
         for (Integer unitId : keys) {
             // 该单位对应的条数
-            Integer count = warnMap.get(unitId);
+            Integer count = warnStartMap.get(unitId);
+            String context = count + "条开票未回款";
             // 向每个单位负责人推送邮件
             for (UserInfo userVO : userList) {
                 if (unitId.equals(userVO.getUnitId())) {
-                    mailService.postMail("1515689038@qq.com", userVO.getNickName(), count.toString());
+                    mailService.postMail("1515689038@qq.com", userVO.getNickName(), context);
                 }
             }
         }
         // 3.按照单位进行统计合同到期未回款预警
-
+        List<WarnCountVO> warnFinalList = projectMapper.selectProjectFinalWarnCount();
+        Map<Integer, Integer> warnMap = warnFinalList.stream().collect(Collectors.toMap(WarnCountVO::getUnitId, WarnCountVO::getCount));
+        Set<Integer> key = warnStartMap.keySet();
+        for (Integer unitId : key) {
+            // 该单位对应的条数
+            Integer count = warnMap.get(unitId);
+            String context = count + "条合同到期未回款";
+            // 向每个单位负责人推送邮件
+            for (UserInfo userVO : userList) {
+                if (unitId.equals(userVO.getUnitId())) {
+                    mailService.postMail("1515689038@qq.com", userVO.getNickName(), context);
+                }
+            }
+        }
     }
 
     @Override
