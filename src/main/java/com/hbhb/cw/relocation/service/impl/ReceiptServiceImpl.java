@@ -57,7 +57,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
         // 判断用户单位
         UserInfo user = userAip.getUserInfoById(userId);
-        if (UnitEnum.isHangzhou(user.getUnitId())) {
+        if (!UnitEnum.isHangzhou(user.getUnitId())) {
             cond.setUnitId(user.getUnitId());
         }
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
@@ -81,11 +81,10 @@ public class ReceiptServiceImpl implements ReceiptService {
         int i = 1;
         for (ReceiptImportVO importVos : dataList) {
             String remake = importVos.getRemake();
+            remake = remake.replace("；", ";");
             // 按照英文分隔符划分
             List<String> arrList = Arrays.asList(remake.split(";"));
-            // 按照中文分隔符划分
-            List<String> brrList = Arrays.asList(remake.split("；"));
-            if (arrList.size() != 4 && brrList.size() != 4) {
+            if (arrList.size() != 4) {
                 msg.add("请检查备注修改列：" + remake + "格式");
             }
             // 判断收据编号是否已存在
@@ -98,10 +97,14 @@ public class ReceiptServiceImpl implements ReceiptService {
             }
             // todo 缺少与基础信息表进行验证，目前导入数据"备注修改列"数据存在匹配不符待后续数据完善进行匹配验证
             //1.获取基础信息中所对应的数据
+            List<ProjectResVO> projectRes = getProjectResVo(arrList, unitMap);
             // 2.与导入数据备注修改列进行比较
+            if (projectRes.size() == 0) {
+                msg.add("第" + i + "行数据备注列信息无法与基础信息数据无法匹配");
+            }
             i++;
         }
-        if (msg.isEmpty()) {
+        if (!msg.isEmpty()) {
             throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_IMPORT_ERROR, msg.toString());
         }
         dataList.forEach(item -> receiptList.add(RelocationReceipt.builder()
@@ -199,7 +202,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         RelocationReceipt receipt = setReceipt(receiptResVO);
         // 新增收据验证
         List<String> msg = new ArrayList<>();
-
+        // 备注列信息
         String remake = receipt.getRemake();
         // 按照英文分隔符划分
         List<String> arrList = Arrays.asList(remake.split(";"));
@@ -212,20 +215,9 @@ public class ReceiptServiceImpl implements ReceiptService {
             msg.add("合同编号：" + receipt.getContractNum() + "在基础信息中不存在请检查！");
         }
         // 判断备注列数据是否对应基础信息
-        // 1-合同编号
-        String contractNum = arrList.get(0);
-        // 2-区县
-        String unitName = arrList.get(1);
-        // 3-项目名称
-        String projectName = arrList.get(3);
+        // 转换单位
         Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
-        Integer unitId = unitMap.get(unitName);
-        ProjectReqVO projectVo = new ProjectReqVO();
-        projectVo.setUnitId(unitId);
-        projectVo.setProjectName(projectName);
-        projectVo.setContractNum(contractNum);
-        // 跟据备注列值匹配项目基础信息
-        List<ProjectResVO> projectRes = projectMapper.selectProjectByCondList(projectVo);
+        List<ProjectResVO> projectRes = getProjectResVo(arrList, unitMap);
         if (projectRes.size() > 1) {
             throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_CANT_MATCH);
         } else if (projectRes.size() == 0) {
@@ -273,5 +265,21 @@ public class ReceiptServiceImpl implements ReceiptService {
         return receipt;
     }
 
+    private List<ProjectResVO> getProjectResVo(List<String> remake, Map<String, Integer> unitMap) {
+        // 判断备注列数据是否对应基础信息
+        // 1-合同编号
+        String contractNum = remake.get(0);
+        // 2-区县
+        String unitName = remake.get(1);
+        // 3-项目名称
+        String projectName = remake.get(3);
+        Integer unitId = unitMap.get(unitName);
+        ProjectReqVO projectVo = new ProjectReqVO();
+        projectVo.setUnitId(unitId);
+        projectVo.setProjectName(projectName);
+        projectVo.setContractNum(contractNum);
+        //  通过备注修改列对比基础项目信息表
+        return projectMapper.selectProjectByCondList(projectVo);
+    }
 
 }

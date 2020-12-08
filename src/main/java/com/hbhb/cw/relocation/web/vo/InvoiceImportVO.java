@@ -1,7 +1,6 @@
 package com.hbhb.cw.relocation.web.vo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -91,12 +90,4 @@ public class InvoiceImportVO implements Serializable {
     @ExcelProperty(value = "备注", index = 23)
     private String remake;
 
-    @ExcelProperty(value = "应收", index = 24)
-    private String receivable;
-
-    @ExcelProperty(value = "已收", index = 25)
-    private String received;
-
-    @ExcelProperty(value = "未收", index = 26)
-    private String unreceived;
 }

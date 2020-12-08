@@ -67,7 +67,7 @@ IncomeServiceImpl implements IncomeService {
     private DictApiExp dictApi;
 
     @Resource
-    private ProjectMapper relocationProjectMapper;
+    private ProjectMapper projectMapper;
 
     @Resource
     private InvoiceMapper invoiceMapper;
@@ -169,7 +169,7 @@ IncomeServiceImpl implements IncomeService {
         }
         //部分回款 2
         if (received.compareTo(receivable) < 0
-            && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
+                && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
             income1.setIsReceived(2);
             incomeMapper.updateTemplateById(income1);
         }
@@ -180,7 +180,7 @@ IncomeServiceImpl implements IncomeService {
     public void addSaveRelocationInvoice(List<IncomeImportVO> dataList) {
         // 转换单位
         Map<String, Integer> unitMap = unitApiExp.getUnitMapByUnitName();
-        List<RelocationIncome> incomes = new ArrayList<>();
+        // List<RelocationIncome> incomes = new ArrayList<>();
         Map<String, String> invoiceTypeMap = getInvoiceType();
         for (IncomeImportVO importVO : dataList) {
             RelocationIncome income = new RelocationIncome();
@@ -196,7 +196,7 @@ IncomeServiceImpl implements IncomeService {
             income.setInvoiceTime(DateUtil.string3DateYMD(importVO.getInvoiceTime()));
             income.setInvoiceNum(importVO.getInvoiceNum());
             income.setInvoiceType(Integer.valueOf(String.valueOf(invoiceTypeMap.get(importVO.getInvoiceType()) != null
-                ? invoiceTypeMap.get(importVO.getInvoiceType()) : 0)));
+                    ? invoiceTypeMap.get(importVO.getInvoiceType()) : 0)));
             income.setInvoiceType(Integer.valueOf(invoiceTypeMap.get(importVO.getInvoiceType())));
             income.setAmount(stringToBigDecimal(importVO.getAmount()));
             income.setTax(stringToBigDecimal(importVO.getTax()));
@@ -276,7 +276,7 @@ IncomeServiceImpl implements IncomeService {
 
     public BigDecimal stringToBigDecimal(String str) {
         if (!isEmpty(str)) {
-            str = str.replace("   ", "");
+            str = str.replace("  ", "");
             str = str.trim();
         }
         if (isEmpty(str)) {
