@@ -7,7 +7,7 @@ import com.hbhb.cw.relocation.service.StatementService;
 import com.hbhb.cw.relocation.web.vo.ProjectResVO;
 import com.hbhb.cw.relocation.web.vo.StatementExportVO;
 import com.hbhb.cw.relocation.web.vo.StatementResVO;
-import com.hbhb.cw.systemcenter.vo.UnitTopVO;
+import com.hbhb.cw.systemcenter.enums.UnitEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
@@ -31,8 +31,7 @@ public class StatementServiceImpl implements StatementService {
 
     @Override
     public PageResult<StatementResVO> getStatementList(Integer pageNum, Integer pageSize, Integer unitId) {
-        UnitTopVO parentUnit = unitApi.getTopUnit();
-        if (parentUnit.getHangzhou().equals(unitId)) {
+        if (UnitEnum.isHangzhou(unitId)) {
             unitId = null;
         }
         PageRequest<ProjectResVO> request = DefaultPageRequest.of(pageNum, pageSize);
@@ -44,8 +43,7 @@ public class StatementServiceImpl implements StatementService {
 
     @Override
     public List<StatementExportVO> export(Integer unitId) {
-        UnitTopVO parentUnit = unitApi.getTopUnit();
-        if (parentUnit.getHangzhou().equals(unitId)) {
+        if (UnitEnum.isHangzhou(unitId)) {
             unitId = null;
         }
         List<StatementResVO> statementList = projectMapper.selectProjectStatementListByUnitId(unitId);

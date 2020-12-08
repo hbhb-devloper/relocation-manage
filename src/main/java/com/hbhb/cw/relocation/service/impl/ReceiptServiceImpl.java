@@ -15,7 +15,7 @@ import com.hbhb.cw.relocation.service.ProjectService;
 import com.hbhb.cw.relocation.service.ReceiptService;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.api.UnitApi;
-import com.hbhb.cw.systemcenter.vo.UnitTopVO;
+import com.hbhb.cw.systemcenter.enums.UnitEnum;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -51,13 +51,13 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize, Integer userId) {
-        UnitTopVO parentUnit = unitApi.getTopUnit();
-        if (parentUnit.getHangzhou().equals(cond.getUnitId())) {
+
+        if (UnitEnum.isHangzhou(cond.getUnitId())) {
             cond.setUnitId(null);
         }
         // 判断用户单位
         UserInfo user = userAip.getUserInfoById(userId);
-        if (!user.getUnitId().equals(parentUnit.getHangzhou())) {
+        if (UnitEnum.isHangzhou(user.getUnitId())) {
             cond.setUnitId(user.getUnitId());
         }
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
@@ -177,13 +177,12 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public List<ReceiptExportVO> export(ReceiptReqVO vo, Integer userId) {
-        UnitTopVO parentUnit = unitApi.getTopUnit();
-        if (parentUnit.getHangzhou().equals(vo.getUnitId())) {
+        if (UnitEnum.isHangzhou(vo.getUnitId())) {
             vo.setUnitId(null);
         }
         // 判断用户单位
         UserInfo user = userAip.getUserInfoById(userId);
-        if (!user.getUnitId().equals(parentUnit.getHangzhou())) {
+        if (UnitEnum.isHangzhou(user.getUnitId())) {
             vo.setUnitId(user.getUnitId());
         }
 
