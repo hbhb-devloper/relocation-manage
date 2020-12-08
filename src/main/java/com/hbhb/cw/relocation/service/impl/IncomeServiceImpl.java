@@ -23,8 +23,8 @@ import com.hbhb.cw.relocation.web.vo.IncomeReqVO;
 import com.hbhb.cw.relocation.web.vo.IncomeResVO;
 import com.hbhb.cw.systemcenter.enums.DictCode;
 import com.hbhb.cw.systemcenter.enums.TypeCode;
+import com.hbhb.cw.systemcenter.enums.UnitEnum;
 import com.hbhb.cw.systemcenter.vo.DictVO;
-import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -85,10 +85,10 @@ IncomeServiceImpl implements IncomeService {
     @Override
     public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize,
                                                  IncomeReqVO cond, Integer userId) {
-        UnitTopVO parentUnit = unitApiExp.getTopUnit();
+
         List<Integer> unitIds = new ArrayList<>();
-        if (parentUnit.getBenbu().equals(cond.getUnitId())) {
-            unitIds = unitApiExp.getSubUnit(parentUnit.getBenbu());
+        if (UnitEnum.isBenbu(cond.getUnitId())) {
+            unitIds = unitApiExp.getSubUnit(cond.getUnitId());
         }
         Map<Integer, String> unitMap = unitApiExp.getUnitMapById();
         cond.setUnitIds(unitIds);

@@ -22,8 +22,8 @@ import com.hbhb.cw.relocation.web.vo.InvoiceReqVO;
 import com.hbhb.cw.relocation.web.vo.InvoiceResVO;
 import com.hbhb.cw.systemcenter.enums.DictCode;
 import com.hbhb.cw.systemcenter.enums.TypeCode;
+import com.hbhb.cw.systemcenter.enums.UnitEnum;
 import com.hbhb.cw.systemcenter.vo.DictVO;
-import com.hbhb.cw.systemcenter.vo.UnitTopVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -73,11 +73,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public PageResult<InvoiceResVO> getInvoiceList(Integer pageNum, Integer pageSize,
                                                    InvoiceReqVO cond, Integer userId) {
-        UnitTopVO parentUnit = unitApi.getTopUnit();
+
         List<Integer> unitIds = new ArrayList<>();
 
-        if (parentUnit.getBenbu().equals(cond.getUnitId())) {
-            unitIds = unitApi.getSubUnit(parentUnit.getBenbu());
+        if (UnitEnum.isBenbu(cond.getUnitId())) {
+            unitIds = unitApi.getSubUnit(cond.getUnitId());
         }
         cond.setUnitIds(unitIds);
         PageRequest<InvoiceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
