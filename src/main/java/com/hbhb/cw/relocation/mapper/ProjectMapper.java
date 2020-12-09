@@ -1,8 +1,8 @@
 package com.hbhb.cw.relocation.mapper;
 
+import com.hbhb.beetlsql.BaseMapper;
 import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.web.vo.*;
-import com.hbhb.web.beetlsql.BaseMapper;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.beetl.sql.mapper.annotation.SqlResource;

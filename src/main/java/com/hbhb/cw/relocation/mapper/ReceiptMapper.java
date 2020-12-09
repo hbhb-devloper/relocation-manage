@@ -1,9 +1,9 @@
 package com.hbhb.cw.relocation.mapper;
 
+import com.hbhb.beetlsql.BaseMapper;
 import com.hbhb.cw.relocation.model.RelocationReceipt;
 import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
-import com.hbhb.web.beetlsql.BaseMapper;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 

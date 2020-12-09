@@ -1,8 +1,8 @@
 package com.hbhb.cw.relocation.mapper;
 
 
+import com.hbhb.beetlsql.BaseMapper;
 import com.hbhb.cw.relocation.model.RelocationFile;
-import com.hbhb.web.beetlsql.BaseMapper;
 
 import java.util.List;
 
