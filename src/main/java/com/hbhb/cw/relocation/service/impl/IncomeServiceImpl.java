@@ -76,8 +76,7 @@ IncomeServiceImpl implements IncomeService {
     public void judgeFileName(String fileName) {
         int i = fileName.lastIndexOf(".");
         String name = fileName.substring(i);
-        if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue()
-                .equals(name))) {
+        if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue().equals(name))) {
             throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
         }
     }
@@ -292,7 +291,7 @@ IncomeServiceImpl implements IncomeService {
 
     private void setConditionDetail(IncomeReqVO cond, Integer userId) {
         UserInfo user = userApi.getUserInfoById(userId);
-        if (userApi.isAdmin(userId)) {
+        if (userApi.isAdmin(userId) && cond.getUnitId() == null) {
             cond.setUnitId(user.getUnitId());
         }
         if (!isEmpty(cond.getStartTimeFrom())) {

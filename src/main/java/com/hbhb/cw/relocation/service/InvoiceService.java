@@ -24,45 +24,38 @@ public interface InvoiceService {
     /**
      * 发票详情
      *
-     * @param id
-     * @return
+     * @param id id
+     * @return 发票详情
      */
     RelocationInvoice getInvoiceDetail(Long id);
 
     /**
      * 修改发票信息
      *
-     * @param invoice
+     * @param invoice 发票内容
      */
     void updateInvoice(InvoiceResVO invoice);
 
     /**
      * 新增发票
      *
-     * @param invoice
+     * @param invoice 发票内容
      */
     void addInvoice(InvoiceResVO invoice);
 
     /**
-     * 检测文件类型
-     *
-     * @param fileName
-     */
-    void judgeFileName(String fileName);
-
-    /**
      * 导入添加
      *
-     * @param dataList
+     * @param dataList excel导入
      */
     void addSaveRelocationInvoice(List<InvoiceImportVO> dataList);
 
     /**
      * 条件导出
      *
-     * @param vo
-     * @param userId
-     * @return
+     * @param vo     条件
+     * @param userId 用户id
+     * @return 导出数据列表
      */
     List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO vo, Integer userId);
 
@@ -73,4 +66,11 @@ public interface InvoiceService {
      * @return 发票详情
      */
     RelocationInvoice getInvoice(String invoiceNum);
+
+    /**
+     * 检测文件类型
+     *
+     * @param fileName 文件类型
+     */
+    void judgeFileName(String fileName);
 }

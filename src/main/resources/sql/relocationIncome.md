@@ -135,7 +135,8 @@ updateIncomeReceived
 selectExportList
 ===
 ```sql
-    ri.id,
+select 
+    id,
     category,
     unit_id unit,
     supplier,

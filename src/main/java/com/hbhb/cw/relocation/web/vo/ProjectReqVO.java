@@ -1,13 +1,12 @@
 package com.hbhb.cw.relocation.web.vo;
 
 import com.hbhb.web.annotation.Decode;
-
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 /**
  * @author xiaokang
@@ -19,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class ProjectReqVO implements Serializable {
     private static final long serialVersionUID = 1660341686428378078L;
 
+    private Long id;
     @Schema(description = "合同编号")
     @Decode
     private String contractNum;

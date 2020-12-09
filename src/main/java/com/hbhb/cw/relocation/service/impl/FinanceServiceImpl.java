@@ -3,6 +3,7 @@ package com.hbhb.cw.relocation.service.impl;
 
 import com.hbhb.core.utils.DateUtil;
 import com.hbhb.cw.relocation.enums.IsReceived;
+import com.hbhb.cw.relocation.enums.State;
 import com.hbhb.cw.relocation.mapper.FinanceMapper;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
@@ -10,22 +11,17 @@ import com.hbhb.cw.relocation.service.FinanceService;
 import com.hbhb.cw.relocation.web.vo.FinanceReqVO;
 import com.hbhb.cw.relocation.web.vo.FinanceResVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
-
+import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Resource;
-
-import lombok.extern.slf4j.Slf4j;
-
-import static java.lang.Integer.parseInt;
 
 /**
  * @author hyk
@@ -54,13 +50,13 @@ public class FinanceServiceImpl implements FinanceService {
         PageRequest<FinanceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         setUnitId(cond, userId);
         PageResult<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond, request);
-        Map<Integer, String> isReceived = getIsReceived();
+        Map<String, String> isReceived = getIsAllReceived();
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
         // 组装理赔方式、收款状态、县市
         financeResVos.getList().forEach(item -> {
             //网银打款、现金转账，开具发票收据
             item.setPayType("网银打款");
-            item.setIsAllReceived(isReceived.get(parseInt(item.getIsAllReceived())));
+            item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
             item.setUnit(unitMap.get(item.getUnitId()));
         });
 
@@ -75,12 +71,12 @@ public class FinanceServiceImpl implements FinanceService {
             cond.setYear(currentYear);
         }
         List<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond);
-        Map<Integer, String> isReceived = getIsReceived();
+        Map<String, String> isReceived = getIsAllReceived();
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
         financeResVos.forEach(item -> {
             //网银打款、现金转账，开具发票收据
             item.setPayType("网银打款");
-            item.setIsAllReceived(isReceived.get(parseInt(item.getIsAllReceived())));
+            item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
             item.setUnit(unitMap.get(item.getUnitId()));
         });
         return financeResVos;
@@ -94,11 +90,16 @@ public class FinanceServiceImpl implements FinanceService {
     }
 
 
-    private Map<Integer, String> getIsReceived() {
-        Map<Integer, String> receivedMap = new HashMap<>();
-        receivedMap.put(IsReceived.RECEIVED.key(), IsReceived.RECEIVED.value());
-        receivedMap.put(IsReceived.NOT_RECEIVED.key(), IsReceived.NOT_RECEIVED.value());
-        receivedMap.put(IsReceived.PART_RECEIVED.key(), IsReceived.PART_RECEIVED.value());
+    private Map<String, String> getIsAllReceived() {
+        Map<String, String> receivedMap = new HashMap<>();
+        receivedMap.put(State.ONE.value(), State.YES.value());
+        receivedMap.put(State.ZERO.value(), State.NO.value());
         return receivedMap;
+    }
+
+    private Map<String, String> getPaymentStatus() {
+        Map<String, String> statusMap = new HashMap<>();
+        statusMap.put(String.valueOf(IsReceived.RECEIVED.key()), IsReceived.RECEIVED.value());
+        return statusMap;
     }
 }

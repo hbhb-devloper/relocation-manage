@@ -105,9 +105,9 @@ public class InvoiceController {
                 null);
     }
 
-    @Operation(summary = "跟据收据编号查看收据详情")
+    @Operation(summary = "跟据发票编号查看收据详情")
     @GetMapping("/info")
-    private void getInvoice(String InvoiceNum) {
-        invoiceService.getInvoice(InvoiceNum);
+    public RelocationInvoice getInvoice(String invoiceNum) {
+        return invoiceService.getInvoice(invoiceNum);
     }
 }

@@ -227,7 +227,7 @@ public class WarnServiceImpl implements WarnService {
     }
 
     private Map<Integer, String> getIsReceived() {
-        Map<Integer, String> receivedMap = new HashMap<>();
+        Map<Integer, String> receivedMap = new HashMap<>(100);
         receivedMap.put(IsReceived.RECEIVED.key(), IsReceived.RECEIVED.value());
         receivedMap.put(IsReceived.NOT_RECEIVED.key(), IsReceived.NOT_RECEIVED.value());
         receivedMap.put(IsReceived.PART_RECEIVED.key(), IsReceived.RECEIVED.value());

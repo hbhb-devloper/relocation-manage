@@ -16,7 +16,7 @@ import java.util.List;
 @SqlResource("relocationProject")
 public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
-    List<ProjectResVO> selectProjectByCondList(ProjectReqVO cond);
+    List<ProjectReqVO> selectProjectByCondList(ProjectReqVO cond);
 
     PageResult<ProjectResVO> selectProjectByCond(ProjectReqVO cond, PageRequest<ProjectResVO> request);
 
@@ -48,7 +48,4 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
 
     List<Long> selectProjectIdByContractNum(String contractNum);
-
-
-    RelocationProject selectOneByContractNum(String contractNum);
 }

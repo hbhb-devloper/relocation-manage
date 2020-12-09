@@ -95,30 +95,23 @@ public class ReceiptServiceImpl implements ReceiptService {
             if (!contractNumList.contains(importVos.getContractNum())) {
                 msg.add("合同编号：" + importVos.getContractNum() + "在基础信息中不存在请检查！");
             }
-            // todo 缺少与基础信息表进行验证，目前导入数据"备注修改列"数据存在匹配不符待后续数据完善进行匹配验证
             //1.获取基础信息中所对应的数据
-            List<ProjectResVO> projectRes = getProjectResVo(arrList, unitMap);
-            // 2.与导入数据备注修改列进行比较
-            if (projectRes.size() == 0) {
-                msg.add("第" + i + "行数据备注列信息无法与基础信息数据无法匹配");
+            List<ProjectReqVO> projectReq = getProjectResVo(arrList, unitMap);
+            RelocationReceipt receipt = new RelocationReceipt();
+            BeanUtils.copyProperties(importVos, receipt);
+            receipt.setUnitId(unitMap.get(importVos.getUnit()));
+            receipt.setReceiptTime(DateUtil.string3DateYMD(importVos.getReceiptTime()));
+            if (projectReq.size() == 1) {
+                projectReq.forEach(item -> receipt.setProjectId(item.getId()));
+            }
+            if (receipt.getProjectId() != null) {
+                receiptList.add(receipt);
             }
             i++;
         }
         if (!msg.isEmpty()) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_IMPORT_ERROR, msg.toString());
+            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
         }
-        dataList.forEach(item -> receiptList.add(RelocationReceipt.builder()
-                .category(item.getCategory())
-                .compensationAmount(item.getCompensationAmount())
-                .contractName(item.getContractName())
-                .contractNum(item.getContractNum())
-                .paymentAmount(item.getPaymentAmount())
-                .paymentDesc(item.getPaymentDesc())
-                .receiptAmount(item.getReceiptAmount())
-                .receiptTime(DateUtil.string3DateYMD(item.getReceiptTime()))
-                .remake(item.getRemake())
-                .unitId(unitMap.get(item.getUnit()))
-                .build()));
         receiptMapper.insertBatch(receiptList);
         // 新增收款信息
         List<RelocationIncome> income = setRelocationIncome(receiptList);
@@ -188,9 +181,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (UnitEnum.isHangzhou(user.getUnitId())) {
             vo.setUnitId(user.getUnitId());
         }
-
         List<ReceiptResVO> list = receiptMapper.selectReceiptListByCond(vo);
-
+        // 处理单位转换格式
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
         list.forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
         return BeanConverter.copyBeanList(list, ReceiptExportVO.class);
@@ -200,34 +192,6 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Transactional(rollbackFor = Exception.class)
     public void addRelocationReceipt(ReceiptResVO receiptResVO) {
         RelocationReceipt receipt = setReceipt(receiptResVO);
-        // 新增收据验证
-        List<String> msg = new ArrayList<>();
-        // 备注列信息
-        String remake = receipt.getRemake();
-        // 按照英文分隔符划分
-        List<String> arrList = Arrays.asList(remake.split(";"));
-        if (arrList.size() != 4) {
-            msg.add("请检查备注修改列：" + remake + "格式");
-        }
-        // 判断合同编号是否存在基础项目表中
-        List<String> contractNumList = projectService.getContractNumList();
-        if (!contractNumList.contains(receipt.getContractNum())) {
-            msg.add("合同编号：" + receipt.getContractNum() + "在基础信息中不存在请检查！");
-        }
-        // 判断备注列数据是否对应基础信息
-        // 转换单位
-        Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
-        List<ProjectResVO> projectRes = getProjectResVo(arrList, unitMap);
-        if (projectRes.size() > 1) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_CANT_MATCH);
-        } else if (projectRes.size() == 0) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_INVOICE_REMAKE_ERROR);
-        } else {
-            projectRes.forEach(item -> receipt.setProjectId(item.getId()));
-        }
-        if (msg.size() != 0) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_INVOICE_REMAKE_ERROR, msg.toString());
-        }
         receiptMapper.insert(receipt);
         List<RelocationReceipt> receipts = new ArrayList<>();
         receipts.add(receipt);
@@ -254,6 +218,40 @@ public class ReceiptServiceImpl implements ReceiptService {
     private RelocationReceipt setReceipt(ReceiptResVO receiptResVO) {
         RelocationReceipt receipt = new RelocationReceipt();
         BeanUtils.copyProperties(receiptResVO, receipt);
+        // 新增收据验证
+        List<String> msg = new ArrayList<>();
+        // 备注列信息
+        String remake = receipt.getRemake();
+        // 按照英文分隔符划分
+        remake = remake.replace("；", ";");
+        List<String> arrList = Arrays.asList(remake.split(";"));
+        if (arrList.size() != 4) {
+            msg.add("请检查备注修改列：" + remake + "格式");
+        }
+        // 判断合同编号是否存在基础项目表中
+        List<String> contractNumList = projectService.getContractNumList();
+        if (!contractNumList.contains(receipt.getContractNum())) {
+            msg.add("合同编号：" + receipt.getContractNum() + "在基础信息中不存在请检查！");
+        }
+        // 判断是否存在该收据
+        List<String> list = receiptMapper.selectReceiptNum();
+        if (list.contains(receiptResVO.getReceiptNum())) {
+            throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_ALREADY_EXIST);
+        }
+        // 判断备注列数据是否对应基础信息
+        // 转换单位
+        Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
+        List<ProjectReqVO> projectRes = getProjectResVo(arrList, unitMap);
+        if (projectRes.size() > 1) {
+            throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_CANT_MATCH);
+        } else if (projectRes.size() == 0) {
+            throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_REMAKE_ERROR);
+        } else {
+            projectRes.forEach(item -> receipt.setProjectId(item.getId()));
+        }
+        if (msg.size() != 0) {
+            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
+        }
         // 赔补金额
         receipt.setCompensationAmount(new BigDecimal(receiptResVO.getCompensationAmount()));
         // 已到账金额
@@ -265,7 +263,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         return receipt;
     }
 
-    private List<ProjectResVO> getProjectResVo(List<String> remake, Map<String, Integer> unitMap) {
+    private List<ProjectReqVO> getProjectResVo(List<String> remake, Map<String, Integer> unitMap) {
         // 判断备注列数据是否对应基础信息
         // 1-合同编号
         String contractNum = remake.get(0);
@@ -281,5 +279,6 @@ public class ReceiptServiceImpl implements ReceiptService {
         //  通过备注修改列对比基础项目信息表
         return projectMapper.selectProjectByCondList(projectVo);
     }
+
 
 }

@@ -101,7 +101,10 @@ getFinanceList
             and rp.contract_num like concat('%', #{cond.contractNum},'%')
           -- @}
           -- @if(cond.receiptStatus == 1){
-            and rp.anticipate_payable = rp.anticipate_payment
+            and rp.anticipate_payable-rp.anticipate_payment=0
+          -- @}
+          -- @if(cond.receiptStatus == 0){
+            and rp.anticipate_payable-rp.anticipate_payment !=0
           -- @}
         -- @}
         -- @pageIgnoreTag(){
