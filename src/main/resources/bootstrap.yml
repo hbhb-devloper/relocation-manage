@@ -50,7 +50,9 @@ host:
 port:
   default: 10042
   dev: 10028
-  test: 10011
+  dev-proxy: 10014
+  test: 10029
+  test-proxy: 10015
   prd: 10018
 
 # 指定服务提供方实例地址（为空则不指定）
@@ -85,28 +87,28 @@ spring:
   profiles: dev
   cloud:
     consul:
-      host: ${host.docker0}
+      host: consul.yeexun.com.cn
       discovery:
         instance-id: ${spring.application.name}-${port.dev}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
         health-check-url: http://${host.docker0}:${port.dev}/actuator/health
-        hostname: ${host.docker0}
-        port: ${port.dev}
-
+        # 开发环境使用代理ip
+        hostname: ${host.proxy}
+        port: ${port.dev-proxy}
 ################### 测试环境配置 ###################
 ---
 spring:
   profiles: test
   cloud:
     consul:
-      host: ${host.docker0}
+      host: consul.yeexun.com.cn
       discovery:
         instance-id: ${spring.application.name}-${port.test}-${spring.cloud.client.ip-address}
         service-name: ${spring.application.name}
         health-check-url: http://${host.docker0}:${port.test}/actuator/health
-        hostname: ${host.docker0}
-        port: ${port.test}
-
+        # 测试环境使用代理ip
+        hostname: ${host.proxy}
+        port: ${port.test-proxy}
 ################### 正式环境配置 ###################
 ---
 spring:
