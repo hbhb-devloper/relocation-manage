@@ -83,8 +83,8 @@ public class ProjectController implements RelocationProjectApi {
 
     @Operation(summary = "删除迁改项目信息")
     @DeleteMapping("/{id}")
-    public void deleteProject(@PathVariable Long id, User user) {
-        projectService.deleteRelocationProject(id, user);
+    public void deleteProject(@PathVariable Long id, @UserId Integer userId) {
+        projectService.deleteRelocationProject(id, userId);
     }
 
     @Override

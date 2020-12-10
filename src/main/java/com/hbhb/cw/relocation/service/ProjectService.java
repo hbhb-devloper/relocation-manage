@@ -44,10 +44,10 @@ public interface ProjectService {
     /**
      * 跟据id删除项目信息
      *
-     * @param id   项目id
-     * @param user 登录用户
+     * @param id     项目id
+     * @param userId 登录用户
      */
-    void deleteRelocationProject(Long id, User user);
+    void deleteRelocationProject(Long id, Integer userId);
 
     /**
      * 获取所有合同编号

@@ -22,7 +22,8 @@ public enum RelocationErrorCode {
     RELOCATION_CONTRACT_ERROR("80909", "relocation.contract.error"),
     RELOCATION_RECEIPT_CANT_MATCH("80910", "relocation.receipt.cant.match"),
     RELOCATION_RECEIPT_ALREADY_EXIST("80911", "relocation.receipt.already.exist"),
-    RELOCATION_RECEIPT_REMAKE_ERROR("80011", "relocation.receipt.remake.error");
+    RELOCATION_RECEIPT_REMAKE_ERROR("80011", "relocation.receipt.remake.error"),
+    RELOCATION_PROJECT_PERMISSION_DENIED("80012", "relocation.project.permission.denied");
 
 
     private final String code;

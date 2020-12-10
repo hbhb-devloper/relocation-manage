@@ -223,7 +223,9 @@ selectProjectNumByProjectNum
 selectProjectStatementListByUnitId
 ===
 ```sql
-SELECT *FROM (
+SELECT
+   t3.*,t6.thisYearInvoiceAccount,t7.thisYearReceivable
+FROM (
          select *
          from (
                   select count(rp.id)                                                                  as compensationAmount,

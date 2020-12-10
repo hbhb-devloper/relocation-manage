@@ -50,7 +50,7 @@ public class ReceiptController {
     public PageResult<ReceiptResVO> getReceiptList(
             @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
             @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
-            @Parameter(description = "接收参数实体") ReceiptReqVO cond, @UserId Integer userId) {
+            @Parameter(description = "接收参数实体") ReceiptReqVO cond, @Parameter(hidden = true) @UserId Integer userId) {
         pageNum = pageNum == null ? 1 : pageNum;
         pageSize = pageSize == null ? 10 : pageSize;
         return receiptService.getReceiptList(cond, pageNum, pageSize, userId);
@@ -92,7 +92,7 @@ public class ReceiptController {
     @Operation(summary = "迁改管理收据导出")
     @PostMapping("/export")
     public void exportReceipt(HttpServletRequest request, HttpServletResponse response,
-                              @Parameter(description = "导出筛选条件实体") @RequestBody ReceiptReqVO vo, @UserId Integer userId) {
+                              @Parameter(description = "导出筛选条件实体") @RequestBody ReceiptReqVO vo, @Parameter(hidden = true) @UserId Integer userId) {
         List<ReceiptExportVO> list = receiptService.export(vo, userId);
         String fileName = ExcelUtil.encodingFileName(request, "签报列表");
         ExcelUtil.export2Web(response, fileName, fileName, ReceiptExportVO.class, list);
@@ -109,7 +109,7 @@ public class ReceiptController {
     public void getReceiptTemplate(HttpServletRequest request, HttpServletResponse response) {
         List<Object> list = new ArrayList<>();
         String fileName = ExcelUtil.encodingFileName(request, "迁改收据信息导入模板");
-        ExcelUtil.export2WebWithTemplate(response, fileName, "收据信息导入模板",
+        ExcelUtil.export2WebWithTemplate(response, fileName, "迁改收据信息导入模板",
                 fileApi.getTemplatePath() + File.separator + "迁改收据信息导入模板.xlsx", list);
     }
 }
