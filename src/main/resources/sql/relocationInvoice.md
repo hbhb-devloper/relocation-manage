@@ -25,7 +25,7 @@ selectListByCondition
         ri.state,
         ri.is_import          isImport,
         ri.manager,
-        rii.is_received       amountStatus,
+        rii.is_received       paymentStatus,
         rii.receivable        receivable,
         rii.received          received,
         rii.unreceived        unreceived
