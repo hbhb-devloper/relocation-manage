@@ -3,16 +3,19 @@ package com.hbhb.cw.relocation.service.impl;
 import com.hbhb.core.bean.BeanConverter;
 import com.hbhb.core.utils.DateUtil;
 import com.hbhb.cw.relocation.enums.InvoiceType;
+import com.hbhb.cw.relocation.enums.PaymentType;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.mapper.ReceiptMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
+import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.model.RelocationReceipt;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.ProjectService;
 import com.hbhb.cw.relocation.service.ReceiptService;
+import com.hbhb.cw.relocation.util.BigDecimalUtil;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.api.UnitApi;
 import com.hbhb.cw.systemcenter.enums.UnitEnum;
@@ -114,61 +117,12 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
         receiptMapper.insertBatch(receiptList);
         // 新增收款信息
-        List<RelocationIncome> income = setRelocationIncome(receiptList);
-        incomeMapper.insertBatch(income);
-    }
-
-    private List<RelocationIncome> setRelocationIncome(List<RelocationReceipt> receiptList) {
         List<RelocationIncome> list = new ArrayList<>();
         for (RelocationReceipt receipt : receiptList) {
-            RelocationIncome income = new RelocationIncome();
-            income.setCategory(1);
-            //经办单位(单位id)
-            income.setUnitId(receipt.getUnitId());
-            //合同编号
-            income.setContractNum(receipt.getContractNum());
-            //合同名称
-            income.setContractName(receipt.getContractName());
-            // 供应商
-            income.setSupplier(receipt.getSupplier());
-            // todo 暂时不匹配
-            // 起始时间
-            income.setStartTime(new Date());
-            // 合同截止时间
-            income.setContractDeadline(new Date());
-            // 合同金额
-            income.setContractAmount(new BigDecimal(0));
-            // 工程名
-            // income.setConstructionName();
-            // 款项类型
-            // income.setPaymentType(receipt.getRemake().split(";")[2]);
-            // 账龄
-            // income.setAging();
-            // 开收据时间
-            income.setInvoiceTime(receipt.getReceiptTime());
-            // 发票号码
-            income.setInvoiceNum(receipt.getReceiptNum());
-            // 发票类型
-            income.setInvoiceType(InvoiceType.RECEIPT.key());
-            // 价款
-            income.setAmount(receipt.getReceiptAmount());
-            // 税额
-            income.setTax(new BigDecimal(0));
-            //税合计
-            income.setTaxIncludeAmount(receipt.getReceiptAmount());
-            // 收款情况（0-未收款、1-已收款）
-            income.setIsReceived(0);
-            // 应收
-            income.setReceivable(receipt.getReceiptAmount());
-            // 已收
-            income.setReceived(receipt.getPaymentAmount());
-            // 未收
-            income.setUnreceived(receipt.getCompensationAmount().subtract(receipt.getPaymentAmount()));
-            // 收款人
-            income.setPayee(receipt.getPayee());
+            RelocationIncome income = setRelocationIncome(receipt);
             list.add(income);
         }
-        return list;
+        incomeMapper.insertBatch(list);
     }
 
     @Override
@@ -191,18 +145,28 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addRelocationReceipt(ReceiptResVO receiptResVO) {
+        // 判断是否存在该收据
+        List<String> list = receiptMapper.selectReceiptNum();
+        if (list.contains(receiptResVO.getReceiptNum())) {
+            throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_ALREADY_EXIST);
+        }
         RelocationReceipt receipt = setReceipt(receiptResVO);
         receiptMapper.insert(receipt);
-        List<RelocationReceipt> receipts = new ArrayList<>();
-        receipts.add(receipt);
-        List<RelocationIncome> incomes = setRelocationIncome(receipts);
-        incomeMapper.insertBatch(incomes);
+        RelocationIncome incomes = setRelocationIncome(receipt);
+        incomeMapper.insert(incomes);
     }
 
     @Override
     public void updateRelocationReceipt(ReceiptResVO receiptResVO) {
         RelocationReceipt receipt = setReceipt(receiptResVO);
         receiptMapper.updateById(receipt);
+        // 修改收款信息
+        RelocationIncome income = setRelocationIncome(receipt);
+        RelocationIncome single = incomeMapper.createLambdaQuery()
+                .andEq(RelocationIncome::getInvoiceNum, receiptResVO.getReceiptNum())
+                .single();
+        income.setId(single.getId());
+        incomeMapper.updateById(income);
     }
 
     @Override
@@ -233,11 +197,6 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (!contractNumList.contains(receipt.getContractNum())) {
             msg.add("合同编号：" + receipt.getContractNum() + "在基础信息中不存在请检查！");
         }
-        // 判断是否存在该收据
-        List<String> list = receiptMapper.selectReceiptNum();
-        if (list.contains(receiptResVO.getReceiptNum())) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_ALREADY_EXIST);
-        }
         // 判断备注列数据是否对应基础信息
         // 转换单位
         Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
@@ -253,11 +212,11 @@ public class ReceiptServiceImpl implements ReceiptService {
             throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
         }
         // 赔补金额
-        receipt.setCompensationAmount(new BigDecimal(receiptResVO.getCompensationAmount()));
+        receipt.setCompensationAmount(BigDecimalUtil.getBigDecimal(receiptResVO.getCompensationAmount()));
         // 已到账金额
-        receipt.setPaymentAmount(new BigDecimal(receiptResVO.getPaymentAmount()));
+        receipt.setPaymentAmount(BigDecimalUtil.getBigDecimal(receiptResVO.getPaymentAmount()));
         // 开收据金额
-        receipt.setReceiptAmount(new BigDecimal(receiptResVO.getReceiptAmount()));
+        receipt.setReceiptAmount(BigDecimalUtil.getBigDecimal(receiptResVO.getReceiptAmount()));
         // 开收据时间
         receipt.setReceiptTime(DateUtil.string2DateYMD(receiptResVO.getReceiptTime()));
         return receipt;
@@ -280,5 +239,66 @@ public class ReceiptServiceImpl implements ReceiptService {
         return projectMapper.selectProjectByCondList(projectVo);
     }
 
+
+    private RelocationIncome setRelocationIncome(RelocationReceipt receipt) {
+        RelocationProject project = projectMapper.single(receipt.getProjectId());
+        RelocationIncome income = new RelocationIncome();
+        income.setCategory(1);
+        //经办单位(单位id)
+        income.setUnitId(receipt.getUnitId());
+        //合同编号
+        income.setContractNum(receipt.getContractNum());
+        //合同名称
+        income.setContractName(receipt.getContractName());
+        // 供应商
+        income.setSupplier(receipt.getSupplier());
+        // 起始时间
+        income.setStartTime(project.getPlanStartTime());
+        // 合同截止时间
+        income.setContractDeadline(project.getActualEndTime());
+        // 合同金额
+        income.setContractAmount(project.getCompensationAmount());
+        // 工程名
+        income.setConstructionName(project.getProjectName());
+        // 账龄新增为0
+        income.setAging(0);
+        // 款项类型
+        String remake = receipt.getRemake();
+        remake = remake.replace("；", ";");
+        List<String> arrList = Arrays.asList(remake.split(";"));
+        Map<String, Integer> payMap = getPaymentType();
+        income.setPaymentType(payMap.get(arrList.get(2)));
+        // 开收据时间
+        income.setInvoiceTime(receipt.getReceiptTime());
+        // 发票号码
+        income.setInvoiceNum(receipt.getReceiptNum());
+        // 发票类型
+        income.setInvoiceType(InvoiceType.RECEIPT.key());
+        // 价款
+        income.setAmount(receipt.getReceiptAmount());
+        // 税额
+        income.setTax(new BigDecimal(0));
+        //税合计
+        income.setTaxIncludeAmount(receipt.getReceiptAmount());
+        // 收款情况（0-未收款、1-已收款）
+        income.setIsReceived(0);
+        // 应收
+        income.setReceivable(receipt.getReceiptAmount());
+        // 已收
+        income.setReceived(receipt.getPaymentAmount());
+        // 未收
+        income.setUnreceived(receipt.getCompensationAmount().subtract(receipt.getPaymentAmount()));
+        // 收款人
+        income.setPayee(receipt.getPayee());
+        return income;
+    }
+
+    private Map<String, Integer> getPaymentType() {
+        Map<String, Integer> paymentTypeMap = new HashMap<>(100);
+        paymentTypeMap.put(PaymentType.ADVANCE_PAYMENT.value(), PaymentType.ADVANCE_PAYMENT.key());
+        paymentTypeMap.put(PaymentType.FINAL_PARAGRAPH.value(), PaymentType.FINAL_PARAGRAPH.key());
+        paymentTypeMap.put(PaymentType.FINAL_PAYMENT.value(), PaymentType.FINAL_PAYMENT.key());
+        return paymentTypeMap;
+    }
 
 }

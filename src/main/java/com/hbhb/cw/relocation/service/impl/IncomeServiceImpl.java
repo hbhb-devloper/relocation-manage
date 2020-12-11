@@ -4,19 +4,19 @@ import com.alibaba.excel.support.ExcelTypeEnum;
 import com.hbhb.core.utils.DateUtil;
 import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
 import com.hbhb.cw.relocation.enums.IsReceived;
+import com.hbhb.cw.relocation.enums.PaymentType;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
-import com.hbhb.cw.relocation.mapper.InvoiceMapper;
-import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationIncomeDetail;
 import com.hbhb.cw.relocation.rpc.DictApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.IncomeService;
+import com.hbhb.cw.relocation.util.BigDecimalUtil;
 import com.hbhb.cw.relocation.web.vo.IncomeExportVO;
 import com.hbhb.cw.relocation.web.vo.IncomeImportVO;
 import com.hbhb.cw.relocation.web.vo.IncomeReqVO;
@@ -66,11 +66,6 @@ IncomeServiceImpl implements IncomeService {
     @Resource
     private DictApiExp dictApi;
 
-    @Resource
-    private ProjectMapper projectMapper;
-
-    @Resource
-    private InvoiceMapper invoiceMapper;
 
     @Override
     public void judgeFileName(String fileName) {
@@ -177,9 +172,9 @@ IncomeServiceImpl implements IncomeService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addSaveRelocationInvoice(List<IncomeImportVO> dataList) {
+        // TODO 导入存量数据时对比是否与发票或收据关联
         // 转换单位
         Map<String, Integer> unitMap = unitApiExp.getUnitMapByUnitName();
-        // List<RelocationIncome> incomes = new ArrayList<>();
         Map<String, String> invoiceTypeMap = getInvoiceType();
         for (IncomeImportVO importVO : dataList) {
             RelocationIncome income = new RelocationIncome();
@@ -191,29 +186,29 @@ IncomeServiceImpl implements IncomeService {
             income.setContractName(importVO.getContractName());
             income.setStartTime(DateUtil.string3DateYMD(importVO.getStartTime()));
             income.setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
-            income.setContractAmount(stringToBigDecimal(importVO.getContractAmount()));
+            income.setContractAmount(BigDecimalUtil.getBigDecimal(importVO.getContractAmount()));
             income.setInvoiceTime(DateUtil.string3DateYMD(importVO.getInvoiceTime()));
             income.setInvoiceNum(importVO.getInvoiceNum());
             income.setInvoiceType(Integer.valueOf(String.valueOf(invoiceTypeMap.get(importVO.getInvoiceType()) != null
                     ? invoiceTypeMap.get(importVO.getInvoiceType()) : 0)));
             income.setInvoiceType(Integer.valueOf(invoiceTypeMap.get(importVO.getInvoiceType())));
-            income.setAmount(stringToBigDecimal(importVO.getAmount()));
-            income.setTax(stringToBigDecimal(importVO.getTax()));
-            income.setTaxIncludeAmount(stringToBigDecimal(importVO.getTaxIncludeAmount()));
+            income.setAmount(BigDecimalUtil.getBigDecimal(importVO.getAmount()));
+            income.setTax(BigDecimalUtil.getBigDecimal(importVO.getTax()));
+            income.setTaxIncludeAmount(BigDecimalUtil.getBigDecimal(importVO.getTaxIncludeAmount()));
             income.setConstructionName(importVO.getConstructionName());
             // 1 预付款   2 决算款
-            income.setPaymentType("预付款".equals(importVO.getPaymentType()) ? 1 : 2);
+            income.setPaymentType(PaymentType.ADVANCE_PAYMENT.value().equals(importVO.getPaymentType()) ? 1 : 2);
             // 10-已收款 20-未收款 30-部分回款
             income.setIsReceived(IsReceived.NOT_RECEIVED.value().equals(importVO.getCategory()) ? IsReceived.NOT_RECEIVED.key()
                     : IsReceived.PART_RECEIVED.value().equals(importVO.getCategory()) ? IsReceived.PART_RECEIVED.key() : IsReceived.RECEIVED.key());
             income.setAging(importVO.getAging());
-            income.setReceivable(stringToBigDecimal(importVO.getReceivable()));
-            income.setReceived(stringToBigDecimal(importVO.getReceived()));
-            income.setUnreceived(stringToBigDecimal(importVO.getUnreceived()));
+            income.setReceivable(BigDecimalUtil.getBigDecimal(importVO.getReceivable()));
+            income.setReceived(BigDecimalUtil.getBigDecimal(importVO.getReceived()));
+            income.setUnreceived(BigDecimalUtil.getBigDecimal(importVO.getUnreceived()));
             income.setAging(importVO.getAging());
-            income.setReceivable(stringToBigDecimal(importVO.getReceivable()));
-            income.setReceived(stringToBigDecimal(importVO.getReceived()));
-            income.setUnreceived(stringToBigDecimal(importVO.getUnreceived()));
+            income.setReceivable(BigDecimalUtil.getBigDecimal(importVO.getReceivable()));
+            income.setReceived(BigDecimalUtil.getBigDecimal(importVO.getReceived()));
+            income.setUnreceived(BigDecimalUtil.getBigDecimal(importVO.getUnreceived()));
             //插入收款信息
             incomeMapper.insert(income);
             //插入收款下的收款详情
@@ -223,7 +218,7 @@ IncomeServiceImpl implements IncomeService {
                 incomeDetail.setCreateTime(DateUtil.getCurrentDate());
                 incomeDetail.setPayee(importVO.getPayee());
                 incomeDetail.setReceiptNum(importVO.getReceiptNum());
-                incomeDetail.setAmount(stringToBigDecimal(importVO.getMonthAmount()));
+                incomeDetail.setAmount(BigDecimalUtil.getBigDecimal(importVO.getMonthAmount()));
                 incomeDetail.setPayMonth(DateUtil.getCurrentMonth());
                 incomeDetailMapper.insert(incomeDetail);
             }
@@ -271,21 +266,6 @@ IncomeServiceImpl implements IncomeService {
         }
 
         return relocationIncomeExportVos;
-    }
-
-    public BigDecimal stringToBigDecimal(String str) {
-        if (!isEmpty(str)) {
-            str = str.replace("  ", "");
-            str = str.trim();
-        }
-        if (isEmpty(str)) {
-            str = "0";
-        } else if (str.contains("，")) {
-            str = str.replace("，", "");
-        } else if (str.contains(",")) {
-            str = str.replace(",", "");
-        }
-        return new BigDecimal(str);
     }
 
 

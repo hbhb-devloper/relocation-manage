@@ -15,6 +15,7 @@ import com.hbhb.cw.relocation.rpc.DictApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.InvoiceService;
+import com.hbhb.cw.relocation.util.BigDecimalUtil;
 import com.hbhb.cw.relocation.web.vo.*;
 import com.hbhb.cw.systemcenter.enums.DictCode;
 import com.hbhb.cw.systemcenter.enums.TypeCode;
@@ -101,12 +102,14 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public void updateInvoice(InvoiceResVO invoiceVo) {
-        Integer re = invoiceMapper.selectListByNumber(invoiceVo.getInvoiceNumber());
-        if (re > 0) {
-            throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_NUMBER_EXIST);
-        }
         RelocationInvoice invoice = translation(invoiceVo);
+        RelocationIncome income = getRelocationIncome(invoice);
         invoiceMapper.updateById(invoice);
+        RelocationIncome single = incomeMapper.createLambdaQuery()
+                .andEq(RelocationIncome::getInvoiceNum, invoiceVo.getInvoiceNumber())
+                .single();
+        income.setId(single.getId());
+        incomeMapper.updateById(income);
     }
 
     @Override
@@ -167,14 +170,14 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoice.setInvoiceType(Integer.valueOf(typeMap.get(invoiceType)));
             // 开票日期格式转换 yyyy/MM/dd
             invoice.setInvoiceTime(DateUtil.string2DateYMD(invoiceImport.getInvoiceTime()));
-            invoice.setAmount(new BigDecimal(invoiceImport.getAmount()));
+            invoice.setAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getAmount()));
             // 税率 空
             invoice.setTaxRate(new BigDecimal("0"));
             // 税额
-            invoice.setTaxAmount(new BigDecimal(invoiceImport.getTaxAmount() == null ? "0"
-                    : invoiceImport.getTaxAmount()));
+            invoice.setTaxAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getTaxAmount()));
+
             // 价税合计
-            invoice.setTaxIncludeAmount(new BigDecimal(invoiceImport.getTaxIncludeAmount()));
+            invoice.setTaxIncludeAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getTaxIncludeAmount()));
             // 备注
             invoice.setRemake(invoiceImport.getRemake());
             // 收款负责人/申请人
@@ -330,7 +333,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private Map<Integer, String> getPaymentStatus() {
         // 收款状态
-        Map<Integer, String> statusMap = new HashMap<>();
+        Map<Integer, String> statusMap = new HashMap<>(100);
         statusMap.put(IsReceived.RECEIVED.key(), IsReceived.RECEIVED.value());
         statusMap.put(IsReceived.NOT_RECEIVED.key(), IsReceived.NOT_RECEIVED.value());
         statusMap.put(IsReceived.PART_RECEIVED.key(), IsReceived.PART_RECEIVED.value());

@@ -1,5 +1,6 @@
 package com.hbhb.cw.relocation.web.vo;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -49,4 +50,7 @@ public class ReceiptImportVO {
 
     @ExcelProperty(value = "备注修改列：（统一格式）合同号；区县；款项性质；项目信息", index = 10)
     private String remake;
+
+    @ExcelIgnore
+    private Long projectId;
 }

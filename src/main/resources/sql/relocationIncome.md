@@ -195,13 +195,3 @@ getMonthAmount
         from relocation_income_detail
         where income_id = #{id} and pay_month = #{currentMonth}
 ```
-
-selectProject
-===
-```sql
-    SELECT project_id
-    FROM relocation_invoice ri,
-     relocation_income rii
-    WHERE ri.invoice_number = #{invoiceNum}
-    AND ri.invoice_number = rii.invoice_num;
-```

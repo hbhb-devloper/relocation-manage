@@ -5,6 +5,7 @@ import com.hbhb.core.utils.ExcelUtil;
 import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
 import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.model.RelocationIncomeDetail;
+import com.hbhb.cw.relocation.rpc.FileApiExp;
 import com.hbhb.cw.relocation.service.IncomeService;
 import com.hbhb.cw.relocation.service.listener.IncomeListener;
 import com.hbhb.cw.relocation.web.vo.IncomeExportVO;
@@ -24,7 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,14 +42,16 @@ public class IncomeController {
 
     @Resource
     private IncomeService incomeService;
+    @Resource
+    private FileApiExp fileApi;
 
     @Operation(summary = "迁改收款查询台账列表")
     @GetMapping("/list")
     public PageResult<IncomeResVO> getIncomeList(
-        @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
-        @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
-        @Parameter(description = "接收参数实体") IncomeReqVO cond,
-        @Parameter(hidden = true) @UserId Integer userId) {
+            @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
+            @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
+            @Parameter(description = "接收参数实体") IncomeReqVO cond,
+            @Parameter(hidden = true) @UserId Integer userId) {
         pageNum = pageNum == null ? 1 : pageNum;
         pageSize = pageSize == null ? 10 : pageSize;
         return incomeService.getIncomeList(pageNum, pageSize, cond, userId);
@@ -60,7 +65,7 @@ public class IncomeController {
         incomeService.judgeFileName(fileName);
         try {
             EasyExcel.read(file.getInputStream(), IncomeImportVO.class,
-                    new IncomeListener(incomeService)).sheet().doRead();
+                    new IncomeListener(incomeService)).sheet().headRowNumber(2).doRead();
         } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_IMPORT_ERROR);
@@ -71,8 +76,8 @@ public class IncomeController {
     @Operation(summary = "迁改管理收款导出")
     @PostMapping("/export")
     public void exportIncome(HttpServletRequest request, HttpServletResponse response,
-        @Parameter(description = "导出筛选条件实体") @RequestBody IncomeReqVO vo,
-        @Parameter(hidden = true) @UserId Integer userId) {
+                             @Parameter(description = "导出筛选条件实体") @RequestBody IncomeReqVO vo,
+                             @Parameter(hidden = true) @UserId Integer userId) {
         List<IncomeExportVO> incomeExport = incomeService.selectExportListByCondition(vo, userId);
         String fileName = ExcelUtil.encodingFileName(request, "迁改收款数据表");
         ExcelUtil.export2Web(response, fileName, "迁改收款清单", IncomeExportVO.class,
@@ -82,17 +87,17 @@ public class IncomeController {
     @Operation(summary = "迁改管理收款模板下载")
     @PostMapping("/exportTemplate")
     public void exportTemplate(HttpServletRequest request, HttpServletResponse response) {
-        List<IncomeImportVO> income = null;
-        String fileName = ExcelUtil.encodingFileName(request, "迁改收款数据表");
-        ExcelUtil.export2Web(response, fileName, "迁改收款清单",
-            IncomeImportVO.class, income);
+        List<Object> object = new ArrayList<>();
+        String fileName = ExcelUtil.encodingFileName(request, "迁改收款导入模板");
+        ExcelUtil.export2WebWithTemplate(response, fileName, "迁改收款导入模板",
+                fileApi.getTemplatePath() + File.separator + "迁改收款导入模板.xlsx", object);
+
     }
 
     @Operation(summary = "迁改收款详情查询")
     @GetMapping("/detail")
-    public List<RelocationIncomeDetail> getIncomeDetail(
-        @Parameter(description = "收款数据id") Long id,
-        @Parameter(description = "查询是否为本月") Integer isNeed) {
+    public List<RelocationIncomeDetail> getIncomeDetail(@Parameter(description = "收款数据id") Long id,
+                                                        @Parameter(description = "查询是否为本月") Integer isNeed) {
         return incomeService.getIncomeDetail(id, isNeed);
     }
 
@@ -105,7 +110,7 @@ public class IncomeController {
     @Operation(summary = "新增收款清单")
     @PostMapping("/addDetail")
     public void addIncomeDetail(@RequestBody RelocationIncomeDetail detail,
-        @Parameter(hidden = true) @UserId Integer userId) {
+                                @Parameter(hidden = true) @UserId Integer userId) {
         incomeService.addIncomeDetail(detail, userId);
     }
 }

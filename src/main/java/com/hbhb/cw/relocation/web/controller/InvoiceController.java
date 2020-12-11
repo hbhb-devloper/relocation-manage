@@ -3,6 +3,7 @@ package com.hbhb.cw.relocation.web.controller;
 import com.alibaba.excel.EasyExcel;
 import com.hbhb.core.utils.ExcelUtil;
 import com.hbhb.cw.relocation.model.RelocationInvoice;
+import com.hbhb.cw.relocation.rpc.FileApiExp;
 import com.hbhb.cw.relocation.service.InvoiceService;
 import com.hbhb.cw.relocation.service.listener.InvoiceListener;
 import com.hbhb.cw.relocation.web.vo.InvoiceExportResVO;
@@ -22,7 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +40,8 @@ public class InvoiceController {
 
     @Resource
     private InvoiceService invoiceService;
+    @Resource
+    private FileApiExp fileApi;
 
     @Operation(summary = "迁改发票查询台账列表")
     @GetMapping("/list")
@@ -76,7 +81,7 @@ public class InvoiceController {
         invoiceService.judgeFileName(fileName);
         try {
             EasyExcel.read(file.getInputStream(), InvoiceImportVO.class,
-                    new InvoiceListener(invoiceService)).sheet().doRead();
+                    new InvoiceListener(invoiceService)).sheet().headRowNumber(2).doRead();
         } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
         }
@@ -99,10 +104,10 @@ public class InvoiceController {
     @Operation(summary = "迁改管理发票模板导出")
     @PostMapping("/export/template")
     public void exportInvoiceTemplate(HttpServletRequest request, HttpServletResponse response) {
-        List<InvoiceExportResVO> invoiceExportRes = null;
-        String fileName = ExcelUtil.encodingFileName(request, "迁改发票数据表");
-        ExcelUtil.export2Web(response, fileName, "迁改发票清单", InvoiceExportResVO.class,
-                null);
+        List<Object> object = new ArrayList<>();
+        String fileName = ExcelUtil.encodingFileName(request, "迁改发票导入模板");
+        ExcelUtil.export2WebWithTemplate(response, fileName, "迁改发票导入模板",
+                fileApi.getTemplatePath() + File.separator + "迁改发票导入模板.xlsx", object);
     }
 
     @Operation(summary = "跟据发票编号查看收据详情")

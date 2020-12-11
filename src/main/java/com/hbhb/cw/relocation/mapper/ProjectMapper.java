@@ -46,6 +46,5 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     List<WarnCountVO> selectProjectFinalWarnCount();
 
-
     List<Long> selectProjectIdByContractNum(String contractNum);
 }

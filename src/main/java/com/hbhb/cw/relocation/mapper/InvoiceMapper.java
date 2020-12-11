@@ -5,7 +5,6 @@ import com.hbhb.cw.relocation.model.RelocationInvoice;
 import com.hbhb.cw.relocation.web.vo.InvoiceExportResVO;
 import com.hbhb.cw.relocation.web.vo.InvoiceReqVO;
 import com.hbhb.cw.relocation.web.vo.InvoiceResVO;
-import com.hbhb.cw.relocation.web.vo.ProjectInfoVO;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 
@@ -19,11 +18,7 @@ public interface InvoiceMapper extends BaseMapper<RelocationInvoice> {
 
     PageResult<InvoiceResVO> selectListByCondition(InvoiceReqVO cond, PageRequest request);
 
-    List<ProjectInfoVO> getProjectInfo();
-
     List<InvoiceExportResVO> selectExportListByCondition(InvoiceReqVO cond);
-
-    Long selectPidByCondition(String contractNum, Integer unitId, String pinfo);
 
     Integer selectListByNumber(String invoiceNumber);
 

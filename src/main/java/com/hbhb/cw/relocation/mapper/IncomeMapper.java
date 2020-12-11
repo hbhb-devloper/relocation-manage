@@ -26,5 +26,4 @@ public interface IncomeMapper extends BaseMapper<RelocationIncome> {
 
     BigDecimal getMonthAmount(Long id, String currentMonth);
 
-    Long selectProject(String invoiceNum);
 }
