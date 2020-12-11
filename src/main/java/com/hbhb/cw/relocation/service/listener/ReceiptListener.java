@@ -2,6 +2,7 @@ package com.hbhb.cw.relocation.service.listener;
 
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.alibaba.excel.exception.ExcelDataConvertException;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.service.ReceiptService;
@@ -70,7 +71,16 @@ public class ReceiptListener extends AnalysisEventListener {
 
     @Override
     public void onException(Exception exception, AnalysisContext context) {
-        throw   new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR);
+        log.info("解析出错：" + exception.getMessage());
+        int row = 0, column = 0;
+        if (exception instanceof ExcelDataConvertException) {
+            ExcelDataConvertException convertException = (ExcelDataConvertException) exception;
+            row = convertException.getRowIndex();
+            column = convertException.getColumnIndex();
+            log.error("解析出错：{}行 {}列", row, column);
+            String msg = "解析出错" + "第" + row + "行,第" + column + "列";
+            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg);
+        }
     }
 
 }

@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author hyk
@@ -30,6 +32,7 @@ public class InvoiceListener extends AnalysisEventListener {
     private final List<InvoiceImportVO> dataList = new ArrayList<>();
 
     private final InvoiceService invoiceService;
+    private final Map<Integer, String> importHeadMap = new HashMap<>();
 
 
     public InvoiceListener(InvoiceService invoiceService) {
@@ -66,4 +69,13 @@ public class InvoiceListener extends AnalysisEventListener {
             invoiceService.addSaveRelocationInvoice(dataList);
         }
     }
+
+    @Override
+    public void invokeHeadMap(Map headMap, AnalysisContext context) {
+        if (headMap != null) {
+            importHeadMap.putAll(headMap);
+        }
+        // 根据自己的情况去做表头的判断即可
+    }
+
 }

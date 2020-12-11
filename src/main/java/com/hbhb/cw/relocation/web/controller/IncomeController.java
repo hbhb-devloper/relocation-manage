@@ -85,7 +85,7 @@ public class IncomeController {
     }
 
     @Operation(summary = "迁改管理收款模板下载")
-    @PostMapping("/exportTemplate")
+    @PostMapping("/export/template")
     public void exportTemplate(HttpServletRequest request, HttpServletResponse response) {
         List<Object> object = new ArrayList<>();
         String fileName = ExcelUtil.encodingFileName(request, "迁改收款导入模板");

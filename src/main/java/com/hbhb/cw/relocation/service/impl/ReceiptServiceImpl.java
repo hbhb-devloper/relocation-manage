@@ -96,7 +96,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             }
             // 判断合同编号是否存在基础项目表中
             if (!contractNumList.contains(importVos.getContractNum())) {
-                msg.add("合同编号：" + importVos.getContractNum() + "在基础信息中不存在请检查！");
+                msg.add("excel表中第" + i + "行,合同编号：" + importVos.getContractNum() + "在基础信息中不存在请检查！");
             }
             //1.获取基础信息中所对应的数据
             List<ProjectReqVO> projectReq = getProjectResVo(arrList, unitMap);
