@@ -1,5 +1,5 @@
 server:
-  port: 8888
+  port: 8885
   # 启用压缩（从终端到该实例）
 
 
@@ -48,7 +48,7 @@ host:
   proxy: 47.96.83.55
 
 port:
-  default: 10042
+  default: 10072
   dev: 10028
   dev-proxy: 10014
   test: 10029

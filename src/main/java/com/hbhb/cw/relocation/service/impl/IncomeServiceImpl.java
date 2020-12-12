@@ -2,10 +2,7 @@ package com.hbhb.cw.relocation.service.impl;
 
 import com.alibaba.excel.support.ExcelTypeEnum;
 import com.hbhb.core.utils.DateUtil;
-import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
-import com.hbhb.cw.relocation.enums.IsReceived;
-import com.hbhb.cw.relocation.enums.PaymentType;
-import com.hbhb.cw.relocation.enums.RelocationErrorCode;
+import com.hbhb.cw.relocation.enums.*;
 import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
@@ -36,10 +33,12 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.lang.Integer.parseInt;
 import static org.springframework.util.StringUtils.isEmpty;
 
 /**
@@ -91,15 +90,12 @@ IncomeServiceImpl implements IncomeService {
         PageResult<IncomeResVO> incomeList = incomeMapper.getIncomeList(cond, request);
         List<IncomeResVO> list = incomeList.getList();
         Map<String, String> typeMap = getInvoiceType();
+        Map<String, String> categoryMap = getCategory();
+        Map<String, String> paymentMap = getPaymentMap();
         for (IncomeResVO incomeResVO : list) {
             String category = incomeResVO.getCategory();
-            if ("1".equals(category)) {
-                incomeResVO.setCategory("迁改");
-            } else if ("2".equals(category)) {
-                incomeResVO.setCategory("搬迁");
-            } else if ("3".equals(category)) {
-                incomeResVO.setCategory("代建");
-            }
+            // 类型
+            incomeResVO.setCategory(categoryMap.get(category));
             //  拼装收款发票类型
             incomeResVO.setInvoiceType(typeMap.get(incomeResVO.getInvoiceType()));
             BigDecimal monthAmount = incomeMapper.getMonthAmount(incomeResVO.getId(), DateUtil.getCurrentMonth());
@@ -110,6 +106,8 @@ IncomeServiceImpl implements IncomeService {
             } else {
                 incomeResVO.setIsReceived(IsReceived.NOT_RECEIVED.value());
             }
+            // 收款类型
+            incomeResVO.setPaymentType(paymentMap.get(incomeResVO.getPaymentType()));
         }
         return incomeList;
     }
@@ -228,44 +226,20 @@ IncomeServiceImpl implements IncomeService {
     @Override
     public List<IncomeExportVO> selectExportListByCondition(IncomeReqVO vo, Integer userId) {
         setConditionDetail(vo, userId);
-        List<IncomeExportVO> relocationIncomeExportVos = incomeMapper
-                .selectExportList(vo);
-        for (int i = 0; i < relocationIncomeExportVos.size(); i++) {
-            IncomeExportVO relocationIncomeExportVO = relocationIncomeExportVos.get(i);
-            String category = relocationIncomeExportVO.getCategory();
-            switch (category) {
-                case "1":
-                    relocationIncomeExportVO.setCategory("迁改");
-                    break;
-                case "2":
-                    relocationIncomeExportVO.setCategory("搬迁");
-                    break;
-                case "3":
-                    relocationIncomeExportVO.setCategory("代建");
-                    break;
-                default:
-                    relocationIncomeExportVO.setCategory("");
-                    break;
-            }
-            String isReceived = relocationIncomeExportVO.getIsReceived();
-            switch (isReceived) {
-                case "20":
-                    relocationIncomeExportVO.setIsReceived(IsReceived.NOT_RECEIVED.value());
-                    break;
-                case "30":
-                    relocationIncomeExportVO.setIsReceived(IsReceived.PART_RECEIVED.value());
-                    break;
-                case "10":
-                    relocationIncomeExportVO.setIsReceived(IsReceived.RECEIVED.value());
-                    break;
-                default:
-                    relocationIncomeExportVO.setIsReceived("");
-                    break;
-            }
-            relocationIncomeExportVO.setNum(i + 1);
+        List<IncomeExportVO> relocationIncomeExport = incomeMapper.selectExportList(vo);
+        // 类型
+        int i = 1;
+        Map<String, String> categoryMap = getCategory();
+        Map<Integer, String> isReceivedMap = getIsReceived();
+        for (IncomeExportVO export : relocationIncomeExport) {
+            String category = export.getCategory();
+            export.setCategory(categoryMap.get(category));
+            // 回款状态
+            export.setIsReceived(isReceivedMap.get(parseInt(export.getIsReceived())));
+            export.setNum(i);
+            i++;
         }
-
-        return relocationIncomeExportVos;
+        return relocationIncomeExport;
     }
 
 
@@ -286,4 +260,31 @@ IncomeServiceImpl implements IncomeService {
         List<DictVO> compensationSateList = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
         return compensationSateList.stream().collect(Collectors.toMap(DictVO::getLabel, DictVO::getValue));
     }
+
+    private Map<String, String> getCategory() {
+        // 类型
+        Map<String, String> categoryMap = new HashMap<>(100);
+        categoryMap.put(Category.RELOCATION.key().toString(), Category.RELOCATION.value());
+        categoryMap.put(Category.REMOVAL.key().toString(), Category.REMOVAL.value());
+        categoryMap.put(Category.CONSTRUCTION.key().toString(), Category.CONSTRUCTION.value());
+        return categoryMap;
+    }
+
+    private Map<Integer, String> getIsReceived() {
+        // 收款状态
+        Map<Integer, String> statusMap = new HashMap<>(100);
+        statusMap.put(IsReceived.RECEIVED.key(), IsReceived.RECEIVED.value());
+        statusMap.put(IsReceived.NOT_RECEIVED.key(), IsReceived.NOT_RECEIVED.value());
+        statusMap.put(IsReceived.PART_RECEIVED.key(), IsReceived.PART_RECEIVED.value());
+        return statusMap;
+    }
+
+    private Map<String, String> getPaymentMap() {
+        Map<String, String> paymentMap = new HashMap<>(100);
+        paymentMap.put(PaymentType.ADVANCE_PAYMENT.key().toString(), PaymentType.ADVANCE_PAYMENT.value());
+        paymentMap.put(PaymentType.FINAL_PARAGRAPH.key().toString(), PaymentType.FINAL_PARAGRAPH.value());
+        paymentMap.put(PaymentType.FINAL_PAYMENT.key().toString(), PaymentType.FINAL_PAYMENT.value());
+        return paymentMap;
+    }
+
 }

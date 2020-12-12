@@ -217,15 +217,22 @@ public class InvoiceServiceImpl implements InvoiceService {
         List<InvoiceExportResVO> exportResVos = invoiceMapper.selectExportListByCondition(vo);
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
         // 组装发票类型 发票状态，单位，区域
-        exportResVos.forEach(item -> {
-            item.setInvoiceType(State.ONE.value().equals(item.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value()
-                    : InvoiceType.SPECIAL_INVOICE.value());
-            item.setState(State.ONE.value().equals(item.getState()) ? InvoiceSate.BLUE_STATE.value()
-                    : InvoiceSate.RED_STATE.value());
-            item.setIsImport(State.ONE.value().equals(item.getState()) ? State.YES.value() : State.NO.value());
-            item.setUnit(unitMap.get(item.getUnitId()));
-            item.setDistrict(unitMap.get(item.getDistrictId()));
-        });
+        int i = 1;
+        for (InvoiceExportResVO export : exportResVos) {
+            // 序号
+            export.setNum(i);
+            // 发票类型
+            export.setInvoiceType(State.ONE.value().equals(export.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
+            // 发票状态
+            export.setState(State.ONE.value().equals(export.getState()) ? InvoiceSate.BLUE_STATE.value() : InvoiceSate.RED_STATE.value());
+            // 是否自定义开票
+            export.setIsImport(State.ONE.value().equals(export.getState()) ? State.YES.value() : State.NO.value());
+            // 单位
+            export.setUnit(unitMap.get(export.getUnitId()));
+            // 区县
+            export.setDistrict(unitMap.get(export.getDistrictId()));
+            i++;
+        }
         return exportResVos;
     }
 
@@ -324,7 +331,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         return projectMapper.selectProjectByCondList(projectVo);
     }
 
-
     private Map<Integer, String> getPaymentStatus() {
         // 收款状态
         Map<Integer, String> statusMap = new HashMap<>(100);
@@ -333,6 +339,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         statusMap.put(IsReceived.PART_RECEIVED.key(), IsReceived.PART_RECEIVED.value());
         return statusMap;
     }
+
 
     @Override
     public void judgeFileName(String fileName) {
@@ -343,6 +350,4 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
         }
     }
-
-
 }

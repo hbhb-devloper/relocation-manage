@@ -65,7 +65,7 @@ public class IncomeResVO implements Serializable {
     @Schema(description = "未收")
     private BigDecimal unreceived;
     @Schema(description = "款项类型")
-    private Integer paymentType;
+    private String paymentType;
     @Schema(description = "收款单号")
     private String receiptNum;
     @Schema(description = "收款人")

@@ -216,6 +216,8 @@ selectExportListByCondition
               and ri.invoice_time <= #{cond.invoiceTimeTo}
           -- @}
         -- @}
+        order by ri.id desc
+
 ```
 selectPidByCondition
 ===
