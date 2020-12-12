@@ -228,15 +228,17 @@ IncomeServiceImpl implements IncomeService {
         setConditionDetail(vo, userId);
         List<IncomeExportVO> relocationIncomeExport = incomeMapper.selectExportList(vo);
         // 类型
-        int i = 1;
+        Map<Integer, String> unitMap = unitApiExp.getUnitMapById();
         Map<String, String> categoryMap = getCategory();
         Map<Integer, String> isReceivedMap = getIsReceived();
+        int i = 1;
         for (IncomeExportVO export : relocationIncomeExport) {
             String category = export.getCategory();
             export.setCategory(categoryMap.get(category));
             // 回款状态
             export.setIsReceived(isReceivedMap.get(parseInt(export.getIsReceived())));
             export.setNum(i);
+            export.setUnit(unitMap.get(Integer.parseInt(export.getUnit())));
             i++;
         }
         return relocationIncomeExport;
