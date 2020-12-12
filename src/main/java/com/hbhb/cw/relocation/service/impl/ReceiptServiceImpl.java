@@ -88,7 +88,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             // 按照英文分隔符划分
             List<String> arrList = Arrays.asList(remake.split(";"));
             if (arrList.size() != 4) {
-                msg.add("请检查备注修改列：" + remake + "格式");
+                msg.add("请检查excel第" + i + "备注修改列：" + remake + "格式");
             }
             // 判断收据编号是否已存在
             if (receiptNumList.contains(importVos.getReceiptNum())) {
@@ -97,6 +97,9 @@ public class ReceiptServiceImpl implements ReceiptService {
             // 判断合同编号是否存在基础项目表中
             if (!contractNumList.contains(importVos.getContractNum())) {
                 msg.add("excel表中第" + i + "行,合同编号：" + importVos.getContractNum() + "在基础信息中不存在请检查！");
+            }
+            if (!msg.isEmpty()) {
+                throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
             }
             //1.获取基础信息中所对应的数据
             List<ProjectReqVO> projectReq = getProjectResVo(arrList, unitMap);
@@ -111,9 +114,6 @@ public class ReceiptServiceImpl implements ReceiptService {
                 receiptList.add(receipt);
             }
             i++;
-        }
-        if (!msg.isEmpty()) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
         }
         receiptMapper.insertBatch(receiptList);
         // 新增收款信息
@@ -197,6 +197,9 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (!contractNumList.contains(receipt.getContractNum())) {
             msg.add("合同编号：" + receipt.getContractNum() + "在基础信息中不存在请检查！");
         }
+        if (msg.size() != 0) {
+            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
+        }
         // 判断备注列数据是否对应基础信息
         // 转换单位
         Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
@@ -207,9 +210,6 @@ public class ReceiptServiceImpl implements ReceiptService {
             throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_REMAKE_ERROR);
         } else {
             projectRes.forEach(item -> receipt.setProjectId(item.getId()));
-        }
-        if (msg.size() != 0) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
         }
         // 赔补金额
         receipt.setCompensationAmount(BigDecimalUtil.getBigDecimal(receiptResVO.getCompensationAmount()));

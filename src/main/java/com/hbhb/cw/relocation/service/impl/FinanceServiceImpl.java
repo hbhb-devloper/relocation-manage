@@ -2,7 +2,6 @@ package com.hbhb.cw.relocation.service.impl;
 
 
 import com.hbhb.core.utils.DateUtil;
-import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.enums.State;
 import com.hbhb.cw.relocation.mapper.FinanceMapper;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
@@ -84,22 +83,16 @@ public class FinanceServiceImpl implements FinanceService {
 
     private void setUnitId(FinanceReqVO cond, Integer userId) {
         UserInfo user = userApi.getUserInfoById(userId);
-        if (userApi.isAdmin(userId)) {
+        if (cond.getUnitId() == null && userApi.isAdmin(userId)) {
             cond.setUnitId(user.getUnitId());
         }
     }
 
 
     private Map<String, String> getIsAllReceived() {
-        Map<String, String> receivedMap = new HashMap<>();
+        Map<String, String> receivedMap = new HashMap<>(100);
         receivedMap.put(State.ONE.value(), State.YES.value());
         receivedMap.put(State.ZERO.value(), State.NO.value());
         return receivedMap;
-    }
-
-    private Map<String, String> getPaymentStatus() {
-        Map<String, String> statusMap = new HashMap<>();
-        statusMap.put(String.valueOf(IsReceived.RECEIVED.key()), IsReceived.RECEIVED.value());
-        return statusMap;
     }
 }

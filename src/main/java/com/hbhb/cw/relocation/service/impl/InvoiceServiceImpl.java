@@ -159,7 +159,17 @@ public class InvoiceServiceImpl implements InvoiceService {
             if (contains) {
                 msg.add("在excel表中第" + i + "行，数据编号为:" + invoiceImport.getNumber() + "已存在发票表中\n");
             }
-            String remake = invoiceImport.getRemake();
+            // 备注列信息
+            String remake = invoice.getRemake();
+            // 按照英文分隔符划分
+            remake = remake.replace("；", ";");
+            List<String> arrList = Arrays.asList(remake.split(";"));
+            if (arrList.size() != 4) {
+                msg.add("请检查excel第" + i + "备注修改列：" + remake + "格式");
+            }
+            if (msg.size() != 0) {
+                throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
+            }
             List<ProjectReqVO> projectRes = getProjectResVo(remake, unitMap);
             if (projectRes.size() == 1) {
                 projectRes.forEach(item -> invoice.setProjectId(item.getId()));
@@ -195,9 +205,6 @@ public class InvoiceServiceImpl implements InvoiceService {
                 incomeList.add(income);
 
             }
-        }
-        if (!msg.isEmpty()) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_TEMPLATE_ERROR, msg.toString());
         }
         // 批量插入发票、收款信息
         incomeMapper.insertBatch(incomeList);
