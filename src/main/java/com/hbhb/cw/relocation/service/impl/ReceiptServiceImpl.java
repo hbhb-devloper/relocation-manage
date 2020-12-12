@@ -158,12 +158,13 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public void updateRelocationReceipt(ReceiptResVO receiptResVO) {
+        RelocationReceipt receiptInfo = receiptMapper.single(receiptResVO.getId());
         RelocationReceipt receipt = setReceipt(receiptResVO);
         receiptMapper.updateById(receipt);
         // 修改收款信息
         RelocationIncome income = setRelocationIncome(receipt);
         RelocationIncome single = incomeMapper.createLambdaQuery()
-                .andEq(RelocationIncome::getInvoiceNum, receiptResVO.getReceiptNum())
+                .andEq(RelocationIncome::getInvoiceNum, receiptInfo.getReceiptNum())
                 .single();
         income.setId(single.getId());
         incomeMapper.updateById(income);

@@ -65,16 +65,6 @@ IncomeServiceImpl implements IncomeService {
     @Resource
     private DictApiExp dictApi;
 
-
-    @Override
-    public void judgeFileName(String fileName) {
-        int i = fileName.lastIndexOf(".");
-        String name = fileName.substring(i);
-        if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue().equals(name))) {
-            throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
-        }
-    }
-
     @Override
     public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize,
                                                  IncomeReqVO cond, Integer userId) {
@@ -287,6 +277,15 @@ IncomeServiceImpl implements IncomeService {
         paymentMap.put(PaymentType.FINAL_PARAGRAPH.key().toString(), PaymentType.FINAL_PARAGRAPH.value());
         paymentMap.put(PaymentType.FINAL_PAYMENT.key().toString(), PaymentType.FINAL_PAYMENT.value());
         return paymentMap;
+    }
+
+    @Override
+    public void judgeFileName(String fileName) {
+        int i = fileName.lastIndexOf(".");
+        String name = fileName.substring(i);
+        if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue().equals(name))) {
+            throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
+        }
     }
 
 }

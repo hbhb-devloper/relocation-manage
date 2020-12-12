@@ -103,12 +103,13 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public void updateInvoice(InvoiceResVO invoiceVo) {
+        RelocationInvoice invoiceInfo = invoiceMapper.single(invoiceVo.getId());
         RelocationInvoice invoice = translation(invoiceVo);
         RelocationProject project = projectMapper.single(invoice.getProjectId());
         RelocationIncome income = getRelocationIncome(invoice, project);
         invoiceMapper.updateById(invoice);
         RelocationIncome single = incomeMapper.createLambdaQuery()
-                .andEq(RelocationIncome::getInvoiceNum, invoiceVo.getInvoiceNumber())
+                .andEq(RelocationIncome::getInvoiceNum, invoiceInfo.getInvoiceNumber())
                 .single();
         income.setId(single.getId());
         incomeMapper.updateById(income);
