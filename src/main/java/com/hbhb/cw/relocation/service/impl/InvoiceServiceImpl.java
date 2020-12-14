@@ -160,9 +160,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         for (InvoiceImportVO invoiceImport : dataList) {
             RelocationInvoice invoice = new RelocationInvoice();
             BeanUtils.copyProperties(invoiceImport, invoice);
-            boolean contains = invoiceNumber.contains(invoiceImport.getInvoiceNumber());
-            if (contains) {
-                msg.add("在excel表中第" + i + "行，发票编号为:" + invoiceImport.getNumber() + "已存在发票表中\n");
+            if (invoiceNumber.contains(invoiceImport.getInvoiceNumber())) {
+                msg.add("在excel表中第" + i + "行，发票号码为:" + invoiceImport.getInvoiceNumber() + "已存在发票表中,请仔细检查后重新导入");
             }
             // 备注列信息
             String remake = invoice.getRemake();
@@ -170,7 +169,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             remake = remake.replace("；", ";");
             List<String> arrList = Arrays.asList(remake.split(";"));
             if (arrList.size() != 4) {
-                msg.add("请检查excel第" + i + "备注修改列：" + remake + "格式");
+                msg.add("请检查excel第" + i + "行，备注修改列：" + remake + "格式");
             }
             if (msg.size() != 0) {
                 throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
@@ -210,6 +209,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 incomeList.add(income);
 
             }
+            i++;
         }
         // 批量插入发票、收款信息
         incomeMapper.insertBatch(incomeList);
