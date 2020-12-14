@@ -86,12 +86,16 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceResVo.getList().forEach(item -> {
             // 转换发票类型
             item.setInvoiceType(typeMap.get(item.getInvoiceType()));
+            // 是否为自定义开票
             item.setIsImport(State.ONE.value().equals(item.getState()) ? State.YES.value() : State.NO.value());
             // 转换单位
             item.setUnit(unitMap.get(item.getUnitId()));
             // 转换区域
             item.setDistrict(unitMap.get(item.getDistrictId()));
+            // 收款状态
             item.setPaymentStatus(statusMap.get(parseInt(item.getPaymentStatus())));
+            // 发票状态
+            item.setState(State.ONE.value().equals(item.getState()) ? InvoiceState.BLUE_STATE.value() : InvoiceState.RED_STATE.value());
         });
         return invoiceResVo;
     }
@@ -182,24 +186,24 @@ public class InvoiceServiceImpl implements InvoiceService {
                 invoice.setDistrict(11);
                 // 经办单位
                 invoice.setUnitId(unitMap.get(invoiceImport.getUnitId()));
+                // 发票编号
                 invoice.setInvoiceNumber(invoiceImport.getInvoiceNumber());
                 String invoiceType = invoiceImport.getInvoiceType();
                 invoice.setInvoiceType(Integer.valueOf(typeMap.get(invoiceType)));
                 // 开票日期格式转换 yyyy/MM/dd
                 invoice.setInvoiceTime(DateUtil.string2DateYMD(invoiceImport.getInvoiceTime()));
+                // 金额
                 invoice.setAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getAmount()));
                 // 税率 空
                 invoice.setTaxRate(new BigDecimal("0"));
                 // 税额
                 invoice.setTaxAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getTaxAmount()));
-
                 // 价税合计
                 invoice.setTaxIncludeAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getTaxIncludeAmount()));
                 // 备注
                 invoice.setRemake(invoiceImport.getRemake());
                 // 收款负责人/申请人
                 invoice.setApplicant(invoiceImport.getApplicant());
-                // ==============添加 收款信息==================
                 // 收款
                 RelocationIncome income = getRelocationIncome(invoice, project);
                 invoiceList.add(invoice);
@@ -225,7 +229,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             // 发票类型
             export.setInvoiceType(State.ONE.value().equals(export.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
             // 发票状态
-            export.setState(State.ONE.value().equals(export.getState()) ? InvoiceSate.BLUE_STATE.value() : InvoiceSate.RED_STATE.value());
+            export.setState(State.ONE.value().equals(export.getState()) ? InvoiceState.BLUE_STATE.value() : InvoiceState.RED_STATE.value());
             // 是否自定义开票
             export.setIsImport(State.ONE.value().equals(export.getState()) ? State.YES.value() : State.NO.value());
             // 单位
@@ -293,8 +297,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         income.setSupplier(invoice.getBuyerName());
         income.setInvoiceTime(invoice.getInvoiceTime());
         income.setInvoiceNum(invoice.getInvoiceNumber());
-        income.setInvoiceType(invoice.getInvoiceType() == 1 ? InvoiceType.ELECTRONIC_PLAIN_INVOICE.key()
-                : InvoiceType.ELECTRONIC_SPECIAL_INVOICE.key());
+        income.setInvoiceType(invoice.getInvoiceType());
         income.setAmount(invoice.getAmount());
         income.setTax(invoice.getTaxAmount());
         income.setTaxIncludeAmount(invoice.getTaxIncludeAmount());
