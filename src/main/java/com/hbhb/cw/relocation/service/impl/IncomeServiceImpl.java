@@ -66,8 +66,7 @@ IncomeServiceImpl implements IncomeService {
     private DictApiExp dictApi;
 
     @Override
-    public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize,
-                                                 IncomeReqVO cond, Integer userId) {
+    public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize, IncomeReqVO cond, Integer userId) {
 
         List<Integer> unitIds = new ArrayList<>();
         if (UnitEnum.isBenbu(cond.getUnitId())) {
@@ -82,6 +81,8 @@ IncomeServiceImpl implements IncomeService {
         Map<String, String> typeMap = getInvoiceType();
         Map<String, String> categoryMap = getCategory();
         Map<String, String> paymentMap = getPaymentMap();
+        Map<Integer, String> isReceivedMap = getIsReceived();
+
         for (IncomeResVO incomeResVO : list) {
             String category = incomeResVO.getCategory();
             // 类型
@@ -91,11 +92,8 @@ IncomeServiceImpl implements IncomeService {
             BigDecimal monthAmount = incomeMapper.getMonthAmount(incomeResVO.getId(), DateUtil.getCurrentMonth());
             incomeResVO.setMonthAmount(monthAmount);
             incomeResVO.setUnit(unitMap.get(Integer.valueOf(incomeResVO.getUnit())));
-            if ("1".equals(incomeResVO.getIsReceived())) {
-                incomeResVO.setIsReceived(IsReceived.RECEIVED.value());
-            } else {
-                incomeResVO.setIsReceived(IsReceived.NOT_RECEIVED.value());
-            }
+            // 回款状态
+            incomeResVO.setIsReceived(isReceivedMap.get(parseInt(incomeResVO.getIsReceived())));
             // 收款类型
             incomeResVO.setPaymentType(paymentMap.get(incomeResVO.getPaymentType()));
         }
@@ -146,13 +144,13 @@ IncomeServiceImpl implements IncomeService {
         BigDecimal received = income1.getReceived();
         //已收完的情况 3
         if (received.compareTo(receivable) == 0 && unreceived.compareTo(new BigDecimal("0")) == 0) {
-            income1.setIsReceived(3);
+            income1.setIsReceived(IsReceived.RECEIVED.key());
             incomeMapper.updateTemplateById(income1);
         }
         //部分回款 2
         if (received.compareTo(receivable) < 0
                 && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
-            income1.setIsReceived(2);
+            income1.setIsReceived(IsReceived.PART_RECEIVED.key());
             incomeMapper.updateTemplateById(income1);
         }
     }
