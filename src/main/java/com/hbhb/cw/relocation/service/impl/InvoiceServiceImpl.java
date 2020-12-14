@@ -93,7 +93,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             // 转换区域
             item.setDistrict(unitMap.get(item.getDistrictId()));
             // 收款状态
-            item.setPaymentStatus(statusMap.get(parseInt(item.getPaymentStatus())));
+            item.setIsReceived(statusMap.get(parseInt(item.getIsReceived())));
             // 发票状态
             item.setState(State.ONE.value().equals(item.getState()) ? InvoiceState.BLUE_STATE.value() : InvoiceState.RED_STATE.value());
         });
@@ -156,13 +156,13 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_EXCEL_EXIST);
         }
         List<String> msg = new ArrayList<>();
-        int i = 1;
+        int i = 3;
         for (InvoiceImportVO invoiceImport : dataList) {
             RelocationInvoice invoice = new RelocationInvoice();
             BeanUtils.copyProperties(invoiceImport, invoice);
             boolean contains = invoiceNumber.contains(invoiceImport.getInvoiceNumber());
             if (contains) {
-                msg.add("在excel表中第" + i + "行，数据编号为:" + invoiceImport.getNumber() + "已存在发票表中\n");
+                msg.add("在excel表中第" + i + "行，发票编号为:" + invoiceImport.getNumber() + "已存在发票表中\n");
             }
             // 备注列信息
             String remake = invoice.getRemake();
@@ -310,7 +310,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         // 未收
         income.setUnreceived(invoice.getAmount());
         // 收款人
-
         return income;
     }
 

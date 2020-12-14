@@ -3,6 +3,7 @@ package com.hbhb.cw.relocation.service.impl;
 import com.hbhb.core.bean.BeanConverter;
 import com.hbhb.core.utils.DateUtil;
 import com.hbhb.cw.relocation.enums.InvoiceType;
+import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.enums.PaymentType;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.cw.relocation.exception.RelocationException;
@@ -32,6 +33,8 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static java.lang.Integer.parseInt;
 
 /**
  * @author wangxiaogang
@@ -66,7 +69,13 @@ public class ReceiptServiceImpl implements ReceiptService {
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<ReceiptResVO> receiptRes = receiptMapper.selectReceiptByCond(cond, request);
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
-        receiptRes.getList().forEach(item -> item.setUnitName(unitMap.get(item.getUnitId())));
+        // 获取回款状态类型
+        Map<Integer, String> statusMap = getPaymentStatus();
+        receiptRes.getList().forEach(item -> {
+            item.setUnitName(unitMap.get(item.getUnitId()));
+            // 收款状态
+            item.setIsReceived(statusMap.get(parseInt(item.getIsReceived())));
+        });
         return receiptRes;
     }
 
@@ -81,7 +90,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         // 查询收据编号
         List<String> receiptNumList = receiptMapper.selectReceiptNum();
         // 检验导入数据准确性
-        int i = 1;
+        int i = 3;
         for (ReceiptImportVO importVos : dataList) {
             String remake = importVos.getRemake();
             remake = remake.replace("；", ";");
@@ -281,14 +290,22 @@ public class ReceiptServiceImpl implements ReceiptService {
         income.setTax(new BigDecimal(0));
         //税合计
         income.setTaxIncludeAmount(receipt.getReceiptAmount());
-        // 收款情况（0-未收款、1-已收款）
-        income.setIsReceived(0);
         // 应收
-        income.setReceivable(receipt.getReceiptAmount());
+        BigDecimal receivable = receipt.getReceiptAmount();
+        income.setReceivable(receivable);
         // 已收
         income.setReceived(receipt.getPaymentAmount());
         // 未收
-        income.setUnreceived(receipt.getCompensationAmount().subtract(receipt.getPaymentAmount()));
+        BigDecimal unreceived = receipt.getCompensationAmount().subtract(receipt.getPaymentAmount());
+        income.setUnreceived(unreceived);
+        // 收款情况（10-已收，20 - 未收 ，30-部分回款）
+        if (unreceived.compareTo(new BigDecimal("0")) == 0) {
+            income.setIsReceived(IsReceived.RECEIVED.key());
+        } else if (unreceived.compareTo(receivable) == 0) {
+            income.setIsReceived(IsReceived.NOT_RECEIVED.key());
+        } else {
+            income.setIsReceived(IsReceived.PART_RECEIVED.key());
+        }
         // 收款人
         income.setPayee(receipt.getPayee());
         return income;
@@ -300,6 +317,15 @@ public class ReceiptServiceImpl implements ReceiptService {
         paymentTypeMap.put(PaymentType.FINAL_PARAGRAPH.value(), PaymentType.FINAL_PARAGRAPH.key());
         paymentTypeMap.put(PaymentType.FINAL_PAYMENT.value(), PaymentType.FINAL_PAYMENT.key());
         return paymentTypeMap;
+    }
+
+    private Map<Integer, String> getPaymentStatus() {
+        // 收款状态
+        Map<Integer, String> statusMap = new HashMap<>(100);
+        statusMap.put(IsReceived.RECEIVED.key(), IsReceived.RECEIVED.value());
+        statusMap.put(IsReceived.NOT_RECEIVED.key(), IsReceived.NOT_RECEIVED.value());
+        statusMap.put(IsReceived.PART_RECEIVED.key(), IsReceived.PART_RECEIVED.value());
+        return statusMap;
     }
 
 }

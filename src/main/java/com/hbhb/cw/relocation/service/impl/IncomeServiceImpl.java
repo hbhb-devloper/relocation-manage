@@ -78,7 +78,7 @@ IncomeServiceImpl implements IncomeService {
         PageRequest<IncomeResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<IncomeResVO> incomeList = incomeMapper.getIncomeList(cond, request);
         List<IncomeResVO> list = incomeList.getList();
-        Map<String, String> typeMap = getInvoiceType();
+        Map<String, String> typeMap = getInvoiceTypeByValue();
         Map<String, String> categoryMap = getCategory();
         Map<String, String> paymentMap = getPaymentMap();
         Map<Integer, String> isReceivedMap = getIsReceived();
@@ -88,7 +88,7 @@ IncomeServiceImpl implements IncomeService {
             // 类型
             incomeResVO.setCategory(categoryMap.get(category));
             //  拼装收款发票类型
-            incomeResVO.setInvoiceType(typeMap.get(incomeResVO.getInvoiceType()));
+            incomeResVO.setInvoiceTypeLabel(typeMap.get(incomeResVO.getInvoiceType().toString()));
             BigDecimal monthAmount = incomeMapper.getMonthAmount(incomeResVO.getId(), DateUtil.getCurrentMonth());
             incomeResVO.setMonthAmount(monthAmount);
             incomeResVO.setUnit(unitMap.get(Integer.valueOf(incomeResVO.getUnit())));
@@ -148,8 +148,7 @@ IncomeServiceImpl implements IncomeService {
             incomeMapper.updateTemplateById(income1);
         }
         //部分回款 2
-        if (received.compareTo(receivable) < 0
-                && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
+        if (received.compareTo(receivable) < 0 && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
             income1.setIsReceived(IsReceived.PART_RECEIVED.key());
             incomeMapper.updateTemplateById(income1);
         }
@@ -161,7 +160,7 @@ IncomeServiceImpl implements IncomeService {
         // TODO 导入存量数据时对比是否与发票或收据关联
         // 转换单位
         Map<String, Integer> unitMap = unitApiExp.getUnitMapByUnitName();
-        Map<String, String> invoiceTypeMap = getInvoiceType();
+        Map<String, String> invoiceTypeMap = getInvoiceTypeByLabel();
         for (IncomeImportVO importVO : dataList) {
             RelocationIncome income = new RelocationIncome();
             // 1 迁改 2 搬迁 3 代建
@@ -246,9 +245,14 @@ IncomeServiceImpl implements IncomeService {
         }
     }
 
-    private Map<String, String> getInvoiceType() {
+    private Map<String, String> getInvoiceTypeByLabel() {
         List<DictVO> compensationSateList = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
         return compensationSateList.stream().collect(Collectors.toMap(DictVO::getLabel, DictVO::getValue));
+    }
+
+    private Map<String, String> getInvoiceTypeByValue() {
+        List<DictVO> compensationSateList = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
+        return compensationSateList.stream().collect(Collectors.toMap(DictVO::getValue, DictVO::getLabel));
     }
 
     private Map<String, String> getCategory() {

@@ -98,7 +98,7 @@ public class WarnController implements RelocationWarnApi {
     public PageResult<WarnResVO> getWarnList(
             @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
             @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
-            @Parameter(description = "预警查询条件") WarnReqVO warnReqVO, @UserId Integer userId) {
+            @Parameter(description = "预警查询条件") WarnReqVO warnReqVO, @Parameter(hidden = true) @UserId Integer userId) {
         pageNum = pageNum == null ? 1 : pageNum;
         pageSize = pageSize == null ? 30 : pageSize;
         return warnService.getWarnList(warnReqVO, userId, pageNum, pageSize);

@@ -43,9 +43,9 @@ public class IncomeResVO implements Serializable {
     @Schema(description = "发票号码")
     private String invoiceNum;
     @Schema(description = "发票类型")
-    private String invoiceType;
+    private Integer invoiceType;
     @Schema(description = "发票类型值")
-    private Integer invoiceTypeLabel;
+    private String invoiceTypeLabel;
     @Schema(description = "价款")
     private BigDecimal amount;
     @Schema(description = "税额")

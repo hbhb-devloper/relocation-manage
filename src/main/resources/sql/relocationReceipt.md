@@ -2,21 +2,26 @@
 selectReceiptListByCond
 ===
  ```sql
-      select 
-            rr.id               as id ,
-             category            as category,
-             unit_id             as unitId,
-             receipt_num         as receiptNum,
-             compensation_amount as compensationAmount,
-             payment_amount      as paymentAmount,
-             contract_name       as contractName,
-             contract_num        as contractNum,
-             payment_desc        as paymentDesc,
-             receipt_amount      as receiptAmount,
-             receipt_time        as receiptTime,
-             remake              as remake,
-             supplier            as supplier
-      from relocation_receipt rr
+select rr.id               as id,
+       rr.category         as category,
+       rr.unit_id          as unitId,
+       receipt_num         as receiptNum,
+       compensation_amount as compensationAmount,
+       payment_amount      as paymentAmount,
+       rr.contract_name    as contractName,
+       rr.contract_num     as contractNum,
+       payment_desc        as paymentDesc,
+       receipt_amount      as receiptAmount,
+       receipt_time        as receiptTime,
+       remake              as remake,
+       rr.supplier         as supplier,
+       rii.is_received        paymentStatus,
+       rii.receivable         receivable,
+       rii.received           received,
+       rii.unreceived         unreceived
+from relocation_receipt rr
+         left join relocation_income rii
+                   on rr.receipt_num = rii.invoice_num
      -- @where(){
        -- @if(!isEmpty(cond.unitId)){
             and rr.unit_id = #{cond.unitId}
@@ -41,21 +46,27 @@ selectReceiptByCond
  ```sql
       select 
  -- @pageTag(){
-            rr.id               as id ,
-             category            as category,
-             unit_id             as unitId,
-             receipt_num         as receiptNum,
-             compensation_amount as compensationAmount,
-             payment_amount      as paymentAmount,
-             contract_name       as contractName,
-             contract_num        as contractNum,
-             payment_desc        as paymentDesc,
-             receipt_amount      as receiptAmount,
-             receipt_time        as receiptTime,
-             remake              as remake,
-             supplier            as supplier
+ rr.id               as id,
+       rr.category         as category,
+       rr.unit_id          as unitId,
+       receipt_num         as receiptNum,
+       compensation_amount as compensationAmount,
+       payment_amount      as paymentAmount,
+       rr.contract_name    as contractName,
+       rr.contract_num     as contractNum,
+       payment_desc        as paymentDesc,
+       receipt_amount      as receiptAmount,
+       receipt_time        as receiptTime,
+       remake              as remake,
+       rr.supplier         as supplier,
+       rii.is_received     as  isReceived,
+       rii.receivable      as  receivable,
+       rii.received        as  received,
+       rii.unreceived      as   unreceived
     -- @}
-      from relocation_receipt rr
+       from relocation_receipt rr
+       left join relocation_income rii
+       on rr.receipt_num = rii.invoice_num
      -- @where(){
        -- @if(!isEmpty(cond.unitId)){
             and rr.unit_id = #{cond.unitId}
