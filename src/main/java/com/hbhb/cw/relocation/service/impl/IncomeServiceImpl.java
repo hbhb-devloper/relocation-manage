@@ -88,7 +88,7 @@ IncomeServiceImpl implements IncomeService {
             // 类型
             incomeResVO.setCategory(categoryMap.get(category));
             //  拼装收款发票类型
-            incomeResVO.setInvoiceTypeLabel(typeMap.get(incomeResVO.getInvoiceType().toString()));
+            incomeResVO.setInvoiceType(typeMap.get(incomeResVO.getInvoiceTypeLabel()));
             BigDecimal monthAmount = incomeMapper.getMonthAmount(incomeResVO.getId(), DateUtil.getCurrentMonth());
             incomeResVO.setMonthAmount(monthAmount);
             incomeResVO.setUnit(unitMap.get(Integer.valueOf(incomeResVO.getUnit())));
