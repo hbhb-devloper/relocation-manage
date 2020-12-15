@@ -107,22 +107,24 @@ public class ReceiptServiceImpl implements ReceiptService {
             if (!contractNumList.contains(importVos.getContractNum())) {
                 msg.add("excel表中第" + i + "行,合同编号：" + importVos.getContractNum() + "在基础信息中不存在请检查！");
             }
-            if (!msg.isEmpty()) {
-                throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
-            }
-            //1.获取基础信息中所对应的数据
-            List<ProjectReqVO> projectReq = getProjectResVo(arrList, unitMap);
-            RelocationReceipt receipt = new RelocationReceipt();
-            BeanUtils.copyProperties(importVos, receipt);
-            receipt.setUnitId(unitMap.get(importVos.getUnit()));
-            receipt.setReceiptTime(DateUtil.string3DateYMD(importVos.getReceiptTime()));
-            if (projectReq.size() == 1) {
-                projectReq.forEach(item -> receipt.setProjectId(item.getId()));
-            }
-            if (receipt.getProjectId() != null) {
-                receiptList.add(receipt);
+            if (arrList.size() == 4) {
+                //1.获取基础信息中所对应的数据
+                List<ProjectReqVO> projectReq = getProjectResVo(arrList, unitMap);
+                RelocationReceipt receipt = new RelocationReceipt();
+                BeanUtils.copyProperties(importVos, receipt);
+                receipt.setUnitId(unitMap.get(importVos.getUnit()));
+                receipt.setReceiptTime(DateUtil.string3DateYMD(importVos.getReceiptTime()));
+                if (projectReq.size() == 1) {
+                    projectReq.forEach(item -> receipt.setProjectId(item.getId()));
+                }
+                if (receipt.getProjectId() != null) {
+                    receiptList.add(receipt);
+                }
             }
             i++;
+        }
+        if (!msg.isEmpty()) {
+            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
         }
         receiptMapper.insertBatch(receiptList);
         // 新增收款信息
@@ -141,7 +143,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
         // 判断用户单位
         UserInfo user = userAip.getUserInfoById(userId);
-        if (UnitEnum.isHangzhou(user.getUnitId())) {
+        if (!UnitEnum.isHangzhou(user.getUnitId()) && vo.getUnitId() == null) {
             vo.setUnitId(user.getUnitId());
         }
         List<ReceiptResVO> list = receiptMapper.selectReceiptListByCond(vo);

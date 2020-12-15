@@ -104,7 +104,7 @@ public class ReceiptController {
         return receiptService.getReceipt(receiptNum);
     }
 
-    @Operation(summary = "基础项目信息模板导出")
+    @Operation(summary = "基础收据信息模板导出")
     @PostMapping("/export/template")
     public void getReceiptTemplate(HttpServletRequest request, HttpServletResponse response) {
         List<Object> list = new ArrayList<>();

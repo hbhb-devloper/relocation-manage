@@ -8,6 +8,7 @@ import com.hbhb.cw.relocation.web.vo.IncomeResVO;
 import org.beetl.sql.core.page.PageResult;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author hyk
@@ -54,9 +55,10 @@ public interface IncomeService {
     /**
      * 导入收款信息
      *
-     * @param dataList 导入
+     * @param dataList      导入
+     * @param importHeadMap 表头
      */
-    void addSaveRelocationInvoice(List<IncomeImportVO> dataList);
+    void addSaveRelocationInvoice(List<IncomeImportVO> dataList, Map<Integer, String> importHeadMap);
 
     /**
      * 跟据条件导出收款列表

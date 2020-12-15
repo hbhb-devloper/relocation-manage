@@ -156,8 +156,19 @@ IncomeServiceImpl implements IncomeService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addSaveRelocationInvoice(List<IncomeImportVO> dataList) {
+    public void addSaveRelocationInvoice(List<IncomeImportVO> dataList, Map<Integer, String> importHeadMap) {
+
         // TODO 导入存量数据时对比是否与发票或收据关联
+        // 对比导入表头与模板表头若相同则执行后续操作，若不同则抛出异常
+        Map<Integer, String> headMap = projectHead();
+        for (Map.Entry<Integer, String> entry : headMap.entrySet()) {
+            String m1value = entry.getValue() == null ? "" : entry.getValue();
+            String m2value = importHeadMap.get(entry.getKey()) == null ? "" : importHeadMap.get(entry.getKey());
+            if (!m1value.equals(m2value)) {
+                //若两个map中相同key对应的value不相等
+                throw new RelocationException(RelocationErrorCode.RELOCATION_TEMPLATE_ERROR);
+            }
+        }
         // 转换单位
         Map<String, Integer> unitMap = unitApiExp.getUnitMapByUnitName();
         Map<String, String> invoiceTypeMap = getInvoiceTypeByLabel();
@@ -256,7 +267,7 @@ IncomeServiceImpl implements IncomeService {
     }
 
     private Map<String, String> getCategory() {
-        // 类型
+        // 发票类型
         Map<String, String> categoryMap = new HashMap<>(100);
         categoryMap.put(Category.RELOCATION.key().toString(), Category.RELOCATION.value());
         categoryMap.put(Category.REMOVAL.key().toString(), Category.REMOVAL.value());
@@ -274,6 +285,7 @@ IncomeServiceImpl implements IncomeService {
     }
 
     private Map<String, String> getPaymentMap() {
+        // 款项类型
         Map<String, String> paymentMap = new HashMap<>(100);
         paymentMap.put(PaymentType.ADVANCE_PAYMENT.key().toString(), PaymentType.ADVANCE_PAYMENT.value());
         paymentMap.put(PaymentType.FINAL_PARAGRAPH.key().toString(), PaymentType.FINAL_PARAGRAPH.value());
@@ -288,6 +300,39 @@ IncomeServiceImpl implements IncomeService {
         if (!(ExcelTypeEnum.XLS.getValue().equals(name) || ExcelTypeEnum.XLSX.getValue().equals(name))) {
             throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
         }
+    }
+
+    private Map<Integer, String> projectHead() {
+        Map<Integer, String> headMap = new HashMap<>(100);
+        headMap.put(0, "序号");
+        headMap.put(1, "类别");
+        headMap.put(2, "经办单位");
+        headMap.put(3, "供应商");
+        headMap.put(4, "合同编号");
+        headMap.put(5, "合同名称");
+        headMap.put(6, "起始时间");
+        headMap.put(7, "合截止时间");
+        headMap.put(8, "合同金额");
+        headMap.put(9, "开票日期");
+        headMap.put(10, "发票号码");
+        headMap.put(11, "发票类型");
+        headMap.put(12, "价款");
+        headMap.put(13, "税额");
+        headMap.put(14, "价税合计");
+        headMap.put(15, "工程名");
+        headMap.put(16, "收款情况");
+        headMap.put(17, "账龄分类");
+        headMap.put(18, "账龄（月）");
+        headMap.put(19, "应收");
+        headMap.put(20, "已收");
+        headMap.put(21, "未收");
+        headMap.put(22, "收款类型");
+        headMap.put(23, "当月收款金额");
+        headMap.put(24, "收款单号");
+        headMap.put(25, "收款人");
+
+
+        return headMap;
     }
 
 }

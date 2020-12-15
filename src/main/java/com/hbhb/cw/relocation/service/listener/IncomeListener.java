@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author hyk
@@ -22,6 +24,8 @@ public class IncomeListener extends AnalysisEventListener {
      * 批处理条数，每隔多少条清理一次list ，方便内存回收
      */
     private static final int BATCH_COUNT = 500;
+    private final Map<Integer, String> importHeadMap = new HashMap<>();
+
 
     /**
      * 数据行
@@ -64,7 +68,19 @@ public class IncomeListener extends AnalysisEventListener {
      */
     private void saveData() {
         if (!CollectionUtils.isEmpty(dataList)) {
-            incomeService.addSaveRelocationInvoice(dataList);
+            incomeService.addSaveRelocationInvoice(dataList, importHeadMap);
         }
     }
+
+    /**
+     * 获取表头
+     */
+    @Override
+    public void invokeHeadMap(Map headMap, AnalysisContext context) {
+        if (headMap != null) {
+            importHeadMap.putAll(headMap);
+        }
+        // 根据自己的情况去做表头的判断即可
+    }
+
 }

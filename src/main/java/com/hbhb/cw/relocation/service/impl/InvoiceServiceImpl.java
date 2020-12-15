@@ -171,45 +171,46 @@ public class InvoiceServiceImpl implements InvoiceService {
             if (arrList.size() != 4) {
                 msg.add("请检查excel第" + i + "行，备注修改列：" + remake + "格式");
             }
-            if (msg.size() != 0) {
-                throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
-            }
-            List<ProjectReqVO> projectRes = getProjectResVo(remake, unitMap);
-            if (projectRes.size() == 1) {
-                projectRes.forEach(item -> invoice.setProjectId(item.getId()));
-            }
-            // 判断是否有对应项目
-            if (!isEmpty(invoice.getProjectId())) {
-                RelocationProject project = projectMapper.single(invoice.getProjectId());
-                // 地区默认11
-                invoice.setDistrict(11);
-                // 经办单位
-                invoice.setUnitId(unitMap.get(invoiceImport.getUnitId()));
-                // 发票编号
-                invoice.setInvoiceNumber(invoiceImport.getInvoiceNumber());
-                String invoiceType = invoiceImport.getInvoiceType();
-                invoice.setInvoiceType(Integer.valueOf(typeMap.get(invoiceType)));
-                // 开票日期格式转换 yyyy/MM/dd
-                invoice.setInvoiceTime(DateUtil.string2DateYMD(invoiceImport.getInvoiceTime()));
-                // 金额
-                invoice.setAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getAmount()));
-                // 税率 空
-                invoice.setTaxRate(new BigDecimal("0"));
-                // 税额
-                invoice.setTaxAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getTaxAmount()));
-                // 价税合计
-                invoice.setTaxIncludeAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getTaxIncludeAmount()));
-                // 备注
-                invoice.setRemake(invoiceImport.getRemake());
-                // 收款负责人/申请人
-                invoice.setApplicant(invoiceImport.getApplicant());
-                // 收款
-                RelocationIncome income = getRelocationIncome(invoice, project);
-                invoiceList.add(invoice);
-                incomeList.add(income);
-
+            if (arrList.size() == 4) {
+                List<ProjectReqVO> projectRes = getProjectResVo(remake, unitMap);
+                if (projectRes.size() == 1) {
+                    projectRes.forEach(item -> invoice.setProjectId(item.getId()));
+                }
+                // 判断是否有对应项目
+                if (!isEmpty(invoice.getProjectId())) {
+                    RelocationProject project = projectMapper.single(invoice.getProjectId());
+                    // 地区默认11
+                    invoice.setDistrict(11);
+                    // 经办单位
+                    invoice.setUnitId(unitMap.get(invoiceImport.getUnitId()));
+                    // 发票编号
+                    invoice.setInvoiceNumber(invoiceImport.getInvoiceNumber());
+                    String invoiceType = invoiceImport.getInvoiceType();
+                    invoice.setInvoiceType(Integer.valueOf(typeMap.get(invoiceType)));
+                    // 开票日期格式转换 yyyy/MM/dd
+                    invoice.setInvoiceTime(DateUtil.string2DateYMD(invoiceImport.getInvoiceTime()));
+                    // 金额
+                    invoice.setAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getAmount()));
+                    // 税率 空
+                    invoice.setTaxRate(new BigDecimal("0"));
+                    // 税额
+                    invoice.setTaxAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getTaxAmount()));
+                    // 价税合计
+                    invoice.setTaxIncludeAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getTaxIncludeAmount()));
+                    // 备注
+                    invoice.setRemake(invoiceImport.getRemake());
+                    // 收款负责人/申请人
+                    invoice.setApplicant(invoiceImport.getApplicant());
+                    // 收款
+                    RelocationIncome income = getRelocationIncome(invoice, project);
+                    invoiceList.add(invoice);
+                    incomeList.add(income);
+                }
             }
             i++;
+        }
+        if (msg.size() != 0) {
+            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
         }
         // 批量插入发票、收款信息
         incomeMapper.insertBatch(incomeList);
