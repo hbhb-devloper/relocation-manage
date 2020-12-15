@@ -87,7 +87,7 @@ public class ProjectListener extends AnalysisEventListener {
             row = convertException.getRowIndex();
             column = convertException.getColumnIndex();
             log.error("解析出错：{}行 {}列", row, column);
-            String msg = "解析出错" + "第" + row + "行,第" + column + "列";
+            String msg = "解析出错啦" + "第" + row + "行,第" + column + "列,请检查数据格式或模板是否正确";
             throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg);
         }
     }
