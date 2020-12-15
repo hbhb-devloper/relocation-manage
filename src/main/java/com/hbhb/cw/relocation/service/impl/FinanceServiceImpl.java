@@ -28,6 +28,7 @@ import java.util.Map;
  */
 @Service
 @Slf4j
+@SuppressWarnings(value = {"unchecked"})
 public class FinanceServiceImpl implements FinanceService {
 
     @Resource

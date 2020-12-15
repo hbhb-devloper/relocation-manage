@@ -46,6 +46,7 @@ import static java.lang.Integer.parseInt;
  */
 @Service
 @Slf4j
+@SuppressWarnings(value = {"unchecked"})
 public class InvoiceServiceImpl implements InvoiceService {
 
     @Resource

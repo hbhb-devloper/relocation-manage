@@ -36,6 +36,7 @@ import static java.lang.Integer.parseInt;
  */
 @Service
 @Slf4j
+@SuppressWarnings(value = {"unchecked"})
 public class WarnServiceImpl implements WarnService {
 
     @Resource
@@ -149,7 +150,7 @@ public class WarnServiceImpl implements WarnService {
         List<WarnCountVO> warnStartList = projectMapper.selectProjectStartWarnCount();
         Map<Integer, Integer> warnStartMap = warnStartList.stream().collect(Collectors.toMap(WarnCountVO::getUnitId, WarnCountVO::getCount));
         // 2.按照统计数据向每个单位负责人推送邮件信息
-        List<Integer> userIdList = flowApi.getFlowRoleUserList("迁改预警负责人");
+        List<Integer> userIdList = flowApi.getUserIdByRoleName("迁改预警负责人");
         List<UserInfo> userList = userApi.getUserInfoBatch(userIdList);
         Set<Integer> keys = warnStartMap.keySet();
         for (Integer unitId : keys) {
@@ -209,7 +210,7 @@ public class WarnServiceImpl implements WarnService {
     @Override
     public PageResult<WarnResVO> getWarnList(WarnReqVO cond, Integer userId, Integer pageNum, Integer pageSize) {
         // 判断该用户是否具有流程角色
-        List<Integer> userIds = flowApi.getFlowRoleUserList("迁改预警负责人");
+        List<Integer> userIds = flowApi.getUserIdByRoleName("迁改预警负责人");
         if (userIds.contains(userId)) {
             Map<Integer, String> unitMap = unitApi.getUnitMapById();
             UserInfo userById = userApi.getUserInfoById(userId);

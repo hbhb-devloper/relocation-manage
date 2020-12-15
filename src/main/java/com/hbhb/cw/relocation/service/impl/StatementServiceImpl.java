@@ -23,6 +23,7 @@ import java.util.Map;
  */
 @Service
 @Slf4j
+@SuppressWarnings(value = {"unchecked"})
 public class StatementServiceImpl implements StatementService {
     @Resource
     private ProjectMapper projectMapper;

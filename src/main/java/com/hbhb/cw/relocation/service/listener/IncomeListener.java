@@ -96,8 +96,6 @@ public class IncomeListener extends AnalysisEventListener {
             column = convertException.getColumnIndex();
             log.error("解析出错：{}行 {}列", row, column);
             msg = "解析出错啦！ " + "第" + row + "行,第" + column + "列,请检查数据格式或模板是否正确";
-            System.out.println(msg);
-
         }
         if (msg != null) {
             throw new RelocationException("80898", msg);

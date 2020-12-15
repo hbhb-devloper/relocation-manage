@@ -48,8 +48,8 @@ import static org.springframework.util.StringUtils.isEmpty;
  */
 @Service
 @Slf4j
-public class
-IncomeServiceImpl implements IncomeService {
+@SuppressWarnings(value = {"unchecked"})
+public class IncomeServiceImpl implements IncomeService {
 
     @Resource
     private IncomeMapper incomeMapper;
