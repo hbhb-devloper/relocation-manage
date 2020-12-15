@@ -59,18 +59,23 @@ public class IncomeController {
 
     @Operation(summary = "迁改管理收款导入")
     @PostMapping(value = "/import", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public void importIncome(MultipartFile file) {
+    public List<String> importIncome(MultipartFile file) {
         long begin = System.currentTimeMillis();
         String fileName = file.getOriginalFilename();
         incomeService.judgeFileName(fileName);
         try {
             EasyExcel.read(file.getInputStream(), IncomeImportVO.class,
                     new IncomeListener(incomeService)).sheet().headRowNumber(2).doRead();
+            List<String> msg = incomeService.getMsg();
+            if (msg.size() != 0) {
+                return msg;
+            }
         } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_IMPORT_ERROR);
         }
         log.info("迁改收款导入结束，总共耗时：" + (System.currentTimeMillis() - begin) / 1000 + "s");
+        return null;
     }
 
     @Operation(summary = "迁改管理收款导出")

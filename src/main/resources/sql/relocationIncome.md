@@ -194,3 +194,9 @@ getMonthAmount
         from relocation_income_detail
         where income_id = #{id} and pay_month = #{currentMonth}
 ```
+selectInvoiceNum
+===
+```sql
+select invoice_num from relocation_income
+group  by invoice_num
+```

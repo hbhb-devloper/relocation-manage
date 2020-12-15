@@ -9,7 +9,7 @@ public enum IsReceived {
     /**
      * 已收款
      */
-    RECEIVED(10, "已回款"),
+    RECEIVED(10, "已收款"),
 
     /**
      * 未收款
@@ -18,7 +18,7 @@ public enum IsReceived {
     /**
      * 部分回款
      */
-    PART_RECEIVED(30, "部分回款");
+    PART_RECEIVED(30, "收款中");
 
 
     private final Integer key;

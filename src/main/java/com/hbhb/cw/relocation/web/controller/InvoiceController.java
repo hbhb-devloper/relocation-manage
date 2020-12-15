@@ -75,17 +75,22 @@ public class InvoiceController {
 
     @Operation(summary = "迁改管理发票导入")
     @PostMapping(value = "/import", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public void importInvoice(MultipartFile file) {
+    public List<String> importInvoice(MultipartFile file) {
         long begin = System.currentTimeMillis();
         String fileName = file.getOriginalFilename();
         invoiceService.judgeFileName(fileName);
         try {
             EasyExcel.read(file.getInputStream(), InvoiceImportVO.class,
                     new InvoiceListener(invoiceService)).sheet().headRowNumber(2).doRead();
+            List<String> msg = invoiceService.getMsg();
+            if (msg.size() != 0) {
+                return msg;
+            }
         } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
         }
         log.info("迁改发票导入结束，总共耗时：" + (System.currentTimeMillis() - begin) / 1000 + "s");
+        return null;
     }
 
     @Operation(summary = "迁改管理发票导出")

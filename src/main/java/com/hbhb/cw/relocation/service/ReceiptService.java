@@ -8,6 +8,9 @@ import org.beetl.sql.core.page.PageResult;
 
 import java.util.List;
 
+/**
+ * @author wangxiaogang
+ */
 public interface ReceiptService {
     /**
      * 跟据条件查询收据列表并分页
@@ -54,4 +57,11 @@ public interface ReceiptService {
      * 跟据收据编号查询收据详情
      */
     ReceiptResVO getReceipt(String receiptNum);
+
+    /**
+     * 导入返回结果集
+     *
+     * @return 结果
+     */
+    List<String> getMsg();
 }

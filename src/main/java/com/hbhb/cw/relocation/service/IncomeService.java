@@ -76,4 +76,11 @@ public interface IncomeService {
      */
     void judgeFileName(String fileName);
 
+    /**
+     * 导入返回结果集
+     *
+     * @return 结果
+     */
+    List<String> getMsg();
+
 }

@@ -94,5 +94,12 @@ public interface ProjectService {
      */
     void updateContractFileId(FileVO file);
 
+    /**
+     * 导入返回结果集
+     *
+     * @return 结果
+     */
+    List<String> getMsg();
+
 
 }

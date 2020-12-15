@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
@@ -52,18 +53,15 @@ IncomeServiceImpl implements IncomeService {
 
     @Resource
     private IncomeMapper incomeMapper;
-
     @Resource
     private IncomeDetailMapper incomeDetailMapper;
-
     @Resource
     private UnitApiExp unitApiExp;
-
     @Resource
     private UserApiExp userApi;
-
     @Resource
     private DictApiExp dictApi;
+    private final List<String> msg = new CopyOnWriteArrayList<>();
 
     @Override
     public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize, IncomeReqVO cond, Integer userId) {
@@ -156,9 +154,8 @@ IncomeServiceImpl implements IncomeService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addSaveRelocationInvoice(List<IncomeImportVO> dataList, Map<Integer, String> importHeadMap) {
-
-        // TODO 导入存量数据时对比是否与发票或收据关联
+    public synchronized void addSaveRelocationInvoice(List<IncomeImportVO> dataList, Map<Integer, String> importHeadMap) {
+        List<String> invoiceNum = incomeMapper.selectInvoiceNum();
         // 对比导入表头与模板表头若相同则执行后续操作，若不同则抛出异常
         Map<Integer, String> headMap = projectHead();
         for (Map.Entry<Integer, String> entry : headMap.entrySet()) {
@@ -172,6 +169,10 @@ IncomeServiceImpl implements IncomeService {
         // 转换单位
         Map<String, Integer> unitMap = unitApiExp.getUnitMapByUnitName();
         Map<String, String> invoiceTypeMap = getInvoiceTypeByLabel();
+        List<String> error = new ArrayList<>();
+        // 收款
+        List<RelocationIncome> incomeList = new ArrayList<>();
+        int i = 3;
         for (IncomeImportVO importVO : dataList) {
             RelocationIncome income = new RelocationIncome();
             // 1 迁改 2 搬迁 3 代建
@@ -184,10 +185,12 @@ IncomeServiceImpl implements IncomeService {
             income.setContractDeadline(DateUtil.string3DateYMD(importVO.getContractDeadline()));
             income.setContractAmount(BigDecimalUtil.getBigDecimal(importVO.getContractAmount()));
             income.setInvoiceTime(DateUtil.string3DateYMD(importVO.getInvoiceTime()));
+            if (invoiceNum.contains(importVO.getInvoiceNum())) {
+                error.add("excel第：" + i + "行数据已存在，请检查导入数据是否正确");
+            }
             income.setInvoiceNum(importVO.getInvoiceNum());
             income.setInvoiceType(Integer.valueOf(String.valueOf(invoiceTypeMap.get(importVO.getInvoiceType()) != null
                     ? invoiceTypeMap.get(importVO.getInvoiceType()) : 0)));
-            income.setInvoiceType(Integer.valueOf(invoiceTypeMap.get(importVO.getInvoiceType())));
             income.setAmount(BigDecimalUtil.getBigDecimal(importVO.getAmount()));
             income.setTax(BigDecimalUtil.getBigDecimal(importVO.getTax()));
             income.setTaxIncludeAmount(BigDecimalUtil.getBigDecimal(importVO.getTaxIncludeAmount()));
@@ -206,18 +209,28 @@ IncomeServiceImpl implements IncomeService {
             income.setReceived(BigDecimalUtil.getBigDecimal(importVO.getReceived()));
             income.setUnreceived(BigDecimalUtil.getBigDecimal(importVO.getUnreceived()));
             //插入收款信息
-            incomeMapper.insert(income);
-            //插入收款下的收款详情
-            if (!isEmpty(importVO.getReceiptNum())) {
-                RelocationIncomeDetail incomeDetail = new RelocationIncomeDetail();
-                incomeDetail.setIncomeId(income.getId());
-                incomeDetail.setCreateTime(DateUtil.getCurrentDate());
-                incomeDetail.setPayee(importVO.getPayee());
-                incomeDetail.setReceiptNum(importVO.getReceiptNum());
-                incomeDetail.setAmount(BigDecimalUtil.getBigDecimal(importVO.getMonthAmount()));
-                incomeDetail.setPayMonth(DateUtil.getCurrentMonth());
-                incomeDetailMapper.insert(incomeDetail);
+            incomeList.add(income);
+            i++;
+        }
+        msg.clear();
+        msg.addAll(error);
+        if (isEmpty(msg)) {
+            incomeMapper.insertBatch(incomeList);
+            List<RelocationIncomeDetail> details = new ArrayList<>();
+            for (RelocationIncome income : incomeList) {
+                if (!isEmpty(income.getReceiptNum())) {
+                    RelocationIncomeDetail incomeDetail = RelocationIncomeDetail.builder()
+                            .incomeId(income.getId())
+                            .createTime(DateUtil.getCurrentDate())
+                            .payee(income.getPayee())
+                            .amount(income.getAmount())
+                            .payMonth(DateUtil.getCurrentMonth())
+                            .build();
+                    details.add(incomeDetail);
+                }
             }
+            //插入收款下的收款详情
+            incomeDetailMapper.insertBatch(details);
         }
     }
 
@@ -335,4 +348,8 @@ IncomeServiceImpl implements IncomeService {
         return headMap;
     }
 
+    @Override
+    public List<String> getMsg() {
+        return this.msg;
+    }
 }

@@ -54,6 +54,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     private UserApiExp userAip;
     @Resource
     private IncomeMapper incomeMapper;
+    private final List<String> msg = new CopyOnWriteArrayList<>();
 
     @Override
     public PageResult<ReceiptResVO> getReceiptList(ReceiptReqVO cond, Integer pageNum, Integer pageSize, Integer userId) {
@@ -82,7 +83,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized void addSaveRelocationReceipt(List<ReceiptImportVO> dataList) {
-        List<String> msg = new CopyOnWriteArrayList<>();
+        List<String> error = new CopyOnWriteArrayList<>();
         Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
         List<RelocationReceipt> receiptList = new ArrayList<>();
         // 验证导入合同编号是否存在
@@ -97,15 +98,15 @@ public class ReceiptServiceImpl implements ReceiptService {
             // 按照英文分隔符划分
             List<String> arrList = Arrays.asList(remake.split(";"));
             if (arrList.size() != 4) {
-                msg.add("请检查excel第" + i + "备注修改列：" + remake + "格式");
+                error.add("请检查excel第" + i + "备注修改列：" + remake + "格式");
             }
             // 判断收据编号是否已存在
             if (receiptNumList.contains(importVos.getReceiptNum())) {
-                msg.add("excel表中第" + i + "行，收据编号为：" + importVos.getReceiptNum() + "在收据信息表中已存在！请仔细检查后重新导入");
+                error.add("excel表中第" + i + "行，收据编号为：" + importVos.getReceiptNum() + "在收据信息表中已存在！请仔细检查后重新导入");
             }
             // 判断合同编号是否存在基础项目表中
             if (!contractNumList.contains(importVos.getContractNum())) {
-                msg.add("excel表中第" + i + "行,合同编号：" + importVos.getContractNum() + "在基础信息中不存在请检查！");
+                error.add("excel表中第" + i + "行,合同编号：" + importVos.getContractNum() + "在基础信息中不存在请检查！");
             }
             if (arrList.size() == 4) {
                 //1.获取基础信息中所对应的数据
@@ -123,17 +124,19 @@ public class ReceiptServiceImpl implements ReceiptService {
             }
             i++;
         }
-        if (!msg.isEmpty()) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
+        // 判断是否有错误如果有则不进入方法体内
+        msg.clear();
+        msg.addAll(error);
+        if (msg.isEmpty()) {
+            receiptMapper.insertBatch(receiptList);
+            // 新增收款信息
+            List<RelocationIncome> list = new ArrayList<>();
+            for (RelocationReceipt receipt : receiptList) {
+                RelocationIncome income = setRelocationIncome(receipt);
+                list.add(income);
+            }
+            incomeMapper.insertBatch(list);
         }
-        receiptMapper.insertBatch(receiptList);
-        // 新增收款信息
-        List<RelocationIncome> list = new ArrayList<>();
-        for (RelocationReceipt receipt : receiptList) {
-            RelocationIncome income = setRelocationIncome(receipt);
-            list.add(income);
-        }
-        incomeMapper.insertBatch(list);
     }
 
     @Override
@@ -210,7 +213,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             msg.add("合同编号：" + receipt.getContractNum() + "在基础信息中不存在请检查！");
         }
         if (msg.size() != 0) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
+            throw new RelocationException("80898", msg.toString());
         }
         // 判断备注列数据是否对应基础信息
         // 转换单位
@@ -330,4 +333,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         return statusMap;
     }
 
+    @Override
+    public List<String> getMsg() {
+        return this.msg;
+    }
 }

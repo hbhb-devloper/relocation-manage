@@ -1,12 +1,14 @@
 package com.hbhb.cw.relocation.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.Serializable;
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.beetl.sql.annotation.entity.AutoID;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @since 2020-09-25
@@ -14,6 +16,7 @@ import org.beetl.sql.annotation.entity.AutoID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class RelocationIncomeDetail implements Serializable {
 
     private static final long serialVersionUID = -7894679294000895303L;

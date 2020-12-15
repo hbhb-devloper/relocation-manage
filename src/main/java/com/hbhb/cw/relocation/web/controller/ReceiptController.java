@@ -76,17 +76,21 @@ public class ReceiptController {
 
     @Operation(summary = "迁改管理收据导入")
     @PostMapping(value = "/import", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public void importReceipt(MultipartFile file) {
+    public List<String> importReceipt(MultipartFile file) {
         long begin = System.currentTimeMillis();
         try {
             EasyExcel.read(file.getInputStream(), ReceiptImportVO.class,
                     new ReceiptListener(receiptService)).sheet().headRowNumber(2).doRead();
+            List<String> msg = receiptService.getMsg();
+            if (msg.size() != 0) {
+                return msg;
+            }
         } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
             throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_IMPORT_ERROR);
         }
         log.info("迁改收据模板导入成功，总共耗时：" + (System.currentTimeMillis() - begin) / 1000 + "s");
-
+        return null;
     }
 
     @Operation(summary = "迁改管理收据导出")

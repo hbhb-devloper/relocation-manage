@@ -3,7 +3,6 @@ package com.hbhb.cw.relocation.service.listener;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.exception.ExcelDataConvertException;
-import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.service.ReceiptService;
 import com.hbhb.cw.relocation.web.vo.ReceiptImportVO;
@@ -78,8 +77,8 @@ public class ReceiptListener extends AnalysisEventListener {
             row = convertException.getRowIndex();
             column = convertException.getColumnIndex();
             log.error("解析出错：{}行 {}列", row, column);
-            String msg = "解析出错啦" + "第" + row + "行,第" + column + "列,请检查数据格式或模板是否正确";
-            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg);
+            String msg = "解析出错啦！ " + "第" + row + "行,第" + column + "列,请检查数据格式或模板是否正确";
+            throw new RelocationException("80898", msg);
         }
     }
 

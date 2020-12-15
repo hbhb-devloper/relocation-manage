@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import static com.alibaba.excel.util.StringUtils.isEmpty;
@@ -49,21 +50,17 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Resource
     private InvoiceMapper invoiceMapper;
-
     @Resource
     private UserApiExp userApi;
-
     @Resource
     private UnitApiExp unitApi;
-
     @Resource
     private IncomeMapper incomeMapper;
-
     @Resource
     private DictApiExp dictApi;
-
     @Resource
     private ProjectMapper projectMapper;
+    private final List<String> msg = new CopyOnWriteArrayList<>();
 
     @Override
     public PageResult<InvoiceResVO> getInvoiceList(Integer pageNum, Integer pageSize,
@@ -79,15 +76,18 @@ public class InvoiceServiceImpl implements InvoiceService {
         PageResult<InvoiceResVO> invoiceResVo = invoiceMapper.selectListByCondition(cond, request);
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
         // 获取发票类型字典
-        List<DictVO> type = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
-        Map<String, String> typeMap = type.stream().collect(Collectors.toMap(DictVO::getValue, DictVO::getLabel));
+        List<DictVO> type = dictApi.getDict(TypeCode.RELOCATION.value(),
+                DictCode.RELOCATION_INVOICE_TYPE.value());
+        Map<String, String> typeMap = type.stream().collect(Collectors.
+                toMap(DictVO::getValue, DictVO::getLabel));
         // 获取回款状态类型
         Map<Integer, String> statusMap = getPaymentStatus();
         invoiceResVo.getList().forEach(item -> {
             // 转换发票类型
             item.setInvoiceType(typeMap.get(item.getInvoiceType()));
             // 是否为自定义开票
-            item.setIsImport(State.ONE.value().equals(item.getState()) ? State.YES.value() : State.NO.value());
+            item.setIsImport(State.ONE.value().equals(item.getState()) ?
+                    State.YES.value() : State.NO.value());
             // 转换单位
             item.setUnit(unitMap.get(item.getUnitId()));
             // 转换区域
@@ -95,7 +95,8 @@ public class InvoiceServiceImpl implements InvoiceService {
             // 收款状态
             item.setIsReceived(statusMap.get(parseInt(item.getIsReceived())));
             // 发票状态
-            item.setState(State.ONE.value().equals(item.getState()) ? InvoiceState.BLUE_STATE.value() : InvoiceState.RED_STATE.value());
+            item.setState(State.ONE.value().equals(item.getState()) ?
+                    InvoiceState.BLUE_STATE.value() : InvoiceState.RED_STATE.value());
         });
         return invoiceResVo;
     }
@@ -138,14 +139,16 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addSaveRelocationInvoice(List<InvoiceImportVO> dataList) {
+    public synchronized void addSaveRelocationInvoice(List<InvoiceImportVO> dataList) {
         // 查询所有发票编号用于与现有发票做对比
         List<String> invoiceNumber = invoiceMapper.selectInvoiceNumber();
         // 转换单位
         Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
         // 获取发票类型字典
-        List<DictVO> type = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());
-        Map<String, String> typeMap = type.stream().collect(Collectors.toMap(DictVO::getLabel, DictVO::getValue));
+        List<DictVO> type = dictApi.getDict(TypeCode.RELOCATION.value(),
+                DictCode.RELOCATION_INVOICE_TYPE.value());
+        Map<String, String> typeMap = type.stream().
+                collect(Collectors.toMap(DictVO::getLabel, DictVO::getValue));
         // 发票
         List<RelocationInvoice> invoiceList = new ArrayList<>();
         // 收款
@@ -155,13 +158,13 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (count < dataList.size()) {
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_EXCEL_EXIST);
         }
-        List<String> msg = new ArrayList<>();
+        List<String> error = new ArrayList<>();
         int i = 3;
         for (InvoiceImportVO invoiceImport : dataList) {
             RelocationInvoice invoice = new RelocationInvoice();
             BeanUtils.copyProperties(invoiceImport, invoice);
             if (invoiceNumber.contains(invoiceImport.getInvoiceNumber())) {
-                msg.add("在excel表中第" + i + "行，发票号码为:" + invoiceImport.getInvoiceNumber() + "已存在发票表中,请仔细检查后重新导入");
+                error.add("在excel表中第" + i + "行，发票号码为:" + invoiceImport.getInvoiceNumber() + "已存在发票表中,请仔细检查后重新导入");
             }
             // 备注列信息
             String remake = invoice.getRemake();
@@ -169,7 +172,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             remake = remake.replace("；", ";");
             List<String> arrList = Arrays.asList(remake.split(";"));
             if (arrList.size() != 4) {
-                msg.add("请检查excel第" + i + "行，备注修改列：" + remake + "格式");
+                error.add("请检查excel第" + i + "行，备注修改列：" + remake + "格式");
             }
             if (arrList.size() == 4) {
                 List<ProjectReqVO> projectRes = getProjectResVo(remake, unitMap);
@@ -209,12 +212,15 @@ public class InvoiceServiceImpl implements InvoiceService {
             }
             i++;
         }
-        if (msg.size() != 0) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR, msg.toString());
+        // 查看错误信息
+        msg.clear();
+        msg.addAll(error);
+        if (isEmpty(msg)) {
+            // 批量插入发票、收款信息
+            incomeMapper.insertBatch(incomeList);
+            invoiceMapper.insertBatch(invoiceList);
         }
-        // 批量插入发票、收款信息
-        incomeMapper.insertBatch(incomeList);
-        invoiceMapper.insertBatch(invoiceList);
+
     }
 
     @Override
@@ -228,11 +234,14 @@ public class InvoiceServiceImpl implements InvoiceService {
             // 序号
             export.setNum(i);
             // 发票类型
-            export.setInvoiceType(State.ONE.value().equals(export.getInvoiceType()) ? InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
+            export.setInvoiceType(State.ONE.value().equals(export.getInvoiceType()) ?
+                    InvoiceType.PLAIN_INVOICE.value() : InvoiceType.SPECIAL_INVOICE.value());
             // 发票状态
-            export.setState(State.ONE.value().equals(export.getState()) ? InvoiceState.BLUE_STATE.value() : InvoiceState.RED_STATE.value());
+            export.setState(State.ONE.value().equals(export.getState()) ?
+                    InvoiceState.BLUE_STATE.value() : InvoiceState.RED_STATE.value());
             // 是否自定义开票
-            export.setIsImport(State.ONE.value().equals(export.getState()) ? State.YES.value() : State.NO.value());
+            export.setIsImport(State.ONE.value().equals(export.getState()) ?
+                    State.YES.value() : State.NO.value());
             // 单位
             export.setUnit(unitMap.get(export.getUnitId()));
             // 区县
@@ -353,5 +362,10 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .equals(name))) {
             throw new RelocationException(RelocationErrorCode.FILE_DATA_NAME_ERROR);
         }
+    }
+
+    @Override
+    public List<String> getMsg() {
+        return this.msg;
     }
 }
