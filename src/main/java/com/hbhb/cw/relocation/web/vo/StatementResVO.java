@@ -76,4 +76,10 @@ public class StatementResVO implements Serializable {
 
     @Schema(description = "当年收款金额（万元）")
     private BigDecimal thisYearReceivable;
+
+    @Schema(description = "当年已开票在途待收（万元））")
+    private BigDecimal thisYearDueIn;
+
+    @Schema(description = "当年开票回款比")
+    private BigDecimal thisYearCostProportion;
 }

@@ -135,4 +135,7 @@ public class ProjectResVO implements Serializable {
     @Schema(description = "文件id")
     private String fileId;
 
+    @Schema(description = "是否包含附件")
+    private String isFile;
+
 }

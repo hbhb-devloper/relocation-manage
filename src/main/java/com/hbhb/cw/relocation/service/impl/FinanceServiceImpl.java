@@ -9,6 +9,7 @@ import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.FinanceService;
 import com.hbhb.cw.relocation.web.vo.FinanceReqVO;
 import com.hbhb.cw.relocation.web.vo.FinanceResVO;
+import com.hbhb.cw.systemcenter.enums.UnitEnum;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,13 @@ public class FinanceServiceImpl implements FinanceService {
         }
         PageRequest<FinanceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         setUnitId(cond, userId);
+
+        List<Integer> unitIds = new ArrayList<>();
+        if (UnitEnum.isBenbu(cond.getUnitId())) {
+            unitIds = unitApi.getSubUnit(cond.getUnitId());
+        }
+        cond.setUnitIds(unitIds);
+
         PageResult<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond, request);
         Map<String, String> isReceived = getIsAllReceived();
         Map<Integer, String> unitMap = unitApi.getUnitMapById();

@@ -318,6 +318,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
         // 收款人
         income.setPayee(receipt.getPayee());
+        income.setProjectId(project.getId());
         return income;
     }
 

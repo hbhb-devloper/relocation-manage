@@ -324,6 +324,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         // 未收
         income.setUnreceived(invoice.getAmount());
         // 收款人
+        income.setProjectId(invoice.getProjectId());
         return income;
     }
 
