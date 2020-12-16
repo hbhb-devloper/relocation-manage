@@ -219,7 +219,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         // 查看错误信息
         msg.clear();
         msg.addAll(error);
-        if (msg.size() == 0) {
+        if (error.size() == 0) {
             // 批量插入发票、收款信息
             incomeMapper.insertBatch(incomeList);
             invoiceMapper.insertBatch(invoiceList);
