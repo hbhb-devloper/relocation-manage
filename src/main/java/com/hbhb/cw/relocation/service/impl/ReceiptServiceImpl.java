@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.lang.Integer.parseInt;
+import static org.springframework.util.StringUtils.isEmpty;
 
 /**
  * @author wangxiaogang
@@ -121,6 +122,9 @@ public class ReceiptServiceImpl implements ReceiptService {
                 }
                 if (receipt.getProjectId() != null) {
                     receiptList.add(receipt);
+                }
+                if (!isEmpty(importVos) && receipt.getProjectId() == null) {
+                    error.add("excel表中" + i + "行数据与基础信息无法匹配,请检查后从新导入！");
                 }
             }
             i++;

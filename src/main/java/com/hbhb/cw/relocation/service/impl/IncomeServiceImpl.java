@@ -189,8 +189,8 @@ public class IncomeServiceImpl implements IncomeService {
                 error.add("excel第：" + i + "行数据已存在，请检查导入数据是否正确");
             }
             income.setInvoiceNum(importVO.getInvoiceNum());
-            income.setInvoiceType(Integer.valueOf(String.valueOf(invoiceTypeMap.get(importVO.getInvoiceType()) != null
-                    ? invoiceTypeMap.get(importVO.getInvoiceType()) : 0)));
+            income.setInvoiceType(isEmpty(importVO.getInvoiceType()) ?
+                    0 : Integer.parseInt(invoiceTypeMap.get(importVO.getInvoiceType())));
             income.setAmount(BigDecimalUtil.getBigDecimal(importVO.getAmount()));
             income.setTax(BigDecimalUtil.getBigDecimal(importVO.getTax()));
             income.setTaxIncludeAmount(BigDecimalUtil.getBigDecimal(importVO.getTaxIncludeAmount()));

@@ -180,6 +180,9 @@ public class InvoiceServiceImpl implements InvoiceService {
                 if (projectRes.size() == 1) {
                     projectRes.forEach(item -> invoice.setProjectId(item.getId()));
                 }
+                if (!StringUtils.isEmpty(invoiceImport) && invoice.getProjectId() == null) {
+                    error.add("excel表中" + i + "行数据与基础信息无法匹配,请检查后从新导入！");
+                }
                 // 判断是否有对应项目
                 if (!isEmpty(invoice.getProjectId())) {
                     RelocationProject project = projectMapper.single(invoice.getProjectId());

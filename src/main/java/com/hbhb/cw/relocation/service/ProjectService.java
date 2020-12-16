@@ -3,7 +3,7 @@ package com.hbhb.cw.relocation.service;
 import com.hbhb.cw.relocation.web.vo.ProjectImportVO;
 import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
 import com.hbhb.cw.relocation.web.vo.ProjectResVO;
-import com.hbhb.cw.systemcenter.model.User;
+import com.hbhb.cw.systemcenter.model.SysUser;
 import com.hbhb.cw.systemcenter.vo.FileVO;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,7 +39,7 @@ public interface ProjectService {
      * @param projectResVO 修改信息实体
      * @param user         登录用户
      */
-    void updateRelocationProject(ProjectResVO projectResVO, User user);
+    void updateRelocationProject(ProjectResVO projectResVO, SysUser user);
 
     /**
      * 跟据id删除项目信息

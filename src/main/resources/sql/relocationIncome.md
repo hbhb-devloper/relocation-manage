@@ -197,6 +197,6 @@ getMonthAmount
 selectInvoiceNum
 ===
 ```sql
-select invoice_num from relocation_income
+select invoice_num as invoiceNum from relocation_income
 group  by invoice_num
 ```

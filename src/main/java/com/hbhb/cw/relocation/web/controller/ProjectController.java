@@ -12,7 +12,7 @@ import com.hbhb.cw.relocation.web.vo.ProjectImportVO;
 import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
 import com.hbhb.cw.relocation.web.vo.ProjectResVO;
 import com.hbhb.cw.systemcenter.enums.FileType;
-import com.hbhb.cw.systemcenter.model.User;
+import com.hbhb.cw.systemcenter.model.SysUser;
 import com.hbhb.cw.systemcenter.vo.FileVO;
 import com.hbhb.web.annotation.UserId;
 import io.swagger.v3.oas.annotations.Operation;
@@ -82,7 +82,7 @@ public class ProjectController implements RelocationProjectApi {
 
     @Operation(summary = "修改迁改项目信息")
     @PutMapping("")
-    public void updateProject(@RequestBody ProjectResVO projectResVO, User user) {
+    public void updateProject(@RequestBody ProjectResVO projectResVO, SysUser user) {
         projectService.updateRelocationProject(projectResVO, user);
     }
 

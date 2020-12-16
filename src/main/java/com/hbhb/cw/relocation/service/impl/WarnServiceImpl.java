@@ -9,13 +9,13 @@ import com.hbhb.cw.relocation.mapper.WarnMapper;
 import com.hbhb.cw.relocation.model.RelocationFile;
 import com.hbhb.cw.relocation.model.RelocationWarn;
 import com.hbhb.cw.relocation.rpc.FileApiExp;
-import com.hbhb.cw.relocation.rpc.FlowApiExp;
+import com.hbhb.cw.relocation.rpc.FlowRoleUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.MailService;
 import com.hbhb.cw.relocation.service.WarnService;
 import com.hbhb.cw.relocation.web.vo.*;
-import com.hbhb.cw.systemcenter.model.File;
+import com.hbhb.cw.systemcenter.model.SysFile;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -58,7 +58,7 @@ public class WarnServiceImpl implements WarnService {
     private UserApiExp userApi;
 
     @Resource
-    private FlowApiExp flowApi;
+    private FlowRoleUserApiExp flowApi;
 
     @Resource
     private MailService mailService;
@@ -195,7 +195,7 @@ public class WarnServiceImpl implements WarnService {
     public List<WarnFileResVO> getWarnFileList(Long warnId) {
         List<Integer> list = fileMapper.selectFileByWarnId(warnId);
         if (list.size() > 0) {
-            List<File> fileList = fileApiExp.getFileInfoBatch(list);
+            List<SysFile> fileList = fileApiExp.getFileInfoBatch(list);
             List<WarnFileResVO> fileVo = new ArrayList<>();
             fileList.forEach(item -> fileVo.add(WarnFileResVO.builder()
                     .fileId(item.getId())
