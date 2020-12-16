@@ -132,7 +132,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         // 判断是否有错误如果有则不进入方法体内
         msg.clear();
         msg.addAll(error);
-        if (msg.isEmpty()) {
+        if (msg.size() == 0) {
             receiptMapper.insertBatch(receiptList);
             // 新增收款信息
             List<RelocationIncome> list = new ArrayList<>();

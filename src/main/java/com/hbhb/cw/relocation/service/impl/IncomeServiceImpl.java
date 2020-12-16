@@ -214,7 +214,7 @@ public class IncomeServiceImpl implements IncomeService {
         }
         msg.clear();
         msg.addAll(error);
-        if (isEmpty(msg)) {
+        if (msg.size() == 0) {
             incomeMapper.insertBatch(incomeList);
             List<RelocationIncomeDetail> details = new ArrayList<>();
             for (RelocationIncome income : incomeList) {
