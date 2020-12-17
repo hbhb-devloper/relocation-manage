@@ -145,56 +145,75 @@ selectContractNumList
 selectProjectStatementByUnitId
 ===
 ```sql
-    SELECT
-        -- @pageTag(){
-        t3.*,
-        t7.thisYearInvoiceAccount,
-        t7.thisYearReceivable,
-        t7.thisYearDueIn,
-        t7.thisYearCostProportion
-        -- @}
-    FROM (
-             select *
-             from (
-                      select count(rp.id)                                                                  as compensationAmount,
-                             sum(
-                                     IF(compensation_sate = 10, construction_budget + material_budget, 0)) as notContractAccount,
-                             count(case when contract_num != '' then 0 end)                                as contractNumAmount,
-                             (count(rp.id) - count(case when contract_num != '' then 0 end))               as notContractNumAmount,
-                             (count(case when contract_num != '' then 0 end) / count(rp.id))               as compensationRatio,
-                             count(distinct contract_num)                                                  as contractAmount,
-                             sum(compensation_amount)                                                      as contractAccount,
-                             unit_id                                                                       as unitId
-                      from relocation_project rp
-                      where has_compensation = true
-                      group by unit_id
-                  ) t1
-                      left join
-                  (
-                      select count(case
-                                       when contract_duration <= 12 and compensation_sate not in (80, 50, 10)
-                                           then 0 end)                          as oneNotCostAmount,
-                             count(case
-                                       when contract_duration between 12 and 36 and compensation_sate not in (80, 50, 10)
-                                           then 0 end)                          as twoNotCostAmount,
-                             count(case
-                                       when contract_duration > 36 and compensation_sate not in (80, 50, 10)
-                                           then 0 end)                          as threeNotCostAmount,
-                             sum(construction_budget + material_budget)         as costTotal,
-                             sum(anticipate_payment + final_payment)            as compensationTotal,
-                             IFNull(sum(construction_budget + material_budget) /
-                                    sum(anticipate_payment + final_payment), 0) as costRation,
-                             sum(IF(compensation_sate = 20 and contract_type != '框架类' and compensation_amount != 0,
-                                    compensation_amount, 0))                    as budgetNotAccount,
-                             (IF(compensation_sate in (20, 30), sum(compensation_amount) - sum(anticipate_payable),
-                                 0)) +
-                             (IF(compensation_sate in (40, 60, 70), sum(compensation_amount) - sum(anticipate_payment),
-                                 0))                                            as finalNotPayment,
-                             unit_id
-                      from relocation_project
-                      group by unit_id
-                  ) t2 on t1.unitId = t2.unit_id
-         ) t3
+    select 
+-- @pageTag(){
+           t.*,
+           t2.*,
+           t3.*,
+           IFNULL(t5.thisYearInvoiceAccount, 0) as thisYearInvoiceAccount,
+           IFNULL(t5.thisYearReceivable, 0)     as thisYearReceivable,
+           IFNULL(t5.thisYearDueIn, 0)          as thisYearDueIn,
+           IFNULL(t5.thisYearCostProportion, 0) as thisYearCostProportion
+       -- @}
+    from (
+             select count(rp.id)                                                                  as compensationAmount,
+                    sum(
+                            IF(compensation_sate = 10, construction_budget + material_budget, 0)) as notContractAccount,
+                    count(case when contract_num != '' then 0 end)                                as contractNumAmount,
+                    (count(rp.id) - count(case when contract_num != '' then 0 end))               as notContractNumAmount,
+                    (count(case when contract_num != '' then 0 end) / count(rp.id))               as compensationRatio,
+                    count(distinct contract_num)                                                  as contractAmount,
+                    sum(compensation_amount)                                                      as contractAccount,
+                    unit_id                                                                       as unitId
+             from relocation_project rp
+             where has_compensation = true
+             group by unit_id
+         ) t
+             left join
+    
+         (select count(case when oneNotCostAmount not in (0) then 0 end
+                     ) as oneNotCostAmount,
+                 count(case when twoNotCostAmount not in (0) then 0 end
+                     ) as twoNotCostAmount,
+                 count(case when threeNotCostAmount not in (0) then 0 end
+                     ) as threeNotCostAmount,
+                 unit_id
+          from (
+                   select count(case
+                                    when contract_duration <= 12 and compensation_sate not in (80, 50, 10,0)
+                                        then 0 end) as oneNotCostAmount,
+                          count(case
+                                    when contract_duration between 12 and 36 and
+                                         compensation_sate not in (80, 50, 10,0)
+                                        then 0 end) as twoNotCostAmount,
+                          count(case
+                                    when contract_duration > 36 and compensation_sate not in (80, 50, 10,0)
+                                        then 0 end) as threeNotCostAmount,
+    
+                          unit_id
+                   from relocation_project
+                   group by unit_id, contract_num
+               ) t1
+          group by unit_id) t2 on t2.unit_id = t.unitId
+             left join
+         (select sum(construction_budget + material_budget)         as costTotal,
+                 sum(anticipate_payment + final_payment)            as compensationTotal,
+                 IFNull(sum(construction_budget + material_budget) /
+                        sum(anticipate_payment + final_payment), 0) as costRation,
+                 sum(IF(compensation_sate = 20 and contract_type != '框架类' and
+                        compensation_amount != 0,
+                        anticipate_payable, 0))                     as budgetNotAccount,
+                 (IF(compensation_sate in (20, 30),
+                     sum(compensation_amount) - sum(anticipate_payable),
+                     0)) +
+                 (IF(compensation_sate in (40, 60, 70),
+                     sum(compensation_amount) - sum(anticipate_payment),
+                     0))                                            as finalNotPayment,
+                 unit_id
+          from relocation_project
+          group by unit_id
+         ) t3 on t3.unit_Id = t2.unit_id
+    
              left join (select IFNULL(SUM(receivable), 0)                 as thisYearInvoiceAccount,
                                IFNULL(sum(received), 0)                   as thisYearReceivable,
                                IFNULL(sum(receivable - received), 0)      as thisYearDueIn,
@@ -203,13 +222,12 @@ selectProjectStatementByUnitId
                         from relocation_income ri
                                  left join relocation_project rp on ri.project_id = rp.id
                         group by ri.unit_id
-    ) t7 on t3.unit_id = t7.unit_id
+    ) t5 on t5.unit_id = t3.unit_id
             -- @where(){
                 -- @if(!isEmpty(unitId)){
-                    and t3.unit_id=#{unitId}
+                    and unitId = #{unitId}
                 -- @}
             -- @}
-  
 ```  
 selectCompensationAmount
 ===  
@@ -265,56 +283,75 @@ selectProjectNumByProjectNum
 selectProjectStatementListByUnitId
 ===
 ```sql
-    SELECT
-        -- @pageTag(){
-        t3.*,
-        t7.thisYearInvoiceAccount,
-        t7.thisYearReceivable,
-        t7.thisYearDueIn,
-        t7.thisYearCostProportion
-        -- @}
-    FROM (
-             select *
-             from (
-                      select count(rp.id)                                                                  as compensationAmount,
-                             sum(
-                                     IF(compensation_sate = 10, construction_budget + material_budget, 0)) as notContractAccount,
-                             count(case when contract_num != '' then 0 end)                                as contractNumAmount,
-                             (count(rp.id) - count(case when contract_num != '' then 0 end))               as notContractNumAmount,
-                             (count(case when contract_num != '' then 0 end) / count(rp.id))               as compensationRatio,
-                             count(distinct contract_num)                                                  as contractAmount,
-                             sum(compensation_amount)                                                      as contractAccount,
-                             unit_id                                                                       as unitId
-                      from relocation_project rp
-                      where has_compensation = true
-                      group by unit_id
-                  ) t1
-                      left join
-                  (
-                      select count(case
-                                       when contract_duration <= 12 and compensation_sate not in (80, 50, 10)
-                                           then 0 end)                          as oneNotCostAmount,
-                             count(case
-                                       when contract_duration between 12 and 36 and compensation_sate not in (80, 50, 10)
-                                           then 0 end)                          as twoNotCostAmount,
-                             count(case
-                                       when contract_duration > 36 and compensation_sate not in (80, 50, 10)
-                                           then 0 end)                          as threeNotCostAmount,
-                             sum(construction_budget + material_budget)         as costTotal,
-                             sum(anticipate_payment + final_payment)            as compensationTotal,
-                             IFNull(sum(construction_budget + material_budget) /
-                                    sum(anticipate_payment + final_payment), 0) as costRation,
-                             sum(IF(compensation_sate = 20 and contract_type != '框架类' and compensation_amount != 0,
-                                    compensation_amount, 0))                    as budgetNotAccount,
-                             (IF(compensation_sate in (20, 30), sum(compensation_amount) - sum(anticipate_payable),
-                                 0)) +
-                             (IF(compensation_sate in (40, 60, 70), sum(compensation_amount) - sum(anticipate_payment),
-                                 0))                                            as finalNotPayment,
-                             unit_id
-                      from relocation_project
-                      group by unit_id
-                  ) t2 on t1.unitId = t2.unit_id
-         ) t3
+    select 
+-- @pageTag(){
+           t.*,
+           t2.*,
+           t3.*,
+           IFNULL(t5.thisYearInvoiceAccount, 0) as thisYearInvoiceAccount,
+           IFNULL(t5.thisYearReceivable, 0)     as thisYearReceivable,
+           IFNULL(t5.thisYearDueIn, 0)          as thisYearDueIn,
+           IFNULL(t5.thisYearCostProportion, 0) as thisYearCostProportion
+       -- @}
+    from (
+             select count(rp.id)                                                                  as compensationAmount,
+                    sum(
+                            IF(compensation_sate = 10, construction_budget + material_budget, 0)) as notContractAccount,
+                    count(case when contract_num != '' then 0 end)                                as contractNumAmount,
+                    (count(rp.id) - count(case when contract_num != '' then 0 end))               as notContractNumAmount,
+                    (count(case when contract_num != '' then 0 end) / count(rp.id))               as compensationRatio,
+                    count(distinct contract_num)                                                  as contractAmount,
+                    sum(compensation_amount)                                                      as contractAccount,
+                    unit_id                                                                       as unitId
+             from relocation_project rp
+             where has_compensation = true
+             group by unit_id
+         ) t
+             left join
+    
+         (select count(case when oneNotCostAmount not in (0) then 0 end
+                     ) as oneNotCostAmount,
+                 count(case when twoNotCostAmount not in (0) then 0 end
+                     ) as twoNotCostAmount,
+                 count(case when threeNotCostAmount not in (0) then 0 end
+                     ) as threeNotCostAmount,
+                 unit_id
+          from (
+                   select count(case
+                                    when contract_duration <= 12 and compensation_sate not in (80, 50, 10,0)
+                                        then 0 end) as oneNotCostAmount,
+                          count(case
+                                    when contract_duration between 12 and 36 and
+                                         compensation_sate not in (80, 50, 10,0)
+                                        then 0 end) as twoNotCostAmount,
+                          count(case
+                                    when contract_duration > 36 and compensation_sate not in (80, 50, 10,0)
+                                        then 0 end) as threeNotCostAmount,
+    
+                          unit_id
+                   from relocation_project
+                   group by unit_id, contract_num
+               ) t1
+          group by unit_id) t2 on t2.unit_id = t.unitId
+             left join
+         (select sum(construction_budget + material_budget)         as costTotal,
+                 sum(anticipate_payment + final_payment)            as compensationTotal,
+                 IFNull(sum(construction_budget + material_budget) /
+                        sum(anticipate_payment + final_payment), 0) as costRation,
+                 sum(IF(compensation_sate = 20 and contract_type != '框架类' and
+                        compensation_amount != 0,
+                        anticipate_payable, 0))                     as budgetNotAccount,
+                 (IF(compensation_sate in (20, 30),
+                     sum(compensation_amount) - sum(anticipate_payable),
+                     0)) +
+                 (IF(compensation_sate in (40, 60, 70),
+                     sum(compensation_amount) - sum(anticipate_payment),
+                     0))                                            as finalNotPayment,
+                 unit_id
+          from relocation_project
+          group by unit_id
+         ) t3 on t3.unit_Id = t2.unit_id
+    
              left join (select IFNULL(SUM(receivable), 0)                 as thisYearInvoiceAccount,
                                IFNULL(sum(received), 0)                   as thisYearReceivable,
                                IFNULL(sum(receivable - received), 0)      as thisYearDueIn,
@@ -323,10 +360,10 @@ selectProjectStatementListByUnitId
                         from relocation_income ri
                                  left join relocation_project rp on ri.project_id = rp.id
                         group by ri.unit_id
-    ) t7 on t3.unit_id = t7.unit_id
+    ) t5 on t5.unit_id = t3.unit_id
             -- @where(){
                 -- @if(!isEmpty(unitId)){
-                    and t3.unit_id=#{unitId}
+                    and unitId = #{unitId}
                 -- @}
             -- @}
   
