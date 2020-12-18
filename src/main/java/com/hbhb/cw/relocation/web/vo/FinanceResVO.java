@@ -3,7 +3,6 @@ package com.hbhb.cw.relocation.web.vo;
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
-import com.alibaba.excel.annotation.write.style.HeadFontStyle;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -127,7 +126,6 @@ public class FinanceResVO implements Serializable {
 
     @ColumnWidth(10)
     @ExcelProperty(value = "一月回款", index = 23)
-    @HeadFontStyle(fontHeightInPoints = 11, bold = false)
     @Schema(description = "1月收款")
     private String janReceivable;
 

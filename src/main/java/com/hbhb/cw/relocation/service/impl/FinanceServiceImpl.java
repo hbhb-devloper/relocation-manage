@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author hyk
@@ -87,6 +84,7 @@ public class FinanceServiceImpl implements FinanceService {
             item.setPayType("网银打款");
             item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
             item.setUnit(unitMap.get(item.getUnitId()));
+            item.setCurrentYear(DateUtil.dateToStringY(new Date()));
         });
         return financeResVos;
     }

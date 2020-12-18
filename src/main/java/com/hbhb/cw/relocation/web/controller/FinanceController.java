@@ -54,7 +54,6 @@ public class FinanceController {
                              @Parameter(description = "接收参数实体") @RequestBody FinanceReqVO cond,
                              @Parameter(hidden = true) @UserId Integer userId) {
         String path = fileApi.getTemplatePath();
-
         List<FinanceResVO> list = financeService.selectExportListByCondition(cond, userId);
         String fileName = ExcelUtil.encodingFileName(request, "涉财报表导出模板");
         log.info("模板路径：" + path + fileName);
