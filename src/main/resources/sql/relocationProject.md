@@ -263,17 +263,7 @@ selectProject
         where compensation_sate not in (10,80,0)
         and actual_end_time is not null 
 ```
-updateBatch
-===
-```sql
-   -- @for(item in list){
-            update relocation_project set
-                contract_num = #{item.contractNum},
-                compensation_amount = #{item. compensationAmount},
-                construction_budget = #{item.constructionBudget}          
-            where id = #{item.id}
-    -- @}
-```
+
 selectProjectNumByProjectNum
 ===
 ```sql

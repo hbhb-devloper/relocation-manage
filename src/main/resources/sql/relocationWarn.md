@@ -13,7 +13,6 @@ selectProjectWarnByCond
         final_payment      as finalPayment,
         contract_duration  as contractDuration
         from relocation_warn rw
-        left join relocation_income ri on ri.contract_num = rw.contract_num
     -- @where(){
             state = 1
         -- @if(!isEmpty(cond.projectNum)){       
@@ -27,6 +26,9 @@ selectProjectWarnByCond
         -- @} 
         -- @if(!isEmpty(cond.unitId)){                
            and rw.unit_id = #{cond.unitId}
+        -- @}
+        -- @if(!isEmpty(cond.type)){                
+           and rw.type = #{cond.type}
         -- @}
     -- @}
 ```
