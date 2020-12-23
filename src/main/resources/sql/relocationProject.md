@@ -261,6 +261,7 @@ selectProject
         select id, contract_duration 
         from relocation_project
         where compensation_sate not in (10,80,0)
+        and contract_duration is not null 
         and actual_end_time is not null 
 ```
 
