@@ -5,10 +5,14 @@ import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.web.exception.BusinessException;
 import lombok.Getter;
 
+/**
+ * @author wangxiaogang
+ */
 @Getter
 public class RelocationException extends BusinessException {
 
 
+    private static final long serialVersionUID = 607151396907007963L;
     private final String code;
 
     public RelocationException(RelocationErrorCode errorCode) {
@@ -16,9 +20,9 @@ public class RelocationException extends BusinessException {
         this.code = errorCode.getCode();
     }
 
-    public RelocationException(RelocationErrorCode errorCode, String msg) {
-        super(errorCode.getCode(), msg);
-        this.code = errorCode.getCode();
+    public RelocationException(String code, String msg) {
+        super(code, msg);
+        this.code = code;
     }
 
 

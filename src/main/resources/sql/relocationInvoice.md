@@ -14,7 +14,7 @@ selectListByCondition
         ri.buyer_tax          buyerTax,
         ri.buyer_name         buyerName,
         ri.invoice_project    invoiceProject,
-        ri.invoice_time       invoiceTime,
+        date_format(ri.invoice_time,'%Y-%m-%d %H')      invoiceTime,
         ri.amount,
         ri.tax_rate           taxRate,
         ri.tax_amount         taxAmount,
@@ -25,7 +25,7 @@ selectListByCondition
         ri.state,
         ri.is_import          isImport,
         ri.manager,
-        rii.is_received       paymentStatus,
+        rii.is_received       isReceived,
         rii.receivable        receivable,
         rii.received          received,
         rii.unreceived        unreceived

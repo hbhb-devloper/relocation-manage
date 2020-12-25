@@ -209,4 +209,24 @@ public class StatementExportVO {
     @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER)
     @Schema(description = "当年赔补开票（万元）")
     private BigDecimal thisYearInvoiceAccount;
+
+    @ColumnWidth(20)
+    @ExcelProperty(value = "当年已开票在途待收（万元）", index = 17)
+    @HeadFontStyle(fontHeightInPoints = 11, bold = false)
+    @HeadStyle(fillPatternType = FillPatternType.NO_FILL, wrapped = false,
+            borderLeft = BorderStyle.NONE, borderRight = BorderStyle.NONE,
+            borderTop = BorderStyle.NONE, borderBottom = BorderStyle.NONE,
+            verticalAlignment = VerticalAlignment.CENTER)
+    @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER)
+    private BigDecimal thisYearDueIn;
+
+    @ColumnWidth(20)
+    @ExcelProperty(value = "当年开票回款比", index = 18)
+    @HeadFontStyle(fontHeightInPoints = 11, bold = false)
+    @HeadStyle(fillPatternType = FillPatternType.NO_FILL, wrapped = false,
+            borderLeft = BorderStyle.NONE, borderRight = BorderStyle.NONE,
+            borderTop = BorderStyle.NONE, borderBottom = BorderStyle.NONE,
+            verticalAlignment = VerticalAlignment.CENTER)
+    @ContentStyle(horizontalAlignment = HorizontalAlignment.CENTER)
+    private BigDecimal thisYearCostProportion;
 }

@@ -12,7 +12,7 @@ import com.hbhb.cw.relocation.web.vo.ProjectImportVO;
 import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
 import com.hbhb.cw.relocation.web.vo.ProjectResVO;
 import com.hbhb.cw.systemcenter.enums.FileType;
-import com.hbhb.cw.systemcenter.model.User;
+import com.hbhb.cw.systemcenter.model.SysUser;
 import com.hbhb.cw.systemcenter.vo.FileVO;
 import com.hbhb.web.annotation.UserId;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,17 +50,22 @@ public class ProjectController implements RelocationProjectApi {
 
     @Operation(summary = "迁改管理基础信息导入")
     @PostMapping(value = "/import", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public void projectImport(@RequestPart(required = false, value = "file") MultipartFile file) {
+    public List<String> projectImport(@RequestPart(required = false, value = "file") MultipartFile file) {
         long begin = System.currentTimeMillis();
         projectService.judgeFileName(file.getOriginalFilename());
         try {
             EasyExcel.read(file.getInputStream(), ProjectImportVO.class,
                     new ProjectListener(projectService)).sheet().headRowNumber(2).doRead();
+            List<String> msg = projectService.getMsg();
+            if (msg.size() != 0) {
+                return msg;
+            }
         } catch (IOException | NumberFormatException | NullPointerException e) {
             log.error(e.getMessage(), e);
             throw new RelocationException(RelocationErrorCode.RELOCATION_IMPORT_DATE_ERROR);
         }
         log.info("迁改基础信息导入成功，总共耗时：" + (System.currentTimeMillis() - begin) / 1000 + "s");
+        return null;
     }
 
     @Operation(summary = "迁改项目信息查询台账列表")
@@ -77,7 +82,7 @@ public class ProjectController implements RelocationProjectApi {
 
     @Operation(summary = "修改迁改项目信息")
     @PutMapping("")
-    public void updateProject(@RequestBody ProjectResVO projectResVO, User user) {
+    public void updateProject(@RequestBody ProjectResVO projectResVO, SysUser user) {
         projectService.updateRelocationProject(projectResVO, user);
     }
 
@@ -121,7 +126,7 @@ public class ProjectController implements RelocationProjectApi {
             FileVO files = fileApi.upload(file, FileType.RELOCATION_CONTRACT_FILE.value());
             projectService.updateContractFileId(files);
         } else {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_CONTRACT_ERROR, file.getOriginalFilename() + "未匹配导入失败");
+            throw new RelocationException("80898", file.getOriginalFilename() + "未匹配导入失败");
         }
     }
 

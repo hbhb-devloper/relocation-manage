@@ -125,4 +125,6 @@ public class RelocationIncome implements Serializable {
      * 计提编号
      */
     private String accrualNumber;
+
+    private Long projectId;
 }

@@ -2,13 +2,17 @@ package com.hbhb.cw.relocation.service.listener;
 
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.alibaba.excel.exception.ExcelDataConvertException;
+import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.service.IncomeService;
 import com.hbhb.cw.relocation.web.vo.IncomeImportVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author hyk
@@ -22,6 +26,8 @@ public class IncomeListener extends AnalysisEventListener {
      * 批处理条数，每隔多少条清理一次list ，方便内存回收
      */
     private static final int BATCH_COUNT = 500;
+    private final Map<Integer, String> importHeadMap = new HashMap<>();
+
 
     /**
      * 数据行
@@ -64,7 +70,35 @@ public class IncomeListener extends AnalysisEventListener {
      */
     private void saveData() {
         if (!CollectionUtils.isEmpty(dataList)) {
-            incomeService.addSaveRelocationInvoice(dataList);
+            incomeService.addSaveRelocationInvoice(dataList, importHeadMap);
+        }
+    }
+
+    /**
+     * 获取表头
+     */
+    @Override
+    public void invokeHeadMap(Map headMap, AnalysisContext context) {
+        if (headMap != null) {
+            importHeadMap.putAll(headMap);
+        }
+        // 根据自己的情况去做表头的判断即可
+    }
+
+    @Override
+    public void onException(Exception exception, AnalysisContext context) {
+        log.info("解析出错：" + exception.getMessage());
+        int row = 0, column = 0;
+        String msg = null;
+        if (exception instanceof ExcelDataConvertException) {
+            ExcelDataConvertException convertException = (ExcelDataConvertException) exception;
+            row = convertException.getRowIndex();
+            column = convertException.getColumnIndex();
+            log.error("解析出错：{}行 {}列", row, column);
+            msg = "解析出错啦！ " + "第" + row + "行,第" + column + "列,请检查数据格式或模板是否正确";
+        }
+        if (msg != null) {
+            throw new RelocationException("80898", msg);
         }
     }
 }

@@ -3,6 +3,7 @@ package com.hbhb.cw.relocation.web.controller;
 
 import com.hbhb.core.utils.ExcelUtil;
 import com.hbhb.cw.relocation.api.RelocationWarnApi;
+import com.hbhb.cw.relocation.enums.WarnType;
 import com.hbhb.cw.relocation.model.RelocationFile;
 import com.hbhb.cw.relocation.rpc.FileApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
@@ -38,9 +39,19 @@ public class WarnController implements RelocationWarnApi {
     @Resource
     private FileApiExp fileApi;
 
-    @Operation(summary = "预警提示列表")
-    @GetMapping("/list")
-    public List<WarnResVO> getWarn(@Parameter(description = "预警查询条件") WarnReqVO warnReqVO, @Parameter(hidden = true) @UserId Integer userId) {
+    @Operation(summary = "开票未回款预警提示列表")
+    @GetMapping("/start-list")
+    public List<WarnResVO> getStartWarn(@Parameter(description = "预警查询条件") WarnReqVO warnReqVO,
+                                        @Parameter(hidden = true) @UserId Integer userId) {
+        warnReqVO.setType(WarnType.START_WARN.value());
+        return warnService.getWarn(warnReqVO, userId);
+    }
+
+    @Operation(summary = "合同到期未回款预警列表")
+    @GetMapping("/final-list")
+    public List<WarnResVO> getFinalWarn(@Parameter(description = "预警查询条件") WarnReqVO warnReqVO,
+                                        @Parameter(hidden = true) @UserId Integer userId) {
+        warnReqVO.setType(WarnType.FINAL_WARN.value());
         return warnService.getWarn(warnReqVO, userId);
     }
 
@@ -98,7 +109,7 @@ public class WarnController implements RelocationWarnApi {
     public PageResult<WarnResVO> getWarnList(
             @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
             @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
-            @Parameter(description = "预警查询条件") WarnReqVO warnReqVO, @UserId Integer userId) {
+            @Parameter(description = "预警查询条件") WarnReqVO warnReqVO, @Parameter(hidden = true) @UserId Integer userId) {
         pageNum = pageNum == null ? 1 : pageNum;
         pageSize = pageSize == null ? 30 : pageSize;
         return warnService.getWarnList(warnReqVO, userId, pageNum, pageSize);

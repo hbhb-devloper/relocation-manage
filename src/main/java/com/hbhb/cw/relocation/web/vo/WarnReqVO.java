@@ -1,13 +1,12 @@
 package com.hbhb.cw.relocation.web.vo;
 
 import com.hbhb.web.annotation.Decode;
-
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
@@ -27,5 +26,8 @@ public class WarnReqVO implements Serializable {
 
     @Schema(description = "单位")
     private Integer unitId;
+
+    @Schema(description = "预警类型")
+    private Integer type;
 
 }

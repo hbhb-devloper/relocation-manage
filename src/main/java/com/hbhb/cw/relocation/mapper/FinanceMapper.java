@@ -6,6 +6,7 @@ import com.hbhb.cw.relocation.web.vo.FinanceReqVO;
 import com.hbhb.cw.relocation.web.vo.FinanceResVO;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
+import org.beetl.sql.mapper.annotation.Param;
 
 import java.util.List;
 
@@ -15,8 +16,8 @@ import java.util.List;
  */
 public interface FinanceMapper extends BaseMapper<FinanceResVO> {
 
-    PageResult<FinanceResVO> getFinanceList(FinanceReqVO cond,
-        PageRequest<FinanceResVO> request);
+    PageResult<FinanceResVO> getFinanceList(@Param("cond") FinanceReqVO cond,
+                                            PageRequest<FinanceResVO> request);
 
     List<FinanceResVO> getFinanceList(FinanceReqVO cond);
 }

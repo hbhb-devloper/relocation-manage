@@ -9,6 +9,7 @@ import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.FinanceService;
 import com.hbhb.cw.relocation.web.vo.FinanceReqVO;
 import com.hbhb.cw.relocation.web.vo.FinanceResVO;
+import com.hbhb.cw.systemcenter.enums.UnitEnum;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -18,9 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author hyk
@@ -28,6 +27,7 @@ import java.util.Map;
  */
 @Service
 @Slf4j
+@SuppressWarnings(value = {"unchecked"})
 public class FinanceServiceImpl implements FinanceService {
 
     @Resource
@@ -48,6 +48,13 @@ public class FinanceServiceImpl implements FinanceService {
         }
         PageRequest<FinanceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         setUnitId(cond, userId);
+
+        List<Integer> unitIds = new ArrayList<>();
+        if (UnitEnum.isBenbu(cond.getUnitId())) {
+            unitIds = unitApi.getSubUnit(cond.getUnitId());
+        }
+        cond.setUnitIds(unitIds);
+
         PageResult<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond, request);
         Map<String, String> isReceived = getIsAllReceived();
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
@@ -77,6 +84,7 @@ public class FinanceServiceImpl implements FinanceService {
             item.setPayType("网银打款");
             item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
             item.setUnit(unitMap.get(item.getUnitId()));
+            item.setCurrentYear(DateUtil.dateToStringY(new Date()));
         });
         return financeResVos;
     }

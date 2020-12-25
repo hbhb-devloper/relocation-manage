@@ -3,19 +3,20 @@ package com.hbhb.cw.relocation.service.impl;
 
 import com.hbhb.core.bean.BeanConverter;
 import com.hbhb.cw.relocation.enums.IsReceived;
+import com.hbhb.cw.relocation.enums.WarnType;
 import com.hbhb.cw.relocation.mapper.FileMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.mapper.WarnMapper;
 import com.hbhb.cw.relocation.model.RelocationFile;
 import com.hbhb.cw.relocation.model.RelocationWarn;
 import com.hbhb.cw.relocation.rpc.FileApiExp;
-import com.hbhb.cw.relocation.rpc.FlowApiExp;
+import com.hbhb.cw.relocation.rpc.FlowRoleUserApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.MailService;
 import com.hbhb.cw.relocation.service.WarnService;
 import com.hbhb.cw.relocation.web.vo.*;
-import com.hbhb.cw.systemcenter.model.File;
+import com.hbhb.cw.systemcenter.model.SysFile;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -36,6 +37,7 @@ import static java.lang.Integer.parseInt;
  */
 @Service
 @Slf4j
+@SuppressWarnings(value = {"unchecked"})
 public class WarnServiceImpl implements WarnService {
 
     @Resource
@@ -57,7 +59,7 @@ public class WarnServiceImpl implements WarnService {
     private UserApiExp userApi;
 
     @Resource
-    private FlowApiExp flowApi;
+    private FlowRoleUserApiExp flowApi;
 
     @Resource
     private MailService mailService;
@@ -124,7 +126,7 @@ public class WarnServiceImpl implements WarnService {
                 .isReceived(false)
                 .state(true)
                 .compensationSate(item.getCompensationSate())
-                .type(0)
+                .type(WarnType.START_WARN.value())
                 .build()));
         // 新增预警信息 1-合同到期未回款预警
         List<WarnResVO> warnResVO = projectMapper.selectProjectFinalWarn();
@@ -141,7 +143,7 @@ public class WarnServiceImpl implements WarnService {
                 .isReceived(false)
                 .state(true)
                 .compensationSate(item.getCompensationSate())
-                .type(1)
+                .type(WarnType.FINAL_WARN.value())
                 .build()));
         // 每隔一个月执行一次api向预警信息表里提供一次数据
         warnMapper.insertBatch(list);
@@ -149,7 +151,7 @@ public class WarnServiceImpl implements WarnService {
         List<WarnCountVO> warnStartList = projectMapper.selectProjectStartWarnCount();
         Map<Integer, Integer> warnStartMap = warnStartList.stream().collect(Collectors.toMap(WarnCountVO::getUnitId, WarnCountVO::getCount));
         // 2.按照统计数据向每个单位负责人推送邮件信息
-        List<Integer> userIdList = flowApi.getFlowRoleUserList("迁改预警负责人");
+        List<Integer> userIdList = flowApi.getUserIdByRoleName("迁改预警负责人");
         List<UserInfo> userList = userApi.getUserInfoBatch(userIdList);
         Set<Integer> keys = warnStartMap.keySet();
         for (Integer unitId : keys) {
@@ -194,7 +196,7 @@ public class WarnServiceImpl implements WarnService {
     public List<WarnFileResVO> getWarnFileList(Long warnId) {
         List<Integer> list = fileMapper.selectFileByWarnId(warnId);
         if (list.size() > 0) {
-            List<File> fileList = fileApiExp.getFileInfoBatch(list);
+            List<SysFile> fileList = fileApiExp.getFileInfoBatch(list);
             List<WarnFileResVO> fileVo = new ArrayList<>();
             fileList.forEach(item -> fileVo.add(WarnFileResVO.builder()
                     .fileId(item.getId())
@@ -209,7 +211,7 @@ public class WarnServiceImpl implements WarnService {
     @Override
     public PageResult<WarnResVO> getWarnList(WarnReqVO cond, Integer userId, Integer pageNum, Integer pageSize) {
         // 判断该用户是否具有流程角色
-        List<Integer> userIds = flowApi.getFlowRoleUserList("迁改预警负责人");
+        List<Integer> userIds = flowApi.getUserIdByRoleName("迁改预警负责人");
         if (userIds.contains(userId)) {
             Map<Integer, String> unitMap = unitApi.getUnitMapById();
             UserInfo userById = userApi.getUserInfoById(userId);

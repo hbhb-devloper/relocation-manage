@@ -71,7 +71,7 @@ public class InvoiceResVO implements Serializable {
     @Schema(description = "客户经理")
     private String manager;
     @Schema(description = "收款状态")
-    private String paymentStatus;
+    private String isReceived;
     @Schema(description = "应收")
     private BigDecimal receivable;
     @Schema(description = "已收")

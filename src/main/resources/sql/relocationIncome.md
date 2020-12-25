@@ -14,7 +14,6 @@ select
     contract_amount contractAmount,
     invoice_time invoiceTime,
     invoice_num invoiceNum,
-    invoice_type invoiceType,
     invoice_type invoiceTypeLabel,
     amount,
     tax,
@@ -194,4 +193,10 @@ getMonthAmount
     select sum(amount)
         from relocation_income_detail
         where income_id = #{id} and pay_month = #{currentMonth}
+```
+selectInvoiceNum
+===
+```sql
+select invoice_num as invoiceNum from relocation_income
+group  by invoice_num
 ```

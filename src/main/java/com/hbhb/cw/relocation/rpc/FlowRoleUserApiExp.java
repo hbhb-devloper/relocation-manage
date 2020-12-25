@@ -7,6 +7,6 @@ import org.springframework.cloud.openfeign.FeignClient;
 /**
  * @author wangxiaogang
  */
-@FeignClient(value = "${provider.flow-center}", url = "", path = "/flow/user")
-public interface FlowApiExp extends FlowRoleUserApi {
+@FeignClient(value = "${provider.flow-center}", url = "", path = "/role/user")
+public interface FlowRoleUserApiExp extends FlowRoleUserApi {
 }

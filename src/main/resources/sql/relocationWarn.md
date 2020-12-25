@@ -11,9 +11,9 @@ selectProjectWarnByCond
         anticipate_payment as anticipatePayment,
         rw.is_received     as isReceived,
         final_payment      as finalPayment,
-        contract_duration  as contractDuration
+        contract_duration  as contractDuration,
+        type               as type    
         from relocation_warn rw
-        left join relocation_income ri on ri.contract_num = rw.contract_num
     -- @where(){
             state = 1
         -- @if(!isEmpty(cond.projectNum)){       
@@ -27,6 +27,9 @@ selectProjectWarnByCond
         -- @} 
         -- @if(!isEmpty(cond.unitId)){                
            and rw.unit_id = #{cond.unitId}
+        -- @}
+        -- @if(!isEmpty(cond.type)){                
+           and rw.type = #{cond.type}
         -- @}
     -- @}
 ```
@@ -73,7 +76,8 @@ selectWarnListByCond
         anticipate_payment as anticipatePayment,
         rw.is_received     as isReceived,
         final_payment      as finalPayment,
-        contract_duration  as contractDuration
+        contract_duration  as contractDuration,
+        type               as type    
   -- @}
         from relocation_warn rw
     -- @where(){

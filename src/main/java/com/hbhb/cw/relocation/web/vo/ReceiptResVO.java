@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @author xiaokang
@@ -44,4 +45,8 @@ public class ReceiptResVO implements Serializable {
     private String remake;
     @Schema(description = "供应商")
     private String supplier;
+    @Schema(description = "收款情况")
+    private String isReceived;
+    @Schema(description = "已收")
+    private BigDecimal received;
 }

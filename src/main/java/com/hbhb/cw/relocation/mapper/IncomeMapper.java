@@ -26,4 +26,6 @@ public interface IncomeMapper extends BaseMapper<RelocationIncome> {
 
     BigDecimal getMonthAmount(Long id, String currentMonth);
 
+    List<String> selectInvoiceNum();
+
 }

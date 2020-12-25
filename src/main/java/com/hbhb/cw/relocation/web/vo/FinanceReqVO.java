@@ -1,13 +1,13 @@
 package com.hbhb.cw.relocation.web.vo;
 
 import com.hbhb.web.annotation.Decode;
-
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author hyk
@@ -35,14 +35,17 @@ public class FinanceReqVO implements Serializable {
     @Schema(description ="计划完成时间")
     private String planEndTime;
 
-    @Schema(description ="立项时间")
+    @Schema(description = "立项时间")
     private String projectTime;
 
     @Schema(description = "合同编号")
     @Decode
     private String contractNum;
 
-    @Schema(description ="预付款是否已到账")
+    @Schema(description = "预付款是否已到账")
     private Integer receiptStatus;
+
+    @Schema(description = "单位id集合")
+    private List<Integer> unitIds;
 
 }
