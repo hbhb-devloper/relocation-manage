@@ -384,24 +384,28 @@ selectProjectStartWarnCount
     from relocation_income ri
              left join relocation_project rp on ri.contract_num = rp.contract_num
     where ri.received != 0
+       and rp.contract_duration != 0 
       and rp.project_num is not null;
 ```
 selectProjectFinalWarn
 ===
 ```sql
-    select id                 as projectId,
-           project_num        as projectNum,    
-           rp.unit_id         as unitId,
-           construction_unit  as constructionUnit,
-           opposite_unit      as oppositeUnit,
-           rp.contract_num    as contractNum,
-           anticipate_payment as anticipatePayment,
-           final_payment      as finalPayment,
-           contract_duration  as contractDuration,
-           compensation_sate       as compensationSate
-    from relocation_project rp
-    where contract_duration mod 2 = 0 and compensation_sate != 10 or 80 and contract_duration != 0 
-    and actual_end_time is not null
+select id                 as projectId,
+       project_num        as projectNum,
+       rp.unit_id         as unitId,
+       construction_unit  as constructionUnit,
+       opposite_unit      as oppositeUnit,
+       rp.contract_num    as contractNum,
+       anticipate_payment as anticipatePayment,
+       final_payment      as finalPayment,
+       contract_duration  as contractDuration,
+       compensation_sate  as compensationSate
+from relocation_project rp
+where contract_duration != 0
+  and contract_duration is not null
+  and compensation_sate != 10
+  and compensation_sate != 80
+  and contract_duration mod 2 = 0
 ``` 
 selectProjectFinalWarnCount
 ===

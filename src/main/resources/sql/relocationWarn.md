@@ -11,7 +11,8 @@ selectProjectWarnByCond
         anticipate_payment as anticipatePayment,
         rw.is_received     as isReceived,
         final_payment      as finalPayment,
-        contract_duration  as contractDuration
+        contract_duration  as contractDuration,
+        type               as type    
         from relocation_warn rw
     -- @where(){
             state = 1
@@ -75,7 +76,8 @@ selectWarnListByCond
         anticipate_payment as anticipatePayment,
         rw.is_received     as isReceived,
         final_payment      as finalPayment,
-        contract_duration  as contractDuration
+        contract_duration  as contractDuration,
+        type               as type    
   -- @}
         from relocation_warn rw
     -- @where(){

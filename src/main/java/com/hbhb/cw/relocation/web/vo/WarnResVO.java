@@ -51,6 +51,9 @@ public class WarnResVO implements Serializable {
     @Schema(description = "未全额回款合同历时")
     private Integer contractDuration;
 
+    @Schema(description = "预警类型")
+    private Integer type;
+
     private Long userId;
 
 }
