@@ -49,19 +49,6 @@ updateSateByProjectNum
      where project_num in (#{join(list)})
  ```
 
-selectWarnCountByUnitId
-===
-  ```sql
-    select count(id)
-    from relocation_warn
-    where unit_id = #{unitId}
-      and id not in (
-        select warn_id
-        from relocation_file
-    );
-  ```
-
-
 selectWarnListByCond
 ===
    ```sql

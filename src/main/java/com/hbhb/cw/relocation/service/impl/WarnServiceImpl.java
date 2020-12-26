@@ -15,20 +15,31 @@ import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.MailService;
 import com.hbhb.cw.relocation.service.WarnService;
-import com.hbhb.cw.relocation.web.vo.*;
+import com.hbhb.cw.relocation.web.vo.WarnCountVO;
+import com.hbhb.cw.relocation.web.vo.WarnExportVO;
+import com.hbhb.cw.relocation.web.vo.WarnFileResVO;
+import com.hbhb.cw.relocation.web.vo.WarnReqVO;
+import com.hbhb.cw.relocation.web.vo.WarnResVO;
 import com.hbhb.cw.systemcenter.model.SysFile;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
-import lombok.extern.slf4j.Slf4j;
+
 import org.beetl.sql.core.page.DefaultPageRequest;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import lombok.extern.slf4j.Slf4j;
 
 import static java.lang.Integer.parseInt;
 
@@ -126,7 +137,7 @@ public class WarnServiceImpl implements WarnService {
                 .isReceived(false)
                 .state(true)
                 .compensationSate(item.getCompensationSate())
-                .type(WarnType.START_WARN.value())
+                .type(WarnType.CLOSED.value())
                 .build()));
         // 新增预警信息 1-合同到期未回款预警
         List<WarnResVO> warnResVO = projectMapper.selectProjectFinalWarn();
@@ -143,7 +154,7 @@ public class WarnServiceImpl implements WarnService {
                 .isReceived(false)
                 .state(true)
                 .compensationSate(item.getCompensationSate())
-                .type(WarnType.FINAL_WARN.value())
+                .type(WarnType.PROCESSING.value())
                 .build()));
         // 每隔一个月执行一次api向预警信息表里提供一次数据
         warnMapper.insertBatch(list);
@@ -188,8 +199,11 @@ public class WarnServiceImpl implements WarnService {
     }
 
     @Override
-    public int getWarnCount(Integer unitId) {
-        return warnMapper.selectWarnCountByUnitId(unitId);
+    public Long countWarn(Integer unitId) {
+        return warnMapper.createLambdaQuery()
+                .andEq(RelocationWarn::getUnitId, unitId)
+                .andEq(RelocationWarn::getState, WarnType.TO_PROCESS.value())
+                .count();
     }
 
     @Override

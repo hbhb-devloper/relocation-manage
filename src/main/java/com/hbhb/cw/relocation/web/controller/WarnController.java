@@ -8,24 +8,37 @@ import com.hbhb.cw.relocation.model.RelocationFile;
 import com.hbhb.cw.relocation.rpc.FileApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.WarnService;
-import com.hbhb.cw.relocation.web.vo.*;
+import com.hbhb.cw.relocation.web.vo.WarnExportVO;
+import com.hbhb.cw.relocation.web.vo.WarnFileResVO;
+import com.hbhb.cw.relocation.web.vo.WarnFileVO;
+import com.hbhb.cw.relocation.web.vo.WarnReqVO;
+import com.hbhb.cw.relocation.web.vo.WarnResVO;
 import com.hbhb.cw.systemcenter.enums.FileType;
 import com.hbhb.cw.systemcenter.vo.FileVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import com.hbhb.web.annotation.UserId;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Date;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
-import java.util.List;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "传输迁改-预警管理")
 @RestController
@@ -43,7 +56,7 @@ public class WarnController implements RelocationWarnApi {
     @GetMapping("/start-list")
     public List<WarnResVO> getStartWarn(@Parameter(description = "预警查询条件") WarnReqVO warnReqVO,
                                         @Parameter(hidden = true) @UserId Integer userId) {
-        warnReqVO.setType(WarnType.START_WARN.value());
+        warnReqVO.setType(WarnType.CLOSED.value());
         return warnService.getWarn(warnReqVO, userId);
     }
 
@@ -51,7 +64,7 @@ public class WarnController implements RelocationWarnApi {
     @GetMapping("/final-list")
     public List<WarnResVO> getFinalWarn(@Parameter(description = "预警查询条件") WarnReqVO warnReqVO,
                                         @Parameter(hidden = true) @UserId Integer userId) {
-        warnReqVO.setType(WarnType.FINAL_WARN.value());
+        warnReqVO.setType(WarnType.PROCESSING.value());
         return warnService.getWarn(warnReqVO, userId);
     }
 
@@ -90,8 +103,8 @@ public class WarnController implements RelocationWarnApi {
 
     @Operation(summary = "预警信息统计")
     @GetMapping("/total")
-    public Integer getTotalInfo(@RequestParam("单位id") Integer unitId) {
-        return warnService.getWarnCount(unitId);
+    public Long getTotalInfo(@RequestParam("单位id") Integer unitId) {
+        return warnService.countWarn(unitId);
     }
 
     @Override
@@ -100,8 +113,8 @@ public class WarnController implements RelocationWarnApi {
     }
 
     @Override
-    public int getWarnCount(Integer unitId) {
-        return warnService.getWarnCount(unitId);
+    public Long countWarn(@RequestParam("单位id") Integer unitId) {
+        return warnService.countWarn(unitId);
     }
 
     @Operation(summary = "预警提示列表")
@@ -114,7 +127,6 @@ public class WarnController implements RelocationWarnApi {
         pageSize = pageSize == null ? 30 : pageSize;
         return warnService.getWarnList(warnReqVO, userId, pageNum, pageSize);
     }
-
 }
 
 
