@@ -415,7 +415,9 @@ selectProjectFinalWarnCount
     from relocation_project rp
     where 
     contract_duration mod 2 = 0 
-    and compensation_sate != 10 or 80 
+    and contract_duration is not null
+    and compensation_sate != 10 
+    and compensation_sate != 80
     and contract_duration != 0 
     group by unit_id;
 ```

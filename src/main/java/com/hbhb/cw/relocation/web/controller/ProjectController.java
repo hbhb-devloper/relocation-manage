@@ -1,6 +1,7 @@
 package com.hbhb.cw.relocation.web.controller;
 
 import com.alibaba.excel.EasyExcel;
+import com.hbhb.api.core.bean.FileVO;
 import com.hbhb.core.utils.ExcelUtil;
 import com.hbhb.cw.relocation.api.RelocationProjectApi;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
@@ -13,7 +14,6 @@ import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
 import com.hbhb.cw.relocation.web.vo.ProjectResVO;
 import com.hbhb.cw.systemcenter.enums.FileType;
 import com.hbhb.cw.systemcenter.model.SysUser;
-import com.hbhb.cw.systemcenter.vo.FileVO;
 import com.hbhb.web.annotation.UserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

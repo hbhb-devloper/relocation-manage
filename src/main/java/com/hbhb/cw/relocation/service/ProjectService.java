@@ -1,10 +1,10 @@
 package com.hbhb.cw.relocation.service;
 
+import com.hbhb.api.core.bean.FileVO;
 import com.hbhb.cw.relocation.web.vo.ProjectImportVO;
 import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
 import com.hbhb.cw.relocation.web.vo.ProjectResVO;
 import com.hbhb.cw.systemcenter.model.SysUser;
-import com.hbhb.cw.systemcenter.vo.FileVO;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.web.multipart.MultipartFile;
 

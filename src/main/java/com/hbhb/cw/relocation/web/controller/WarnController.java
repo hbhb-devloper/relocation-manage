@@ -1,6 +1,7 @@
 package com.hbhb.cw.relocation.web.controller;
 
 
+import com.hbhb.api.core.bean.FileVO;
 import com.hbhb.core.utils.ExcelUtil;
 import com.hbhb.cw.relocation.api.RelocationWarnApi;
 import com.hbhb.cw.relocation.enums.WarnType;
@@ -8,9 +9,12 @@ import com.hbhb.cw.relocation.model.RelocationFile;
 import com.hbhb.cw.relocation.rpc.FileApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.WarnService;
-import com.hbhb.cw.relocation.web.vo.*;
+import com.hbhb.cw.relocation.web.vo.WarnExportVO;
+import com.hbhb.cw.relocation.web.vo.WarnFileResVO;
+import com.hbhb.cw.relocation.web.vo.WarnFileVO;
+import com.hbhb.cw.relocation.web.vo.WarnReqVO;
+import com.hbhb.cw.relocation.web.vo.WarnResVO;
 import com.hbhb.cw.systemcenter.enums.FileType;
-import com.hbhb.cw.systemcenter.vo.FileVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import com.hbhb.web.annotation.UserId;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +22,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.beetl.sql.core.page.PageResult;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
