@@ -21,7 +21,7 @@ public interface WarnMapper extends BaseMapper<RelocationWarn> {
     @Update
     void updateSateByProjectNum(List<String> list);
 
-    int selectWarnCountByUnitId(Integer unitId);
+    Long selectWarnCountByUnitId(Integer unitId);
 
     PageResult<WarnResVO> selectWarnListByCond(WarnReqVO cond, PageRequest<WarnResVO> request);
 }

@@ -100,7 +100,7 @@ public class WarnController implements RelocationWarnApi {
 
     @Operation(summary = "预警信息统计")
     @GetMapping("/total")
-    public Integer getTotalInfo(@RequestParam("单位id") Integer unitId) {
+    public Long getTotalInfo(@RequestParam("单位id") Integer unitId) {
         return warnService.getWarnCount(unitId);
     }
 
@@ -110,7 +110,7 @@ public class WarnController implements RelocationWarnApi {
     }
 
     @Override
-    public int getWarnCount(Integer unitId) {
+    public Long countWarn(Integer unitId) {
         return warnService.getWarnCount(unitId);
     }
 

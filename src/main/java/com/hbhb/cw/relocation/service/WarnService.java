@@ -6,7 +6,6 @@ import com.hbhb.cw.relocation.web.vo.WarnExportVO;
 import com.hbhb.cw.relocation.web.vo.WarnFileResVO;
 import com.hbhb.cw.relocation.web.vo.WarnReqVO;
 import com.hbhb.cw.relocation.web.vo.WarnResVO;
-
 import org.beetl.sql.core.page.PageResult;
 
 import java.util.List;
@@ -36,7 +35,7 @@ public interface WarnService {
     /**
      * 跟据用户id统计预警数量
      */
-    int getWarnCount(Integer userId);
+    Long getWarnCount(Integer userId);
 
     /**
      * 跟据预警id获取预警附件列表
