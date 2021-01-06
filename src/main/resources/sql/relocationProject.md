@@ -146,7 +146,7 @@ selectProjectStatementByUnitId
 ===
 ```sql
     select
-    -- @pageTag(){
+-- @pageTag(){
     t.*,
     t2.*,
     t3.*,
@@ -154,7 +154,7 @@ selectProjectStatementByUnitId
     IFNULL(t5.thisYearReceivable, 0)     as thisYearReceivable,
     IFNULL(t5.thisYearDueIn, 0)          as thisYearDueIn,
     IFNULL(t5.thisYearCostProportion, 0) as thisYearCostProportion
-    -- @}
+-- @}
     from (
              select count(rp.id)                                                                  as compensationAmount,
                     sum(
@@ -162,7 +162,7 @@ selectProjectStatementByUnitId
                     count(case when contract_num != '' then 0 end)                                as contractNumAmount,
                     (count(rp.id) - count(case when contract_num != '' then 0 end))               as notContractNumAmount,
                     (count(case when contract_num != '' then 0 end) / count(rp.id))               as compensationRatio,
-                    count( distinct if( contract_num ='',null,contract_num) )                                         as contractAmount,
+                    count(distinct if(contract_num = '', null, contract_num))                     as contractAmount,
                     sum(compensation_amount)                                                      as contractAccount,
                     unit_id                                                                       as unitId
              from relocation_project rp
@@ -203,12 +203,9 @@ selectProjectStatementByUnitId
                  sum(IF(compensation_sate = 20 and contract_type != '框架类' and
                         compensation_amount != 0,
                         anticipate_payable, 0))                        as budgetNotAccount,
-                 (IF(compensation_sate in (20, 30),
-                     sum(compensation_amount) - sum(anticipate_payable),
-                     0)) +
-                 (IF(compensation_sate in (40, 60, 70),
-                     sum(compensation_amount) - sum(anticipate_payment),
-                     0))                                               as finalNotPayment,
+                 sum(IF(compensation_sate in (40, 60, 70),
+                        compensation_amount - anticipate_payment,
+                        0))                                                as finalNotPayment,
                  unit_id
           from relocation_project
           group by unit_id
@@ -276,7 +273,7 @@ selectProjectNumByProjectNum
 selectProjectStatementListByUnitId
 ===
 ```sql
-    select
+select 
     t.*,
     t2.*,
     t3.*,
@@ -291,7 +288,7 @@ selectProjectStatementListByUnitId
                     count(case when contract_num != '' then 0 end)                                as contractNumAmount,
                     (count(rp.id) - count(case when contract_num != '' then 0 end))               as notContractNumAmount,
                     (count(case when contract_num != '' then 0 end) / count(rp.id))               as compensationRatio,
-                    count( distinct if( contract_num ='',null,contract_num) )                                         as contractAmount,
+                    count(distinct if(contract_num = '', null, contract_num))                     as contractAmount,
                     sum(compensation_amount)                                                      as contractAccount,
                     unit_id                                                                       as unitId
              from relocation_project rp
@@ -332,12 +329,9 @@ selectProjectStatementListByUnitId
                  sum(IF(compensation_sate = 20 and contract_type != '框架类' and
                         compensation_amount != 0,
                         anticipate_payable, 0))                        as budgetNotAccount,
-                 (IF(compensation_sate in (20, 30),
-                     sum(compensation_amount) - sum(anticipate_payable),
-                     0)) +
-                 (IF(compensation_sate in (40, 60, 70),
-                     sum(compensation_amount) - sum(anticipate_payment),
-                     0))                                               as finalNotPayment,
+                 sum(IF(compensation_sate in (40, 60, 70),
+                        compensation_amount - anticipate_payment,
+                        0))                                                as finalNotPayment,
                  unit_id
           from relocation_project
           group by unit_id
