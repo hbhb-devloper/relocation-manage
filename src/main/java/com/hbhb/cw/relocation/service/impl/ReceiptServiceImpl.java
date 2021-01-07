@@ -24,6 +24,7 @@ import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptResVO;
 import com.hbhb.cw.systemcenter.api.UnitApi;
 import com.hbhb.cw.systemcenter.enums.UnitEnum;
+import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -74,8 +75,12 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
         // 判断用户单位
         UserInfo user = userAip.getUserInfoById(userId);
+        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
         if (!UnitEnum.isHangzhou(user.getUnitId())) {
             cond.setUnitId(user.getUnitId());
+        }
+        if ("网络部".equals(unitInfo.getUnitName())) {
+            cond.setUnitId(null);
         }
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<ReceiptResVO> receiptRes = receiptMapper.selectReceiptByCond(cond, request);
