@@ -1,94 +1,32 @@
 getFinanceList
 ===
 ```sql
-select
-      -- @pageTag(){
-       rp.unit_id                                                                             unitId,
-       rp.project_type                                                                        projectType,
-       rp.eoms_repair_num                                                                     eomsRepairNum,
-       rp.project_name                                                                        projectName,
-       rp.plan_end_time                                                                       planEndTime,
-       rp.construction_budget + rp.material_budget                                            estimatedCost,
-       rp.construction_cost                                                                   constructionCost,
-       rp.material_cost                                                                       materialCost,
-       rp.compensation_amount                                                                 compensationAmount,
-       rp.plan_start_time                                                                     planStartTime,
-       rp.actual_end_time                                                                     actualEndTime,
-       rp.contract_num                                                                        contractNum,
-       rp.contract_name                                                                       contractName,
-       rp.opposite_unit                                                                       oppositeUnit,
-       rp.opposite_contacts                                                                   oppositeContacts,
-       rp.compensation_amount                                                                 oppositeAmount,
-       IFNULL((select sum(init_amount) from relocation_income ri where project_id = rp.id), 0)
-                                                                                              initRecoveredAmount,
-       (rp.anticipate_payment + rp.final_payment)                                             yearRecoveredAmount,
-       rp.anticipate_payable                                                                  advanceReceivableAmount,
-       rp.anticipate_payment                                                                  advanceReceivedAmount,
-       if(rp.anticipate_payable = rp.anticipate_payment, 1, 0)                                isAllReceived,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '01')), 0)                                         janReceivable,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '02')), 0)                                         febReceivable,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '03')), 0)                                         marReceivable,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '04')), 0)                                         aprReceivable,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '05')), 0)                                         mayReceivable,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '06')), 0)                                         juneReceivable,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '07')), 0)                                         julReceivable,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '08')), 0)                                         augReceivable,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '09')), 0)                                         sepReceivable,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '10')), 0)                                         octReceivable,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '11')), 0)                                         novReceivable,
-       ifnull((select sum(rid.amount) amount
-               from relocation_income_detail rid
-                        left join relocation_income rii on rid.income_id = rii.id
-               where rii.project_id = rp.id
-                 and pay_month = concat(#{cond.year}, '12')), 0)                                         decReceivable,
-       (rp.compensation_amount - rp.anticipate_payment - rp.final_payment)                    unpaidCollection,
-       IFNULL((select sum(receivable) from relocation_income ri where project_id = rp.id), 0) invoicedAmount
-       -- @}
-        from relocation_project rp
+select 
+-- @pageTag(){
+       rp.unit_id                                                          unitId,
+       rp.project_type                                                     projectType,
+       rp.eoms_repair_num                                                  eomsRepairNum,
+       rp.project_name                                                     projectName,
+       rp.plan_end_time                                                    planEndTime,
+       rp.construction_budget + rp.material_budget                         estimatedCost,
+       rp.construction_budget                                              constructionBudget,
+       rp.construction_cost                                                constructionCost,
+       rp.material_cost                                                    materialCost,
+       rp.compensation_amount                                              compensationAmount,
+       rp.plan_start_time                                                  planStartTime,
+       rp.actual_end_time                                                  actualEndTime,
+       rp.contract_num                                                     contractNum,
+       rp.contract_name                                                    contractName,
+       rp.opposite_unit                                                    oppositeUnit,
+       rp.opposite_contacts                                                oppositeContacts,
+       rp.compensation_amount                                              oppositeAmount,
+       (rp.anticipate_payment + rp.final_payment)                          yearRecoveredAmount,
+       rp.anticipate_payable                                               advanceReceivableAmount,
+       rp.anticipate_payment                                               advanceReceivedAmount,
+       if(rp.anticipate_payable = rp.anticipate_payment, 1, 0)             isAllReceived,
+       (rp.compensation_amount - rp.anticipate_payment - rp.final_payment) unpaidCollection
+-- @}
+       from relocation_project rp
         -- @where(){
           -- @if(cond.unitIds == 429){
             and rp.unit_id in (#{join(cond.unitIds)})
@@ -121,4 +59,26 @@ select
         -- @pageIgnoreTag(){
         order by rp.project_year desc
         -- @}
+```
+selectSumPayMonthAmount
+===
+```sql
+select contract_num                                                                     as contractNum,
+       ifnull(sum(case when pay_month = concat(#{year},  '01') then rid.amount end), 0) as janReceivable,
+       ifnull(sum(case when pay_month = concat(#{year},  '02') then rid.amount end), 0) as febReceivable,
+       ifnull(sum(case when pay_month = concat(#{year},  '03') then rid.amount end), 0) as marReceivable,
+       ifnull(sum(case when pay_month = concat(#{year},  '04') then rid.amount end), 0) as aprReceivable,
+       ifnull(sum(case when pay_month = concat(#{year},  '05') then rid.amount end), 0) as mayReceivable,
+       ifnull(sum(case when pay_month = concat(#{year},  '06') then rid.amount end), 0) as juneReceivable,
+       ifnull(sum(case when pay_month = concat(#{year},  '07') then rid.amount end), 0) as julReceivable,
+       ifnull(sum(case when pay_month = concat(#{year},  '08') then rid.amount end), 0) as augReceivable,
+       ifnull(sum(case when pay_month = concat(#{year},  '09') then rid.amount end), 0) as sepReceivable,
+       ifnull(sum(case when pay_month = concat(#{year},  '10') then rid.amount end), 0) as octReceivable,
+       ifnull(sum(case when pay_month = concat(#{year},  '11') then rid.amount end), 0) as novReceivable,
+       ifnull(sum(case when pay_month = concat(#{year},  '12') then rid.amount end), 0) as decReceivable,
+       IFNULL(sum(init_amount), 0)                                                      as initRecoveredAmount,
+       IFNULL(sum(receivable), 0)                                                       as  invoicedAmount
+from relocation_income_detail rid
+         left join relocation_income ri on rid.income_id = ri.id
+group by contract_num
 ```

@@ -11,13 +11,12 @@ import com.hbhb.cw.relocation.mapper.IncomeMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.mapper.ReceiptMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
-import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.model.RelocationReceipt;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.ProjectService;
 import com.hbhb.cw.relocation.service.ReceiptService;
 import com.hbhb.cw.relocation.util.BigDecimalUtil;
-import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
+import com.hbhb.cw.relocation.web.vo.ContractInfoVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptExportVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptImportVO;
 import com.hbhb.cw.relocation.web.vo.ReceiptReqVO;
@@ -42,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
 import static org.springframework.util.StringUtils.isEmpty;
@@ -98,9 +99,16 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public synchronized void addSaveRelocationReceipt(List<ReceiptImportVO> dataList) {
+
+        // 获取已存在的合同信息
+        List<ContractInfoVO> contractInfo = projectMapper.selectContractInfo();
+        Map<String, ContractInfoVO> contractMap = contractInfo.stream()
+                .collect(Collectors.toMap(ContractInfoVO::getContractNum, Function.identity()));
+
         List<String> error = new CopyOnWriteArrayList<>();
         Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
         List<RelocationReceipt> receiptList = new ArrayList<>();
+
         // 验证导入合同编号是否存在
         List<String> contractNumList = projectService.getContractNumList();
         // 查询收据编号
@@ -125,14 +133,12 @@ public class ReceiptServiceImpl implements ReceiptService {
             }
             if (arrList.size() == 4) {
                 //1.获取基础信息中所对应的数据
-                List<ProjectReqVO> projectReq = getProjectResVo(arrList, unitMap);
+
                 RelocationReceipt receipt = new RelocationReceipt();
                 BeanUtils.copyProperties(importVos, receipt);
                 receipt.setUnitId(unitMap.get(importVos.getUnit()));
                 receipt.setReceiptTime(DateUtil.string3DateYMD(importVos.getReceiptTime()));
-                if (projectReq.size() == 1) {
-                    projectReq.forEach(item -> receipt.setProjectId(item.getId()));
-                }
+
                 if (receipt.getProjectId() != null) {
                     receiptList.add(receipt);
                 }
@@ -150,7 +156,8 @@ public class ReceiptServiceImpl implements ReceiptService {
             // 新增收款信息
             List<RelocationIncome> list = new ArrayList<>();
             for (RelocationReceipt receipt : receiptList) {
-                RelocationIncome income = setRelocationIncome(receipt);
+                List<String> arrList = Arrays.asList(receipt.getRemake().split(";"));
+                RelocationIncome income = setRelocationIncome(receipt, contractMap, arrList);
                 list.add(income);
             }
             incomeMapper.insertBatch(list);
@@ -162,6 +169,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (UnitEnum.isHangzhou(vo.getUnitId())) {
             vo.setUnitId(null);
         }
+
         // 判断用户单位
         UserInfo user = userAip.getUserInfoById(userId);
         if (!UnitEnum.isHangzhou(user.getUnitId()) && vo.getUnitId() == null) {
@@ -182,19 +190,38 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (list.contains(receiptResVO.getReceiptNum())) {
             throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_ALREADY_EXIST);
         }
+
+        // 获取已存在的合同信息
+        List<ContractInfoVO> contractInfo = projectMapper.selectContractInfo();
+        Map<String, ContractInfoVO> contractMap = contractInfo.stream()
+                .collect(Collectors.toMap(ContractInfoVO::getContractNum, Function.identity()));
+
+        // 设置收据信息
         RelocationReceipt receipt = setReceipt(receiptResVO);
         receiptMapper.insert(receipt);
-        RelocationIncome incomes = setRelocationIncome(receipt);
-        incomeMapper.insert(incomes);
+
+        // 设置收款信息
+        List<String> arrList = Arrays.asList(receipt.getRemake().split("；"));
+        RelocationIncome income = setRelocationIncome(receipt, contractMap, arrList);
+        incomeMapper.insert(income);
     }
 
     @Override
     public void updateRelocationReceipt(ReceiptResVO receiptResVO) {
         RelocationReceipt receiptInfo = receiptMapper.single(receiptResVO.getId());
+
+        // 获取已存在的合同信息
+        List<ContractInfoVO> contractInfo = projectMapper.selectContractInfo();
+        Map<String, ContractInfoVO> contractMap = contractInfo.stream()
+                .collect(Collectors.toMap(ContractInfoVO::getContractNum, Function.identity()));
+
+        // 修改收据信息
         RelocationReceipt receipt = setReceipt(receiptResVO);
         receiptMapper.updateById(receipt);
+
         // 修改收款信息
-        RelocationIncome income = setRelocationIncome(receipt);
+        List<String> arrList = Arrays.asList(receipt.getRemake().split("；"));
+        RelocationIncome income = setRelocationIncome(receipt, contractMap, arrList);
         RelocationIncome single = incomeMapper.createLambdaQuery()
                 .andEq(RelocationIncome::getInvoiceNum, receiptInfo.getReceiptNum())
                 .single();
@@ -233,17 +260,6 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (msg.size() != 0) {
             throw new RelocationException("80898", msg.toString());
         }
-        // 判断备注列数据是否对应基础信息
-        // 转换单位
-        Map<String, Integer> unitMap = unitApi.getUnitMapByUnitName();
-        List<ProjectReqVO> projectRes = getProjectResVo(arrList, unitMap);
-        if (projectRes.size() > 1) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_CANT_MATCH);
-        } else if (projectRes.size() == 0) {
-            throw new RelocationException(RelocationErrorCode.RELOCATION_RECEIPT_REMAKE_ERROR);
-        } else {
-            projectRes.forEach(item -> receipt.setProjectId(item.getId()));
-        }
         // 赔补金额
         receipt.setCompensationAmount(BigDecimalUtil.getBigDecimal(receiptResVO.getCompensationAmount()));
         // 已到账金额
@@ -255,26 +271,11 @@ public class ReceiptServiceImpl implements ReceiptService {
         return receipt;
     }
 
-    private List<ProjectReqVO> getProjectResVo(List<String> remake, Map<String, Integer> unitMap) {
-        // 判断备注列数据是否对应基础信息
-        // 1-合同编号
-        String contractNum = remake.get(0);
-        // 2-区县
-        String unitName = remake.get(1);
-        // 3-项目名称
-        String projectName = remake.get(3);
-        Integer unitId = unitMap.get(unitName);
-        ProjectReqVO projectVo = new ProjectReqVO();
-        projectVo.setUnitId(unitId);
-        projectVo.setProjectName(projectName);
-        projectVo.setContractNum(contractNum);
-        //  通过备注修改列对比基础项目信息表
-        return projectMapper.selectProjectByCondList(projectVo);
-    }
 
+    private RelocationIncome setRelocationIncome(RelocationReceipt receipt,
+                                                 Map<String, ContractInfoVO> contractMap,
+                                                 List<String> arrList) {
 
-    private RelocationIncome setRelocationIncome(RelocationReceipt receipt) {
-        RelocationProject project = projectMapper.single(receipt.getProjectId());
         RelocationIncome income = new RelocationIncome();
         income.setCategory(1);
         //经办单位(单位id)
@@ -286,19 +287,16 @@ public class ReceiptServiceImpl implements ReceiptService {
         // 供应商
         income.setSupplier(receipt.getSupplier());
         // 起始时间
-        income.setStartTime(project.getPlanStartTime());
+        income.setStartTime(contractMap.get(receipt.getContractNum()).getPlanStartTime());
         // 合同截止时间
-        income.setContractDeadline(project.getActualEndTime());
+        income.setContractDeadline(contractMap.get(receipt.getContractNum()).getPlanEndTime());
         // 合同金额
-        income.setContractAmount(project.getCompensationAmount());
+        income.setContractAmount(contractMap.get(receipt.getContractNum()).getTotal());
         // 工程名
-        income.setConstructionName(project.getProjectName());
+        income.setConstructionName(arrList.get(2));
         // 账龄新增为0
         income.setAging(0);
         // 款项类型
-        String remake = receipt.getRemake();
-        remake = remake.replace("；", ";");
-        List<String> arrList = Arrays.asList(remake.split(";"));
         Map<String, Integer> payMap = getPaymentType();
         income.setPaymentType(payMap.get(arrList.get(2)));
         // 开收据时间
@@ -331,7 +329,6 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
         // 收款人
         income.setPayee(receipt.getPayee());
-        income.setProjectId(project.getId());
         return income;
     }
 

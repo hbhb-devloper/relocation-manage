@@ -28,8 +28,14 @@ public class AmountVO implements Serializable {
     @Schema(description = "施工费（预算：元）")
     private BigDecimal constructionBudget;
 
-    @Schema(description = "甲供材料费（预算：元）")
-    private BigDecimal materialBudget;
+    @Schema(description = "预付款应付金额")
+    private BigDecimal anticipatePayable;
+
+    @Schema(description = "预付款到账金额")
+    private BigDecimal anticipatePayment;
+
+    @Schema(description = "决算款到账金额")
+    private BigDecimal finalPayment;
 
     @Schema(description = "补偿金额")
     private BigDecimal compensationAmount;

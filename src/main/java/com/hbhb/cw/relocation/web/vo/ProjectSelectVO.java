@@ -1,5 +1,6 @@
 package com.hbhb.cw.relocation.web.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,16 @@ import java.math.BigDecimal;
 public class ProjectSelectVO implements Serializable {
     private static final long serialVersionUID = 8716582677047370236L;
 
+    @Schema(description = "合同编号")
     private String num;
 
-    private BigDecimal account;
+    @Schema(description = "施工费总额")
+    private BigDecimal constructionBudget;
+
+    @Schema(description = "预付款应付金额总额")
+    private BigDecimal anticipatePayable;
+
+    @Schema(description = "赔补总额")
+    private BigDecimal compensationAmount;
+
 }

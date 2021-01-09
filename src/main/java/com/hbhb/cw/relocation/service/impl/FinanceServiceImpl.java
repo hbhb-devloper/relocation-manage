@@ -4,11 +4,14 @@ package com.hbhb.cw.relocation.service.impl;
 import com.hbhb.core.utils.DateUtil;
 import com.hbhb.cw.relocation.enums.State;
 import com.hbhb.cw.relocation.mapper.FinanceMapper;
+import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.FinanceService;
 import com.hbhb.cw.relocation.web.vo.FinanceReqVO;
 import com.hbhb.cw.relocation.web.vo.FinanceResVO;
+import com.hbhb.cw.relocation.web.vo.FinanceStatisticsVO;
+import com.hbhb.cw.relocation.web.vo.ProjectSelectVO;
 import com.hbhb.cw.systemcenter.enums.UnitEnum;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +22,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static com.alibaba.excel.util.StringUtils.isEmpty;
 
 
 /**
@@ -39,6 +46,9 @@ public class FinanceServiceImpl implements FinanceService {
     private FinanceMapper financeMapper;
 
     @Resource
+    private ProjectMapper projectMapper;
+
+    @Resource
     private UserApiExp userApi;
 
     @Resource
@@ -47,30 +57,22 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     public PageResult<FinanceResVO> getFinanceList(Integer pageNum, Integer pageSize,
                                                    FinanceReqVO cond, Integer userId) {
+        // 设置年份
         String currentYear = DateUtil.getCurrentYear();
         if (StringUtils.isEmpty(cond.getYear())) {
             cond.setYear(currentYear);
         }
-        PageRequest<FinanceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
-        setUnitId(cond, userId);
 
+        // 设置默认查询单位
+        setUnitId(cond, userId);
         List<Integer> unitIds = new ArrayList<>();
         if (UnitEnum.isBenbu(cond.getUnitId())) {
             unitIds = unitApi.getSubUnit(cond.getUnitId());
         }
         cond.setUnitIds(unitIds);
-
+        PageRequest<FinanceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond, request);
-        Map<String, String> isReceived = getIsAllReceived();
-        Map<Integer, String> unitMap = unitApi.getUnitMapById();
-        // 组装理赔方式、收款状态、县市
-        financeResVos.getList().forEach(item -> {
-            //网银打款、现金转账，开具发票收据
-            item.setPayType("网银打款");
-            item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
-            item.setUnit(unitMap.get(item.getUnitId()));
-        });
-
+        getFinanceList(financeResVos.getList());
         return financeResVos;
     }
 
@@ -82,15 +84,7 @@ public class FinanceServiceImpl implements FinanceService {
             cond.setYear(currentYear);
         }
         List<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond);
-        Map<String, String> isReceived = getIsAllReceived();
-        Map<Integer, String> unitMap = unitApi.getUnitMapById();
-        financeResVos.forEach(item -> {
-            //网银打款、现金转账，开具发票收据
-            item.setPayType("网银打款");
-            item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
-            item.setUnit(unitMap.get(item.getUnitId()));
-            item.setCurrentYear(DateUtil.dateToStringY(new Date()));
-        });
+        getFinanceList(financeResVos);
         return financeResVos;
     }
 
@@ -107,5 +101,102 @@ public class FinanceServiceImpl implements FinanceService {
         receivedMap.put(State.ONE.value(), State.YES.value());
         receivedMap.put(State.ZERO.value(), State.NO.value());
         return receivedMap;
+    }
+
+    private void getFinanceList(List<FinanceResVO> financeList) {
+        // 按合同纬度统计每月份收款信息
+        List<FinanceStatisticsVO> statistics = financeMapper.selectSumPayMonthAmount();
+        Map<String, FinanceStatisticsVO> contractMap = statistics.stream()
+                .collect(Collectors.toMap(FinanceStatisticsVO::getContractNum, Function.identity()));
+
+        // 获取按合同划分预算统计
+        List<String> list = projectMapper.selectContractNumList();
+        List<ProjectSelectVO> totalList = projectMapper.selectSumConstructionBudget(list);
+        Map<String, BigDecimal> contractBudgetMap = totalList.stream()
+                .collect(Collectors.toMap(ProjectSelectVO::getNum, ProjectSelectVO::getConstructionBudget));
+
+        // 收款状态
+        Map<String, String> isReceived = getIsAllReceived();
+        // 单位
+        Map<Integer, String> unitMap = unitApi.getUnitMapById();
+        for (FinanceResVO item : financeList) {
+            item.setPayType("网银打款");
+            // 预付款是否完全到账
+            item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
+            // 单位
+            item.setUnit(unitMap.get(item.getUnitId()));
+            if (isEmpty(item.getContractNum())) {
+                // 1月回款
+                item.setJulReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getJanReceivable())
+                );
+                // 2月回款
+                item.setFebReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getJanReceivable())
+                );
+                // 3月回款
+                item.setMarReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getFebReceivable())
+                );
+                // 4月回款
+                item.setAprReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getAprReceivable())
+                );
+                // 5月回款
+                item.setMayReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getMayReceivable())
+                );
+                // 6月回款
+                item.setJuneReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getJuneReceivable())
+                );
+                // 7月回款
+                item.setJulReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getJulReceivable())
+                );
+                // 8月回款
+                item.setAugReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getAugReceivable())
+                );
+                // 9月回款
+                item.setSepReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getSepReceivable())
+                );
+                // 10月回款
+                item.setOctReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getOctReceivable())
+                );
+                // 11月回款
+                item.setNovReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getNovReceivable())
+                );
+                // 12月回款
+                item.setDecReceivable((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getDecReceivable())
+                );
+                // 初始化回收金额
+                item.setInitRecoveredAmount((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getInitRecoveredAmount())
+                );
+                // 已开票金额
+                item.setInvoicedAmount((item.getConstructionBudget()
+                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                        .multiply(contractMap.get(item.getContractNum()).getInvoicedAmount())
+                );
+            }
+        }
     }
 }

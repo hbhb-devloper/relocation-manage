@@ -11,17 +11,21 @@ import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
+import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.model.RelocationIncome;
 import com.hbhb.cw.relocation.model.RelocationIncomeDetail;
+import com.hbhb.cw.relocation.model.RelocationProject;
 import com.hbhb.cw.relocation.rpc.DictApiExp;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
 import com.hbhb.cw.relocation.service.IncomeService;
 import com.hbhb.cw.relocation.util.BigDecimalUtil;
+import com.hbhb.cw.relocation.web.vo.AmountVO;
 import com.hbhb.cw.relocation.web.vo.IncomeExportVO;
 import com.hbhb.cw.relocation.web.vo.IncomeImportVO;
 import com.hbhb.cw.relocation.web.vo.IncomeReqVO;
 import com.hbhb.cw.relocation.web.vo.IncomeResVO;
+import com.hbhb.cw.relocation.web.vo.ProjectSelectVO;
 import com.hbhb.cw.systemcenter.enums.DictCode;
 import com.hbhb.cw.systemcenter.enums.TypeCode;
 import com.hbhb.cw.systemcenter.enums.UnitEnum;
@@ -60,6 +64,8 @@ public class IncomeServiceImpl implements IncomeService {
     @Resource
     private IncomeDetailMapper incomeDetailMapper;
     @Resource
+    private ProjectMapper projectMapper;
+    @Resource
     private UnitApiExp unitApiExp;
     @Resource
     private UserApiExp userApi;
@@ -76,7 +82,12 @@ public class IncomeServiceImpl implements IncomeService {
         }
         Map<Integer, String> unitMap = unitApiExp.getUnitMapById();
         cond.setUnitIds(unitIds);
-        setConditionDetail(cond, userId);
+
+        UserInfo user = userApi.getUserInfoById(userId);
+        if (userApi.isAdmin(userId) && cond.getUnitId() == null) {
+            cond.setUnitId(user.getUnitId());
+        }
+
         PageRequest<IncomeResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<IncomeResVO> incomeList = incomeMapper.getIncomeList(cond, request);
         List<IncomeResVO> list = incomeList.getList();
@@ -116,43 +127,95 @@ public class IncomeServiceImpl implements IncomeService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addIncomeDetail(RelocationIncomeDetail detail, Integer userId) {
-        String currentMonth = DateUtil.getCurrentMonth();
-        detail.setPayMonth(currentMonth);
-        detail.setPayMonth(detail.getPayMonth().replace("-", ""));
+
         UserInfo user = userApi.getUserInfoById(userId);
-        String nickName = user.getNickName();
-        BigDecimal amount = detail.getAmount();
-        Long incomeId = detail.getIncomeId();
-        detail.setPayee(nickName);
+
+        // 收款月份
+        detail.setPayMonth(DateUtil.getCurrentMonth());
+        detail.setPayMonth(detail.getPayMonth().replace("-", ""));
+
+        // 收款人
+        detail.setPayee(user.getNickName());
+
+        // 创建时间
         detail.setCreateTime(DateUtil.getCurrentDate());
         incomeDetailMapper.insert(detail);
-        RelocationIncome relocationIncome = incomeMapper.single(incomeId);
         //未收减少
-        RelocationIncome single = incomeMapper.single(incomeId);
+        RelocationIncome single = incomeMapper.single(detail.getIncomeId());
+
+        // 更新收款信息
         RelocationIncome income = new RelocationIncome();
-        income.setId(incomeId);
-        BigDecimal subtractRe = single.getUnreceived().subtract(amount);
+        income.setId(detail.getIncomeId());
+
+        // 未收
+        BigDecimal subtractRe = single.getUnreceived().subtract(detail.getAmount());
         income.setUnreceived(subtractRe);
         if (subtractRe.compareTo(new BigDecimal("0.0")) < 0) {
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_AMOUNT_ERROR);
         }
         //已收增加
-        income.setReceived(single.getReceived().add(amount));
+        income.setReceived(single.getReceived().add(detail.getAmount()));
         incomeMapper.updateTemplateById(income);
+
         // 判断更新后的收款状态
-        RelocationIncome income1 = incomeMapper.single(incomeId);
+        RelocationIncome income1 = incomeMapper.single(detail.getIncomeId());
         BigDecimal receivable = income1.getReceivable();
         BigDecimal unreceived = income1.getUnreceived();
         BigDecimal received = income1.getReceived();
-        //已收完的情况 3
+
+        //已收完的情况
         if (received.compareTo(receivable) == 0 && unreceived.compareTo(new BigDecimal("0")) == 0) {
             income1.setIsReceived(IsReceived.RECEIVED.key());
             incomeMapper.updateTemplateById(income1);
         }
-        //部分回款 2
-        if (received.compareTo(receivable) < 0 && relocationIncome.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
+
+        //部分回款
+        if (received.compareTo(receivable) < 0 && single.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
             income1.setIsReceived(IsReceived.PART_RECEIVED.key());
             incomeMapper.updateTemplateById(income1);
+        }
+
+        // 更新基础信息表预付款到账金额，决算款到账金额
+        List<String> contractNum = new ArrayList<>();
+        contractNum.add(income.getContractNum());
+        List<RelocationProject> projectList = new ArrayList<>();
+
+        // 获取收款项合同对应所有项目
+        List<AmountVO> amountVO = projectMapper.selectCompensationAmount(contractNum);
+
+        // 合同施工费总额
+        List<ProjectSelectVO> totalList = projectMapper.selectSumConstructionBudget(contractNum);
+        Map<String, BigDecimal> constructionBudgetMap = totalList.stream().collect(Collectors.
+                toMap(ProjectSelectVO::getNum, ProjectSelectVO::getConstructionBudget));
+
+        // 1.按合同编号找出预付款到账金额 并按施工费预算比例修改预付款到账金额
+        if (single.getPaymentType().equals(PaymentType.ADVANCE_PAYMENT.key())) {
+            for (AmountVO amount : amountVO) {
+                RelocationProject project = new RelocationProject();
+                // 预付款到账金额 = 施工费占整个合同比例*本次收款到账金额
+                project.setAnticipatePayable(amount.getAnticipatePayable()
+                        .add(detail.getAmount().multiply(amount.getConstructionBudget()
+                                .divide(constructionBudgetMap
+                                        .get(amount.getContractNum()), 4, 4))));
+                project.setId(amount.getId());
+                projectList.add(project);
+            }
+            projectMapper.updateBatchTempById(projectList);
+        }
+
+        //2.  按合同编号找出决算款到账金额 并按施工费预算比例修决算款到账金额
+        if (single.getPaymentType().equals(PaymentType.FINAL_PARAGRAPH.key())) {
+            for (AmountVO amount : amountVO) {
+                RelocationProject project = new RelocationProject();
+                // 预付款到账金额 = 施工费占整个合同比例*本次收款到账金额
+                project.setFinalPayment(amount.getAnticipatePayable()
+                        .add(detail.getAmount().multiply(amount.getConstructionBudget()
+                                .divide(constructionBudgetMap
+                                        .get(amount.getContractNum()), 4, 4))));
+                project.setId(amount.getId());
+                projectList.add(project);
+            }
+            projectMapper.updateBatchTempById(projectList);
         }
     }
 
@@ -239,9 +302,12 @@ public class IncomeServiceImpl implements IncomeService {
     }
 
     @Override
-    public List<IncomeExportVO> selectExportListByCondition(IncomeReqVO vo, Integer userId) {
-        setConditionDetail(vo, userId);
-        List<IncomeExportVO> relocationIncomeExport = incomeMapper.selectExportList(vo);
+    public List<IncomeExportVO> selectExportListByCondition(IncomeReqVO cond, Integer userId) {
+        UserInfo user = userApi.getUserInfoById(userId);
+        if (userApi.isAdmin(userId) && cond.getUnitId() == null) {
+            cond.setUnitId(user.getUnitId());
+        }
+        List<IncomeExportVO> relocationIncomeExport = incomeMapper.selectExportList(cond);
         // 类型
         Map<Integer, String> unitMap = unitApiExp.getUnitMapById();
         Map<String, String> categoryMap = getCategory();
@@ -259,19 +325,6 @@ public class IncomeServiceImpl implements IncomeService {
         return relocationIncomeExport;
     }
 
-
-    private void setConditionDetail(IncomeReqVO cond, Integer userId) {
-        UserInfo user = userApi.getUserInfoById(userId);
-        if (userApi.isAdmin(userId) && cond.getUnitId() == null) {
-            cond.setUnitId(user.getUnitId());
-        }
-        if (!isEmpty(cond.getStartTimeFrom())) {
-            cond.setStartTimeFrom(cond.getStartTimeFrom() + " 00:00:00");
-        }
-        if (!isEmpty(cond.getStartTimeTo())) {
-            cond.setStartTimeTo(cond.getStartTimeTo() + " 23:59:59");
-        }
-    }
 
     private Map<String, String> getInvoiceTypeByLabel() {
         List<DictVO> compensationSateList = dictApi.getDict(TypeCode.RELOCATION.value(), DictCode.RELOCATION_INVOICE_TYPE.value());

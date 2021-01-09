@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @author hyk
@@ -47,6 +48,10 @@ public class FinanceResVO implements Serializable {
     @ColumnWidth(20)
     @ExcelProperty(value = "项目割接或完成时间", index = 4)
     private String planEndTime;
+
+    @ExcelIgnore
+    @Schema(description = "施工费预算")
+    private BigDecimal constructionBudget;
 
     @ColumnWidth(15)
     @ExcelProperty(value = "预算费用", index = 5)
@@ -99,20 +104,20 @@ public class FinanceResVO implements Serializable {
     @ColumnWidth(15)
     @ExcelProperty(value = "初始化已回收金额", index = 17)
     @Schema(description = "初始化回收金额【2019年底】")
-    private String initRecoveredAmount;
+    private BigDecimal initRecoveredAmount;
 
     @ColumnWidth(15)
     @ExcelProperty(value = "当年已回收金额", index = 18)
     @Schema(description = "当年已回收金额")
-    private String yearRecoveredAmount;
+    private BigDecimal yearRecoveredAmount;
 
     @ColumnWidth(15)
     @ExcelProperty(value = "预付款应收金额", index = 19)
-    private String advanceReceivableAmount;
+    private BigDecimal advanceReceivableAmount;
 
     @ColumnWidth(15)
     @ExcelProperty(value = "预付款已收金额", index = 20)
-    private String advanceReceivedAmount;
+    private BigDecimal advanceReceivedAmount;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "预付款是否完全到账", index = 21)
@@ -127,71 +132,71 @@ public class FinanceResVO implements Serializable {
     @ColumnWidth(10)
     @ExcelProperty(value = "一月回款", index = 23)
     @Schema(description = "1月收款")
-    private String janReceivable;
+    private BigDecimal janReceivable;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "二月回款", index = 24)
     @Schema(description = "2月收款")
-    private String febReceivable;
+    private BigDecimal febReceivable;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "三月回款", index = 25)
     @Schema(description = "3月收款")
-    private String marReceivable;
+    private BigDecimal marReceivable;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "四月回款", index = 26)
     @Schema(description = "4月收款")
-    private String aprReceivable;
+    private BigDecimal aprReceivable;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "五月回款", index = 27)
     @Schema(description = "5月收款")
-    private String mayReceivable;
+    private BigDecimal mayReceivable;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "六月回款", index = 28)
     @Schema(description = "6月收款")
-    private String juneReceivable;
+    private BigDecimal juneReceivable;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "七月回款", index = 29)
     @Schema(description = "7月收款")
-    private String julReceivable;
+    private BigDecimal julReceivable;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "八月回款", index = 30)
     @Schema(description = "8月收款")
-    private String augReceivable;
+    private BigDecimal augReceivable;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "九月回款", index = 31)
     @Schema(description = "9月收款")
-    private String sepReceivable;
+    private BigDecimal sepReceivable;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "十月回款", index = 32)
     @Schema(description = "10月收款")
-    private String octReceivable;
+    private BigDecimal octReceivable;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "十一月回款", index = 33)
     @Schema(description = "11月收款")
-    private String novReceivable;
+    private BigDecimal novReceivable;
 
     @ColumnWidth(10)
     @ExcelProperty(value = "十二月回款", index = 34)
     @Schema(description = "12月收款")
-    private String decReceivable;
+    private BigDecimal decReceivable;
 
     @ColumnWidth(15)
     @ExcelProperty(value = "待回收金额", index = 35)
     @Schema(description = "待回收金额")
-    private String unpaidCollection;
+    private BigDecimal unpaidCollection;
 
     @ColumnWidth(15)
     @ExcelProperty(value = "已开票金额", index = 36)
     @Schema(description = "已开票金额")
-    private String invoicedAmount;
+    private BigDecimal invoicedAmount;
 
 }

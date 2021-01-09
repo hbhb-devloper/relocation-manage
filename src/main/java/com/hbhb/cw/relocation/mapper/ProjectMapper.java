@@ -2,7 +2,14 @@ package com.hbhb.cw.relocation.mapper;
 
 import com.hbhb.beetlsql.BaseMapper;
 import com.hbhb.cw.relocation.model.RelocationProject;
-import com.hbhb.cw.relocation.web.vo.*;
+import com.hbhb.cw.relocation.web.vo.AmountVO;
+import com.hbhb.cw.relocation.web.vo.ContractInfoVO;
+import com.hbhb.cw.relocation.web.vo.ProjectReqVO;
+import com.hbhb.cw.relocation.web.vo.ProjectResVO;
+import com.hbhb.cw.relocation.web.vo.ProjectSelectVO;
+import com.hbhb.cw.relocation.web.vo.StatementResVO;
+import com.hbhb.cw.relocation.web.vo.WarnCountVO;
+import com.hbhb.cw.relocation.web.vo.WarnResVO;
 import org.beetl.sql.core.page.PageRequest;
 import org.beetl.sql.core.page.PageResult;
 import org.beetl.sql.mapper.annotation.SqlResource;
@@ -32,7 +39,6 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
 
     List<RelocationProject> selectProject();
 
-    List<ProjectSelectVO> selectSumCompensationAmount();
 
     List<String> selectProjectNumByProjectNum(List<String> list);
 
@@ -49,4 +55,6 @@ public interface ProjectMapper extends BaseMapper<RelocationProject> {
     List<Long> selectProjectIdByContractNum(String contractNum);
 
     ProjectResVO selectProjectById(Long id);
+
+    List<ContractInfoVO> selectContractInfo();
 }

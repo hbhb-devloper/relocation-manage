@@ -229,26 +229,24 @@ selectProjectStatementByUnitId
 selectCompensationAmount
 ===  
 ```sql
-select id                  as id ,
-       contract_num        as contractNum,
-       material_budget       as materialBudget,
-       compensation_amount as compensationAmount,
-       construction_budget as constructionBudget
+select id                       as id ,
+       contract_num             as contractNum,
+       material_budget          as materialBudget,
+       compensation_amount      as compensationAmount,
+       construction_budget      as constructionBudget,
+       anticipate_payment       as anticipatePayment,
+       final_payment            as finalPayment
 from relocation_project
 where contract_num in (#{join(list)})
  ```
-selectSumCompensationAmount
-===
- ```sql
-        select contract_num  as num, sum(compensation_amount) as account
-        from relocation_project
-        where contract_num  is not null and contract_num !=''
-        group by contract_num
- ```
+
 selectSumConstructionBudget
 ===
  ```sql
-    select  contract_num as num , sum(construction_budget + material_budget) as account
+    select  contract_num               as num ,
+             sum(construction_budget)  as constructionBudget,
+             sum(anticipate_payable)   as anticipatePayable,
+              sum(compensation_amount) as compensationAmount
     from relocation_project
     where contract_num  is not null and contract_num !='' 
     and  contract_num in (#{join(list)})
@@ -431,4 +429,15 @@ select id
 from relocation_project
 where contract_num =#{contractNum}        
 ```
-
+selectContractInfo
+===
+```sql
+    select contract_num             as contractNum,
+           contract_name            as contractName,
+           min(plan_start_time)     as planStartTime,
+           max(plan_end_time)       as planEndTime,
+           sum(compensation_amount) as total
+    from relocation_project
+    where contract_num != ''
+    group by contract_num
+```
