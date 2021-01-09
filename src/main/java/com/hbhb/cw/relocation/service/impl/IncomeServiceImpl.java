@@ -150,7 +150,7 @@ public class IncomeServiceImpl implements IncomeService {
         // 未收
         BigDecimal subtractRe = single.getUnreceived().subtract(detail.getAmount());
         income.setUnreceived(subtractRe);
-        if (subtractRe.compareTo(new BigDecimal("0.0")) < 0) {
+        if (subtractRe.compareTo(BigDecimal.ZERO) < 0) {
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INCOME_AMOUNT_ERROR);
         }
         //已收增加
@@ -164,13 +164,13 @@ public class IncomeServiceImpl implements IncomeService {
         BigDecimal received = income1.getReceived();
 
         //已收完的情况
-        if (received.compareTo(receivable) == 0 && unreceived.compareTo(new BigDecimal("0")) == 0) {
+        if (received.compareTo(receivable) == 0 && unreceived.compareTo(BigDecimal.ZERO) == 0) {
             income1.setIsReceived(IsReceived.RECEIVED.key());
             incomeMapper.updateTemplateById(income1);
         }
 
         //部分回款
-        if (received.compareTo(receivable) < 0 && single.getUnreceived().compareTo(new BigDecimal("0")) > 0) {
+        if (received.compareTo(receivable) < 0 && single.getUnreceived().compareTo(BigDecimal.ZERO) > 0) {
             income1.setIsReceived(IsReceived.PART_RECEIVED.key());
             incomeMapper.updateTemplateById(income1);
         }

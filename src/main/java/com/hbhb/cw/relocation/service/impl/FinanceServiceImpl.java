@@ -103,11 +103,14 @@ public class FinanceServiceImpl implements FinanceService {
         return receivedMap;
     }
 
-    private List<FinanceResVO> getFinanceList(List<FinanceResVO> financeList, String year) {
+    private void getFinanceList(List<FinanceResVO> financeList, String year) {
         // 按合同纬度统计每月份收款信息
         List<FinanceStatisticsVO> statistics = financeMapper.selectSumPayMonthAmount(year);
         Map<String, FinanceStatisticsVO> contractMap = statistics.stream()
                 .collect(Collectors.toMap(FinanceStatisticsVO::getContractNum, Function.identity()));
+        List<String> contractNumList = new ArrayList<>();
+        statistics.forEach(item -> contractNumList.add(item.getContractNum()));
+
 
         // 获取按合同划分预算统计
         List<String> list = projectMapper.selectContractNumList();
@@ -119,13 +122,14 @@ public class FinanceServiceImpl implements FinanceService {
         Map<String, String> isReceived = getIsAllReceived();
         // 单位
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
+        BigDecimal zero = BigDecimal.ZERO;
         for (FinanceResVO item : financeList) {
             item.setPayType("网银打款");
             // 预付款是否完全到账
             item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
             // 单位
             item.setUnit(unitMap.get(item.getUnitId()));
-            if (!isEmpty(item.getContractNum())) {
+            if (!isEmpty(item.getContractNum()) && contractNumList.contains(item.getContractNum())) {
                 // 1月回款
                 item.setJanReceivable((item.getConstructionBudget()
                         .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
@@ -134,7 +138,7 @@ public class FinanceServiceImpl implements FinanceService {
                 // 2月回款
                 item.setFebReceivable((item.getConstructionBudget()
                         .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getJanReceivable())
+                        .multiply(contractMap.get(item.getContractNum()).getFebReceivable())
                 );
                 // 3月回款
                 item.setMarReceivable((item.getConstructionBudget()
@@ -196,8 +200,22 @@ public class FinanceServiceImpl implements FinanceService {
                         .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
                         .multiply(contractMap.get(item.getContractNum()).getInvoicedAmount())
                 );
+            } else {
+                item.setJanReceivable(zero);
+                item.setFebReceivable(zero);
+                item.setMarReceivable(zero);
+                item.setAprReceivable(zero);
+                item.setMayReceivable(zero);
+                item.setJuneReceivable(zero);
+                item.setJulReceivable(zero);
+                item.setAugReceivable(zero);
+                item.setSepReceivable(zero);
+                item.setOctReceivable(zero);
+                item.setNovReceivable(zero);
+                item.setDecReceivable(zero);
+                item.setInitRecoveredAmount(zero);
+                item.setInvoicedAmount(zero);
             }
         }
-        return financeList;
     }
 }

@@ -333,7 +333,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         BigDecimal unreceived = receipt.getCompensationAmount().subtract(receipt.getPaymentAmount());
         income.setUnreceived(unreceived);
         // 收款情况（10-已收，20 - 未收 ，30-部分回款）
-        if (unreceived.compareTo(new BigDecimal("0")) == 0) {
+        if (unreceived.compareTo(BigDecimal.ZERO) == 0) {
             income.setIsReceived(IsReceived.RECEIVED.key());
         } else if (unreceived.compareTo(receivable) == 0) {
             income.setIsReceived(IsReceived.NOT_RECEIVED.key());
