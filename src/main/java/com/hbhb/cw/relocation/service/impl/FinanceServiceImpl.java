@@ -127,7 +127,7 @@ public class FinanceServiceImpl implements FinanceService {
             item.setUnit(unitMap.get(item.getUnitId()));
             if (!isEmpty(item.getContractNum())) {
                 // 1月回款
-                item.setJulReceivable((item.getConstructionBudget()
+                item.setJanReceivable((item.getConstructionBudget()
                         .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
                         .multiply(contractMap.get(item.getContractNum()).getJanReceivable())
                 );

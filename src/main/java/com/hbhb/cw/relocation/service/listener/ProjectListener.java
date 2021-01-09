@@ -93,5 +93,13 @@ public class ProjectListener extends AnalysisEventListener {
         }
     }
 
+    @Override
+    public void invokeHeadMap(Map headMap, AnalysisContext context) {
+        if (headMap != null) {
+            importHeadMap.putAll(headMap);
+        }
+        // 根据自己的情况去做表头的判断即可
+    }
+
 
 }
