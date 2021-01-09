@@ -145,6 +145,12 @@ public class ReceiptServiceImpl implements ReceiptService {
                 if (!isEmpty(importVos) && receipt.getProjectId() == null) {
                     error.add("excel表中" + i + "行数据与基础信息无法匹配,请检查后从新导入！");
                 }
+                if (!arrList.get(2).equals(PaymentType.ADVANCE_PAYMENT.value())
+                        || !arrList.get(2).equals(PaymentType.FINAL_PARAGRAPH.value())
+                        || !arrList.get(2).equals(PaymentType.FINAL_PAYMENT.value())) {
+                    msg.add("excel第：" + i + "行数据款项类型错误");
+                }
+
             }
             i++;
         }
@@ -252,6 +258,13 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (arrList.size() != 4) {
             msg.add("请检查备注修改列：" + remake + "格式");
         }
+        // 判断款项类型
+        if (!arrList.get(2).equals(PaymentType.ADVANCE_PAYMENT.value())
+                || !arrList.get(2).equals(PaymentType.FINAL_PARAGRAPH.value())
+                || !arrList.get(2).equals(PaymentType.FINAL_PAYMENT.value())) {
+            msg.add("请检查备注修改列：数据款项类型错误");
+        }
+
         // 判断合同编号是否存在基础项目表中
         List<String> contractNumList = projectService.getContractNumList();
         if (!contractNumList.contains(receipt.getContractNum())) {

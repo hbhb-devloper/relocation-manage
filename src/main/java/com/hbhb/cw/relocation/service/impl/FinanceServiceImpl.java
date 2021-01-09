@@ -103,7 +103,7 @@ public class FinanceServiceImpl implements FinanceService {
         return receivedMap;
     }
 
-    private void getFinanceList(List<FinanceResVO> financeList, String year) {
+    private List<FinanceResVO> getFinanceList(List<FinanceResVO> financeList, String year) {
         // 按合同纬度统计每月份收款信息
         List<FinanceStatisticsVO> statistics = financeMapper.selectSumPayMonthAmount(year);
         Map<String, FinanceStatisticsVO> contractMap = statistics.stream()
@@ -125,7 +125,7 @@ public class FinanceServiceImpl implements FinanceService {
             item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
             // 单位
             item.setUnit(unitMap.get(item.getUnitId()));
-            if (isEmpty(item.getContractNum())) {
+            if (!isEmpty(item.getContractNum())) {
                 // 1月回款
                 item.setJulReceivable((item.getConstructionBudget()
                         .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
@@ -198,5 +198,6 @@ public class FinanceServiceImpl implements FinanceService {
                 );
             }
         }
+        return financeList;
     }
 }

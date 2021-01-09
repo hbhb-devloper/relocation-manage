@@ -222,6 +222,11 @@ public class InvoiceServiceImpl implements InvoiceService {
                 if (!contractNumList.contains(contractNum)) {
                     error.add("excel第：" + i + "行数据合同编号与基础信息不匹配");
                 }
+                if (!arrList.get(2).equals(PaymentType.ADVANCE_PAYMENT.value())
+                        || !arrList.get(2).equals(PaymentType.FINAL_PARAGRAPH.value())
+                        || !arrList.get(2).equals(PaymentType.FINAL_PAYMENT.value())) {
+                    error.add("excel第：" + i + "行数据款项类型错误");
+                }
                 // 判断是否有对应项目
                 // 地区默认11
                 invoice.setDistrict(11);
