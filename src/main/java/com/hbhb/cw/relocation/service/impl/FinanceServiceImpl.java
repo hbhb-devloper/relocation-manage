@@ -72,7 +72,7 @@ public class FinanceServiceImpl implements FinanceService {
         cond.setUnitIds(unitIds);
         PageRequest<FinanceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond, request);
-        getFinanceList(financeResVos.getList());
+        getFinanceList(financeResVos.getList(), cond.getYear());
         return financeResVos;
     }
 
@@ -84,7 +84,7 @@ public class FinanceServiceImpl implements FinanceService {
             cond.setYear(currentYear);
         }
         List<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond);
-        getFinanceList(financeResVos);
+        getFinanceList(financeResVos, cond.getYear());
         return financeResVos;
     }
 
@@ -103,9 +103,9 @@ public class FinanceServiceImpl implements FinanceService {
         return receivedMap;
     }
 
-    private void getFinanceList(List<FinanceResVO> financeList) {
+    private void getFinanceList(List<FinanceResVO> financeList, String year) {
         // 按合同纬度统计每月份收款信息
-        List<FinanceStatisticsVO> statistics = financeMapper.selectSumPayMonthAmount();
+        List<FinanceStatisticsVO> statistics = financeMapper.selectSumPayMonthAmount(year);
         Map<String, FinanceStatisticsVO> contractMap = statistics.stream()
                 .collect(Collectors.toMap(FinanceStatisticsVO::getContractNum, Function.identity()));
 

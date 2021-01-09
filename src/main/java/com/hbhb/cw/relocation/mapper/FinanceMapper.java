@@ -23,5 +23,5 @@ public interface FinanceMapper extends BaseMapper<FinanceResVO> {
     List<FinanceResVO> getFinanceList(FinanceReqVO cond);
 
 
-    List<FinanceStatisticsVO> selectSumPayMonthAmount();
+    List<FinanceStatisticsVO> selectSumPayMonthAmount(String year);
 }

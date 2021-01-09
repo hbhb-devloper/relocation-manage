@@ -217,7 +217,6 @@ selectProjectStatementByUnitId
                                IFNULL(sum(received) / sum(receivable), 0) as thisYearCostProportion,
                                ri.unit_id
                         from relocation_income ri
-                                 left join relocation_project rp on ri.project_id = rp.id
                         group by ri.unit_id
     ) t5 on t5.unit_id = t3.unit_id
             -- @where(){
@@ -341,7 +340,6 @@ select
                                IFNULL(sum(received) / sum(receivable), 0) as thisYearCostProportion,
                                ri.unit_id
                         from relocation_income ri
-                                 left join relocation_project rp on ri.project_id = rp.id
                         group by ri.unit_id
     ) t5 on t5.unit_id = t3.unit_id
             -- @where(){
