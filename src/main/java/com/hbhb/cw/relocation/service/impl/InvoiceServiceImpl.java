@@ -223,8 +223,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                     error.add("excel第：" + i + "行数据合同编号与基础信息不匹配");
                 }
                 if (!arrList.get(2).equals(PaymentType.ADVANCE_PAYMENT.value())
-                        || !arrList.get(2).equals(PaymentType.FINAL_PARAGRAPH.value())
-                        || !arrList.get(2).equals(PaymentType.FINAL_PAYMENT.value())) {
+                        && !arrList.get(2).equals(PaymentType.FINAL_PARAGRAPH.value())
+                        && !arrList.get(2).equals(PaymentType.FINAL_PAYMENT.value())) {
                     error.add("excel第：" + i + "行数据款项类型错误");
                 }
                 // 判断是否有对应项目
@@ -241,7 +241,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 // 金额
                 invoice.setAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getAmount()));
                 // 税率 空
-                invoice.setTaxRate(new BigDecimal("0"));
+                invoice.setTaxRate(BigDecimal.ZERO);
                 // 税额
                 invoice.setTaxAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getTaxAmount()));
                 // 价税合计
@@ -341,7 +341,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         income.setStartTime(contractMap.get(arrList.get(0)).getPlanStartTime());
         income.setContractDeadline(contractMap.get(arrList.get(0)).getPlanEndTime());
         income.setContractAmount(contractMap.get(arrList.get(0)).getTotal());
-        income.setConstructionName(arrList.get(2));
+        income.setConstructionName(arrList.get(3));
         //类别 默认迁改
         income.setCategory(1);
         income.setUnitId(invoice.getUnitId());
@@ -361,7 +361,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         // 应收
         income.setReceivable(invoice.getAmount());
         // 已收
-        income.setReceived(BigDecimal.valueOf(0));
+        income.setReceived(BigDecimal.ZERO);
         // 未收
         income.setUnreceived(invoice.getAmount());
         // 收款人

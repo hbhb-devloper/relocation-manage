@@ -146,9 +146,9 @@ public class ReceiptServiceImpl implements ReceiptService {
                     error.add("excel表中" + i + "行数据与基础信息无法匹配,请检查后从新导入！");
                 }
                 if (!arrList.get(2).equals(PaymentType.ADVANCE_PAYMENT.value())
-                        || !arrList.get(2).equals(PaymentType.FINAL_PARAGRAPH.value())
-                        || !arrList.get(2).equals(PaymentType.FINAL_PAYMENT.value())) {
-                    msg.add("excel第：" + i + "行数据款项类型错误");
+                        && !arrList.get(2).equals(PaymentType.FINAL_PARAGRAPH.value())
+                        && !arrList.get(2).equals(PaymentType.FINAL_PAYMENT.value())) {
+                    error.add("excel第：" + i + "行数据款项类型错误");
                 }
 
             }
@@ -260,9 +260,9 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
         // 判断款项类型
         if (!arrList.get(2).equals(PaymentType.ADVANCE_PAYMENT.value())
-                || !arrList.get(2).equals(PaymentType.FINAL_PARAGRAPH.value())
-                || !arrList.get(2).equals(PaymentType.FINAL_PAYMENT.value())) {
-            msg.add("请检查备注修改列：数据款项类型错误");
+                && !arrList.get(2).equals(PaymentType.FINAL_PARAGRAPH.value())
+                && !arrList.get(2).equals(PaymentType.FINAL_PAYMENT.value())) {
+            msg.add("备注列数据款项类型错误");
         }
 
         // 判断合同编号是否存在基础项目表中
@@ -306,7 +306,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         // 合同金额
         income.setContractAmount(contractMap.get(receipt.getContractNum()).getTotal());
         // 工程名
-        income.setConstructionName(arrList.get(2));
+        income.setConstructionName(arrList.get(3));
         // 账龄新增为0
         income.setAging(0);
         // 款项类型
@@ -321,7 +321,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         // 价款
         income.setAmount(receipt.getReceiptAmount());
         // 税额
-        income.setTax(new BigDecimal(0));
+        income.setTax(BigDecimal.ZERO);
         //税合计
         income.setTaxIncludeAmount(receipt.getReceiptAmount());
         // 应收
