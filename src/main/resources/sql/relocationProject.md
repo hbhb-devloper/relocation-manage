@@ -251,9 +251,11 @@ selectSumConstructionBudget
               sum(final_payment)        as finalPayment,
               sum(compensation_amount)  as compensationAmount
     from relocation_project
-    where contract_num  is not null and contract_num !='' 
-     -- @if(!isEmpty(list)){
+     -- @where(){ 
+        contract_num  is not null and contract_num !='' 
+     -- @if(isNotEmpty(list)){
         and  contract_num in (#{join(list)})
+     -- @}
      -- @}
     group by contract_num
  ```

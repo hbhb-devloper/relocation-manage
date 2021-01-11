@@ -119,108 +119,112 @@ public class FinanceServiceImpl implements FinanceService {
 
         // 获取按合同划分预算统计
         List<String> list = projectMapper.selectContractNumList();
-        List<ProjectSelectVO> totalList = projectMapper.selectSumConstructionBudget(list);
-        Map<String, BigDecimal> contractBudgetMap = totalList.stream()
-                .collect(Collectors.toMap(ProjectSelectVO::getNum, ProjectSelectVO::getConstructionBudget));
+        if (isEmpty(list)) {
 
-        // 收款状态
-        Map<String, String> isReceived = getIsAllReceived();
-        // 单位
-        Map<Integer, String> unitMap = unitApi.getUnitMapById();
-        BigDecimal zero = BigDecimal.ZERO;
-        for (FinanceResVO item : financeList) {
-            item.setCurrentYear(DateUtil.getCurrentYear());
-            item.setPayType("网银打款");
-            // 预付款是否完全到账
-            item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
+
+            List<ProjectSelectVO> totalList = projectMapper.selectSumConstructionBudget(list);
+            Map<String, BigDecimal> contractBudgetMap = totalList.stream()
+                    .collect(Collectors.toMap(ProjectSelectVO::getNum, ProjectSelectVO::getConstructionBudget));
+
+            // 收款状态
+            Map<String, String> isReceived = getIsAllReceived();
             // 单位
-            item.setUnit(unitMap.get(item.getUnitId()));
-            if (!isEmpty(item.getContractNum()) && contractNumList.contains(item.getContractNum())) {
-                // 1月回款
-                item.setJanReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getJanReceivable())
-                );
-                // 2月回款
-                item.setFebReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getFebReceivable())
-                );
-                // 3月回款
-                item.setMarReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getFebReceivable())
-                );
-                // 4月回款
-                item.setAprReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getAprReceivable())
-                );
-                // 5月回款
-                item.setMayReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getMayReceivable())
-                );
-                // 6月回款
-                item.setJuneReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getJuneReceivable())
-                );
-                // 7月回款
-                item.setJulReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getJulReceivable())
-                );
-                // 8月回款
-                item.setAugReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getAugReceivable())
-                );
-                // 9月回款
-                item.setSepReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getSepReceivable())
-                );
-                // 10月回款
-                item.setOctReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getOctReceivable())
-                );
-                // 11月回款
-                item.setNovReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getNovReceivable())
-                );
-                // 12月回款
-                item.setDecReceivable((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getDecReceivable())
-                );
-                // 初始化回收金额
-                item.setInitRecoveredAmount((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getInitRecoveredAmount())
-                );
-                // 已开票金额
-                item.setInvoicedAmount((item.getConstructionBudget()
-                        .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
-                        .multiply(contractMap.get(item.getContractNum()).getInvoicedAmount())
-                );
-            } else {
-                item.setJanReceivable(zero);
-                item.setFebReceivable(zero);
-                item.setMarReceivable(zero);
-                item.setAprReceivable(zero);
-                item.setMayReceivable(zero);
-                item.setJuneReceivable(zero);
-                item.setJulReceivable(zero);
-                item.setAugReceivable(zero);
-                item.setSepReceivable(zero);
-                item.setOctReceivable(zero);
-                item.setNovReceivable(zero);
-                item.setDecReceivable(zero);
-                item.setInitRecoveredAmount(zero);
-                item.setInvoicedAmount(zero);
+            Map<Integer, String> unitMap = unitApi.getUnitMapById();
+            BigDecimal zero = BigDecimal.ZERO;
+            for (FinanceResVO item : financeList) {
+                item.setCurrentYear(DateUtil.getCurrentYear());
+                item.setPayType("网银打款");
+                // 预付款是否完全到账
+                item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
+                // 单位
+                item.setUnit(unitMap.get(item.getUnitId()));
+                if (!isEmpty(item.getContractNum()) && contractNumList.contains(item.getContractNum())) {
+                    // 1月回款
+                    item.setJanReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getJanReceivable())
+                    );
+                    // 2月回款
+                    item.setFebReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getFebReceivable())
+                    );
+                    // 3月回款
+                    item.setMarReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getFebReceivable())
+                    );
+                    // 4月回款
+                    item.setAprReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getAprReceivable())
+                    );
+                    // 5月回款
+                    item.setMayReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getMayReceivable())
+                    );
+                    // 6月回款
+                    item.setJuneReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getJuneReceivable())
+                    );
+                    // 7月回款
+                    item.setJulReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getJulReceivable())
+                    );
+                    // 8月回款
+                    item.setAugReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getAugReceivable())
+                    );
+                    // 9月回款
+                    item.setSepReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getSepReceivable())
+                    );
+                    // 10月回款
+                    item.setOctReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getOctReceivable())
+                    );
+                    // 11月回款
+                    item.setNovReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getNovReceivable())
+                    );
+                    // 12月回款
+                    item.setDecReceivable((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getDecReceivable())
+                    );
+                    // 初始化回收金额
+                    item.setInitRecoveredAmount((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getInitRecoveredAmount())
+                    );
+                    // 已开票金额
+                    item.setInvoicedAmount((item.getConstructionBudget()
+                            .divide(contractBudgetMap.get(item.getContractNum()), 4, 4))
+                            .multiply(contractMap.get(item.getContractNum()).getInvoicedAmount())
+                    );
+                } else {
+                    item.setJanReceivable(zero);
+                    item.setFebReceivable(zero);
+                    item.setMarReceivable(zero);
+                    item.setAprReceivable(zero);
+                    item.setMayReceivable(zero);
+                    item.setJuneReceivable(zero);
+                    item.setJulReceivable(zero);
+                    item.setAugReceivable(zero);
+                    item.setSepReceivable(zero);
+                    item.setOctReceivable(zero);
+                    item.setNovReceivable(zero);
+                    item.setDecReceivable(zero);
+                    item.setInitRecoveredAmount(zero);
+                    item.setInvoicedAmount(zero);
+                }
             }
         }
     }
