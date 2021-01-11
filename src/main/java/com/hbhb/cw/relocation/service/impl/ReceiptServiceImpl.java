@@ -155,7 +155,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             // 新增收款信息
             List<RelocationIncome> list = new ArrayList<>();
             for (RelocationReceipt receipt : receiptList) {
-                List<String> arrList = Arrays.asList(receipt.getRemake().split(";"));
+                List<String> arrList = Arrays.asList(receipt.getRemake().split("；"));
                 RelocationIncome income = setRelocationIncome(receipt, contractMap, arrList);
                 list.add(income);
             }
