@@ -7,6 +7,7 @@ import com.hbhb.cw.relocation.service.StatementService;
 import com.hbhb.cw.relocation.web.vo.StatementExportVO;
 import com.hbhb.cw.relocation.web.vo.StatementReqVO;
 import com.hbhb.cw.relocation.web.vo.StatementResVO;
+import com.hbhb.web.annotation.UserId;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,10 +43,11 @@ public class StatementController {
     public PageResult<StatementResVO> getStatementList(
             @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
             @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
-            @Parameter(description = "查询单位") @RequestParam(required = false) Integer unitId) {
+            @Parameter(description = "查询单位") @RequestParam(required = false) Integer unitId,
+            @Parameter(hidden = true) @UserId Integer userId) {
         pageNum = pageNum == null ? 1 : pageNum;
         pageSize = pageSize == null ? 30 : pageSize;
-        return statementService.getStatementList(pageNum, pageSize, unitId);
+        return statementService.getStatementList(pageNum, pageSize, unitId, userId);
     }
 
     @Operation(summary = "统计报表导出")

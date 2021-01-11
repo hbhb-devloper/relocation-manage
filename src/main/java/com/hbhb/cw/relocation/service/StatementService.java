@@ -10,7 +10,7 @@ public interface StatementService {
     /**
      * 跟据单位id查询迁改统计列表
      */
-    PageResult<StatementResVO> getStatementList(Integer pageNum , Integer pageSize, Integer unitId);
+    PageResult<StatementResVO> getStatementList(Integer pageNum, Integer pageSize, Integer unitId, Integer userId);
 
     /**
      * 导出迁改统计信息

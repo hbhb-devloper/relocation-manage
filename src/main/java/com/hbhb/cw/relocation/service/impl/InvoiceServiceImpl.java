@@ -85,7 +85,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (UnitEnum.isBenbu(cond.getUnitId())) {
             unitIds = unitApi.getSubUnit(cond.getUnitId());
         }
-
+        if (UnitEnum.isHangzhou(cond.getUnitId())) {
+            cond.setUnitId(null);
+        }
         UserInfo user = userApi.getUserInfoById(userId);
         Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
         if ("网络部".equals(unitInfo.getUnitName())
@@ -250,6 +252,9 @@ public class InvoiceServiceImpl implements InvoiceService {
                 invoice.setAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getAmount()));
                 // 税率 空
                 invoice.setTaxRate(BigDecimal.ZERO);
+                //发票状态
+                invoice.setState(invoiceImport.getState().equals(InvoiceState.RED_STATE.value())
+                        ? InvoiceState.RED_STATE.key() : InvoiceState.BLUE_STATE.key());
                 // 税额
                 invoice.setTaxAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getTaxAmount()));
                 // 价税合计

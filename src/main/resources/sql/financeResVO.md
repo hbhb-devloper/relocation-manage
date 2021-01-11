@@ -31,7 +31,7 @@ select
           -- @if(cond.unitIds == 429){
             and rp.unit_id in (#{join(cond.unitIds)})
           -- @}
-          -- @if(cond.unitId != 11 && cond.unitId != 429){
+          -- @if(isNotEmpty(cond.unitId)){
                 and rp.unit_id = #{cond.unitId}
           -- @}
           -- @if(isNotEmpty(cond.projectType)){

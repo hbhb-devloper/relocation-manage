@@ -143,7 +143,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                         && !arrList.get(2).equals(PaymentType.FINAL_PAYMENT.value())) {
                     error.add("excel第：" + i + "行数据款项类型错误");
                 }
-
+                receiptList.add(receipt);
             }
             i++;
         }
@@ -196,7 +196,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .collect(Collectors.toMap(ContractInfoVO::getContractNum, Function.identity()));
 
         // 设置收据信息
-        RelocationReceipt receipt = setReceipt(receiptResVO);
+        List<String> contractNumList = projectService.getContractNumList();
+        RelocationReceipt receipt = setReceipt(receiptResVO, contractNumList);
         receiptMapper.insert(receipt);
 
         // 设置收款信息
@@ -215,7 +216,8 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .collect(Collectors.toMap(ContractInfoVO::getContractNum, Function.identity()));
 
         // 修改收据信息
-        RelocationReceipt receipt = setReceipt(receiptResVO);
+        List<String> contractNumList = projectService.getContractNumList();
+        RelocationReceipt receipt = setReceipt(receiptResVO, contractNumList);
         receiptMapper.updateById(receipt);
 
         // 修改收款信息
@@ -238,7 +240,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         return receiptMapper.selectReceiptByReceiptNum(receiptNum);
     }
 
-    private RelocationReceipt setReceipt(ReceiptResVO receiptResVO) {
+    private RelocationReceipt setReceipt(ReceiptResVO receiptResVO, List<String> contractNumList) {
         RelocationReceipt receipt = new RelocationReceipt();
         BeanUtils.copyProperties(receiptResVO, receipt);
         // 新增收据验证
@@ -259,7 +261,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
 
         // 判断合同编号是否存在基础项目表中
-        List<String> contractNumList = projectService.getContractNumList();
+
         if (!contractNumList.contains(receipt.getContractNum())) {
             msg.add("合同编号：" + receipt.getContractNum() + "在基础信息中不存在请检查！");
         }
