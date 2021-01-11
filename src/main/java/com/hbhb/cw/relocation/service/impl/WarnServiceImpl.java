@@ -169,7 +169,7 @@ public class WarnServiceImpl implements WarnService {
             // 向每个单位负责人推送邮件
             for (UserInfo userVO : userList) {
                 if (unitId.equals(userVO.getUnitId())) {
-                    mailService.postMail("1515689038@qq.com", userVO.getNickName(), context);
+                    mailService.postMail(userVO.getEmail(), userVO.getNickName(), context);
                 }
             }
         }
@@ -184,7 +184,7 @@ public class WarnServiceImpl implements WarnService {
             // 向每个单位负责人推送邮件
             for (UserInfo userVO : userList) {
                 if (unitId.equals(userVO.getUnitId())) {
-                    mailService.postMail("1515689038@qq.com", userVO.getNickName(), context);
+                    mailService.postMail(userVO.getEmail(), userVO.getNickName(), context);
                 }
             }
         }
