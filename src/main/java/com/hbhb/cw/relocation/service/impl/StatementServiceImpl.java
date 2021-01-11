@@ -35,6 +35,7 @@ public class StatementServiceImpl implements StatementService {
         if (UnitEnum.isHangzhou(unitId)) {
             unitId = null;
         }
+
         PageRequest<ProjectResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<StatementResVO> statementResVO = projectMapper.selectProjectStatementByUnitId(unitId, request);
         Map<Integer, String> unitMap = unitApi.getUnitMapById();

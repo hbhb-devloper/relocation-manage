@@ -242,10 +242,12 @@ where contract_num in (#{join(list)})
 selectSumConstructionBudget
 ===
  ```sql
-    select  contract_num               as num ,
-             sum(construction_budget)  as constructionBudget,
-             sum(anticipate_payable)   as anticipatePayable,
-              sum(compensation_amount) as compensationAmount
+    select  contract_num                as num ,
+              sum(construction_budget)  as constructionBudget,
+              sum(anticipate_payable)   as anticipatePayable,
+              sum(anticipate_payment)   as anticipatePayment,
+              sum(final_payment)        as finalPayment,
+              sum(compensation_amount)  as compensationAmount
     from relocation_project
     where contract_num  is not null and contract_num !='' 
     and  contract_num in (#{join(list)})

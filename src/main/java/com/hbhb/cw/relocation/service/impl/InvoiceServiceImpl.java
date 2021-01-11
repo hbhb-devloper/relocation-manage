@@ -29,6 +29,7 @@ import com.hbhb.cw.relocation.web.vo.InvoiceResVO;
 import com.hbhb.cw.systemcenter.enums.DictCode;
 import com.hbhb.cw.systemcenter.enums.TypeCode;
 import com.hbhb.cw.systemcenter.enums.UnitEnum;
+import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.DictVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -83,6 +84,13 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         if (UnitEnum.isBenbu(cond.getUnitId())) {
             unitIds = unitApi.getSubUnit(cond.getUnitId());
+        }
+
+        UserInfo user = userApi.getUserInfoById(userId);
+        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
+        if ("网络部".equals(unitInfo.getUnitName())
+                || "财务部".equals(unitInfo.getUnitName())) {
+            cond.setUnitId(null);
         }
         cond.setUnitIds(unitIds);
         PageRequest<InvoiceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
@@ -276,6 +284,12 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (userApi.isAdmin(userId) && cond.getUnitId() == null) {
             cond.setUnitId(user.getUnitId());
         }
+        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
+        if ("网络部".equals(unitInfo.getUnitName())
+                || "财务部".equals(unitInfo.getUnitName())) {
+            cond.setUnitId(null);
+        }
+
         List<InvoiceExportResVO> exportResVos = invoiceMapper.selectExportListByCondition(cond);
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
         // 组装发票类型 发票状态，单位，区域

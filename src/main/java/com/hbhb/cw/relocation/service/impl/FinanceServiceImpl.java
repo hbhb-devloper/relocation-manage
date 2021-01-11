@@ -13,6 +13,7 @@ import com.hbhb.cw.relocation.web.vo.FinanceResVO;
 import com.hbhb.cw.relocation.web.vo.FinanceStatisticsVO;
 import com.hbhb.cw.relocation.web.vo.ProjectSelectVO;
 import com.hbhb.cw.systemcenter.enums.UnitEnum;
+import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.beetl.sql.core.page.DefaultPageRequest;
@@ -69,6 +70,12 @@ public class FinanceServiceImpl implements FinanceService {
         if (UnitEnum.isBenbu(cond.getUnitId())) {
             unitIds = unitApi.getSubUnit(cond.getUnitId());
         }
+        UserInfo user = userApi.getUserInfoById(userId);
+        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
+        if ("网络部".equals(unitInfo.getUnitName())
+                || "财务部".equals(unitInfo.getUnitName())) {
+            cond.setUnitId(null);
+        }
         cond.setUnitIds(unitIds);
         PageRequest<FinanceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond, request);
@@ -82,6 +89,12 @@ public class FinanceServiceImpl implements FinanceService {
         String currentYear = DateUtil.getCurrentYear();
         if (StringUtils.isEmpty(cond.getYear())) {
             cond.setYear(currentYear);
+        }
+        UserInfo user = userApi.getUserInfoById(userId);
+        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
+        if ("网络部".equals(unitInfo.getUnitName())
+                || "财务部".equals(unitInfo.getUnitName())) {
+            cond.setUnitId(null);
         }
         List<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond);
         getFinanceList(financeResVos, cond.getYear());

@@ -29,6 +29,7 @@ import com.hbhb.cw.relocation.web.vo.ProjectSelectVO;
 import com.hbhb.cw.systemcenter.enums.DictCode;
 import com.hbhb.cw.systemcenter.enums.TypeCode;
 import com.hbhb.cw.systemcenter.enums.UnitEnum;
+import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.DictVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +72,9 @@ public class IncomeServiceImpl implements IncomeService {
     private UserApiExp userApi;
     @Resource
     private DictApiExp dictApi;
+    @Resource
+    private UnitApiExp unitApi;
+
     private final List<String> msg = new CopyOnWriteArrayList<>();
 
     @Override
@@ -88,6 +92,11 @@ public class IncomeServiceImpl implements IncomeService {
             cond.setUnitId(user.getUnitId());
         }
 
+        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
+        if ("网络部".equals(unitInfo.getUnitName())
+                || "财务部".equals(unitInfo.getUnitName())) {
+            cond.setUnitId(null);
+        }
         PageRequest<IncomeResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<IncomeResVO> incomeList = incomeMapper.getIncomeList(cond, request);
         List<IncomeResVO> list = incomeList.getList();
@@ -306,6 +315,12 @@ public class IncomeServiceImpl implements IncomeService {
         UserInfo user = userApi.getUserInfoById(userId);
         if (userApi.isAdmin(userId) && cond.getUnitId() == null) {
             cond.setUnitId(user.getUnitId());
+        }
+
+        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
+        if ("网络部".equals(unitInfo.getUnitName())
+                || "财务部".equals(unitInfo.getUnitName())) {
+            cond.setUnitId(null);
         }
         List<IncomeExportVO> relocationIncomeExport = incomeMapper.selectExportList(cond);
         // 类型

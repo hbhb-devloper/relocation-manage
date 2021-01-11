@@ -26,6 +26,12 @@ public class ProjectSelectVO implements Serializable {
     @Schema(description = "预付款应付金额总额")
     private BigDecimal anticipatePayable;
 
+    @Schema(description = "预付款到账金额总额")
+    private BigDecimal anticipatePayment;
+
+    @Schema(description = "决算款到账总额")
+    private BigDecimal finalPayment;
+
     @Schema(description = "赔补总额")
     private BigDecimal compensationAmount;
 

@@ -27,31 +27,28 @@ public class ReceiptImportVO {
     @ExcelProperty(value = "收据编号", index = 2)
     private String receiptNum;
 
-    @ExcelProperty(value = "迁改收款责任人", index = 3)
-    private String payee;
-
-    @ExcelProperty(value = "赔补金额", index = 4)
+    @ExcelProperty(value = "赔补金额", index = 3)
     private BigDecimal compensationAmount;
 
-    @ExcelProperty(value = "已到账金额", index = 5)
+    @ExcelProperty(value = "已到账金额", index = 4)
     private BigDecimal paymentAmount;
 
-    @ExcelProperty(value = "赔补合同名", index = 6)
+    @ExcelProperty(value = "赔补合同名", index = 5)
     private String contractName;
 
-    @ExcelProperty(value = "合同编号", index = 7)
+    @ExcelProperty(value = "合同编号", index = 6)
     private String contractNum;
 
-    @ExcelProperty(value = "赔补金额到账情况说明", index = 8)
+    @ExcelProperty(value = "赔补金额到账情况说明", index = 7)
     private String paymentDesc;
 
-    @ExcelProperty(value = "2020年开收据（元）", index = 9)
+    @ExcelProperty(value = "2020年开收据（元）", index = 8)
     private BigDecimal receiptAmount;
 
-    @ExcelProperty(value = "开收据时间", index = 10)
+    @ExcelProperty(value = "开收据时间", index = 9)
     private String receiptTime;
 
-    @ExcelProperty(value = "备注修改列：（统一格式）合同号；区县；款项性质；项目信息", index = 11)
+    @ExcelProperty(value = "备注修改列：（统一格式）合同号；区县；款项性质；项目信息", index = 10)
     private String remake;
 
     @ExcelIgnore

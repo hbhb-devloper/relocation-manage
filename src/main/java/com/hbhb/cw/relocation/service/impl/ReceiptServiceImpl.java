@@ -45,7 +45,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
-import static org.springframework.util.StringUtils.isEmpty;
 
 /**
  * @author wangxiaogang
@@ -80,7 +79,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (!UnitEnum.isHangzhou(user.getUnitId())) {
             cond.setUnitId(user.getUnitId());
         }
-        if ("网络部".equals(unitInfo.getUnitName())) {
+        if ("网络部".equals(unitInfo.getUnitName()) || "财务部".equals(unitInfo.getUnitName())) {
             cond.setUnitId(null);
         }
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);
@@ -132,19 +131,13 @@ public class ReceiptServiceImpl implements ReceiptService {
                 error.add("excel表中第" + i + "行,合同编号：" + importVos.getContractNum() + "在基础信息中不存在请检查！");
             }
             if (arrList.size() == 4) {
-                //1.获取基础信息中所对应的数据
 
                 RelocationReceipt receipt = new RelocationReceipt();
                 BeanUtils.copyProperties(importVos, receipt);
                 receipt.setUnitId(unitMap.get(importVos.getUnit()));
                 receipt.setReceiptTime(DateUtil.string3DateYMD(importVos.getReceiptTime()));
 
-                if (receipt.getProjectId() != null) {
-                    receiptList.add(receipt);
-                }
-                if (!isEmpty(importVos) && receipt.getProjectId() == null) {
-                    error.add("excel表中" + i + "行数据与基础信息无法匹配,请检查后从新导入！");
-                }
+                // 款项类型匹配
                 if (!arrList.get(2).equals(PaymentType.ADVANCE_PAYMENT.value())
                         && !arrList.get(2).equals(PaymentType.FINAL_PARAGRAPH.value())
                         && !arrList.get(2).equals(PaymentType.FINAL_PAYMENT.value())) {
@@ -328,7 +321,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         BigDecimal receivable = receipt.getReceiptAmount();
         income.setReceivable(receivable);
         // 已收
-        income.setReceived(receipt.getPaymentAmount());
+        income.setReceived(BigDecimal.ZERO);
         // 未收
         BigDecimal unreceived = receipt.getCompensationAmount().subtract(receipt.getPaymentAmount());
         income.setUnreceived(unreceived);
@@ -340,8 +333,6 @@ public class ReceiptServiceImpl implements ReceiptService {
         } else {
             income.setIsReceived(IsReceived.PART_RECEIVED.key());
         }
-        // 收款人
-        income.setPayee(receipt.getPayee());
         return income;
     }
 
