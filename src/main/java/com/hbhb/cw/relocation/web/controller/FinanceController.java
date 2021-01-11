@@ -47,7 +47,7 @@ public class FinanceController {
             @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
             @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
             @Parameter(description = "接收参数实体") FinanceReqVO cond,
-            @Parameter(hidden = true) Integer userId) {
+            @Parameter(hidden = true) @UserId Integer userId) {
         pageNum = pageNum == null ? 1 : pageNum;
         pageSize = pageSize == null ? 10 : pageSize;
         return financeService.getFinanceList(pageNum, pageSize, cond, userId);
