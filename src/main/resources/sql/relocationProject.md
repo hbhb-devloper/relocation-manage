@@ -253,7 +253,7 @@ selectSumConstructionBudget
     from relocation_project
     where contract_num  is not null and contract_num !='' 
     and  contract_num in (#{join(list)})
-    group by contract_num;
+    group by contract_num
  ```
 selectProject
 ===
