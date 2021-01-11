@@ -59,14 +59,14 @@ public class FinanceServiceImpl implements FinanceService {
     @Override
     public PageResult<FinanceResVO> getFinanceList(Integer pageNum, Integer pageSize,
                                                    FinanceReqVO cond, Integer userId) {
+        // 设置默认查询单位
+        UserInfo user = userApi.getUserInfoById(userId);
+        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
         // 设置年份
         String currentYear = DateUtil.getCurrentYear();
         if (StringUtils.isEmpty(cond.getYear())) {
             cond.setYear(currentYear);
         }
-        // 设置默认查询单位
-        UserInfo user = userApi.getUserInfoById(userId);
-        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
         if (UnitEnum.isHangzhou(cond.getUnitId())) {
             cond.setUnitId(null);
         }
@@ -82,17 +82,16 @@ public class FinanceServiceImpl implements FinanceService {
 
     @Override
     public List<FinanceResVO> selectExportListByCondition(FinanceReqVO cond, Integer userId) {
+        UserInfo user = userApi.getUserInfoById(userId);
+        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
 
         String currentYear = DateUtil.getCurrentYear();
         if (StringUtils.isEmpty(cond.getYear())) {
             cond.setYear(currentYear);
         }
-
         if (UnitEnum.isHangzhou(cond.getUnitId())) {
             cond.setUnitId(null);
         }
-        UserInfo user = userApi.getUserInfoById(userId);
-        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
         if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
                 || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {
             cond.setUnitId(null);
@@ -130,6 +129,7 @@ public class FinanceServiceImpl implements FinanceService {
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
         BigDecimal zero = BigDecimal.ZERO;
         for (FinanceResVO item : financeList) {
+            item.setCurrentYear(DateUtil.getCurrentYear());
             item.setPayType("网银打款");
             // 预付款是否完全到账
             item.setIsAllReceived(isReceived.get(item.getIsAllReceived()));
