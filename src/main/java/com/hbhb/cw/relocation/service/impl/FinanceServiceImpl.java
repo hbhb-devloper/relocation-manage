@@ -88,6 +88,9 @@ public class FinanceServiceImpl implements FinanceService {
             cond.setYear(currentYear);
         }
 
+        if (UnitEnum.isHangzhou(cond.getUnitId())) {
+            cond.setUnitId(null);
+        }
         UserInfo user = userApi.getUserInfoById(userId);
         Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
         if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())

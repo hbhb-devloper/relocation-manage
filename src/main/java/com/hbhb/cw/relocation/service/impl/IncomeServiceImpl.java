@@ -29,6 +29,7 @@ import com.hbhb.cw.relocation.web.vo.IncomeResVO;
 import com.hbhb.cw.relocation.web.vo.ProjectSelectVO;
 import com.hbhb.cw.systemcenter.enums.DictCode;
 import com.hbhb.cw.systemcenter.enums.TypeCode;
+import com.hbhb.cw.systemcenter.enums.UnitEnum;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.DictVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
@@ -83,11 +84,11 @@ public class IncomeServiceImpl implements IncomeService {
 
         Map<Integer, String> unitMap = unitApiExp.getUnitMapById();
         UserInfo user = userApi.getUserInfoById(userId);
-
-        if (userApi.isAdmin(userId) && cond.getUnitId() == null) {
-            cond.setUnitId(user.getUnitId());
-        }
         Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
+
+        if (UnitEnum.isHangzhou(cond.getUnitId())) {
+            cond.setUnitId(null);
+        }
         if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
                 || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {
             cond.setUnitId(null);
@@ -308,10 +309,9 @@ public class IncomeServiceImpl implements IncomeService {
     @Override
     public List<IncomeExportVO> selectExportListByCondition(IncomeReqVO cond, Integer userId) {
         UserInfo user = userApi.getUserInfoById(userId);
-        if (userApi.isAdmin(userId) && cond.getUnitId() == null) {
-            cond.setUnitId(user.getUnitId());
+        if (UnitEnum.isHangzhou(cond.getUnitId())) {
+            cond.setUnitId(null);
         }
-
         Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
         if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
                 || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {

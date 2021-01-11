@@ -284,10 +284,9 @@ public class InvoiceServiceImpl implements InvoiceService {
         UserInfo user = userApi.getUserInfoById(userId);
         Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
 
-        if (userApi.isAdmin(userId) && cond.getUnitId() == null) {
-            cond.setUnitId(user.getUnitId());
+        if (UnitEnum.isHangzhou(cond.getUnitId())) {
+            cond.setUnitId(null);
         }
-
 
         if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
                 || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {
