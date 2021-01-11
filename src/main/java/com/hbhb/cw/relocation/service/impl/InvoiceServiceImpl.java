@@ -138,14 +138,16 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .collect(Collectors.toMap(ContractInfoVO::getContractNum, Function.identity()));
 
         // 设置收款信息
-        List<String> arrList = Arrays.asList(invoice.getRemake().split("；"));
-        RelocationIncome income = getRelocationIncome(invoice, contractMap, arrList);
+        List<RelocationInvoice> invoiceList = new ArrayList<>();
+        invoiceList.add(invoice);
+        List<RelocationIncome> incomeList = getRelocationIncome(invoiceList, contractMap);
 
         // 修改发票
         invoiceMapper.updateTemplateById(invoice);
         RelocationIncome single = incomeMapper.createLambdaQuery()
                 .andEq(RelocationIncome::getInvoiceNum, invoiceInfo.getInvoiceNumber())
                 .single();
+        RelocationIncome income = incomeList.get(0);
         income.setId(single.getId());
 
         // 修改收款
@@ -170,9 +172,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoiceMapper.insert(invoice);
 
         // 处理收款数据内容并新增
-        List<String> arrList = Arrays.asList(invoice.getRemake().split("；"));
-        RelocationIncome relocationIncome = getRelocationIncome(invoice, contractMap, arrList);
-        incomeMapper.insert(relocationIncome);
+        List<RelocationInvoice> invoiceList = new ArrayList<>();
+        invoiceList.add(invoice);
+        List<RelocationIncome> incomeList = getRelocationIncome(invoiceList, contractMap);
+        incomeMapper.insert(incomeList.get(0));
     }
 
 
@@ -198,8 +201,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .collect(Collectors.toMap(DictVO::getLabel, DictVO::getValue));
         // 发票
         List<RelocationInvoice> invoiceList = new ArrayList<>();
-        // 收款
-        List<RelocationIncome> incomeList = new ArrayList<>();
+
         long count = dataList.stream().distinct().count();
         // 文件内查重
         if (count < dataList.size()) {
@@ -243,7 +245,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 String invoiceType = invoiceImport.getInvoiceType();
                 invoice.setInvoiceType(Integer.valueOf(typeMap.get(invoiceType)));
                 // 开票日期格式转换 yyyy/MM/dd
-                invoice.setInvoiceTime(DateUtil.string2DateYMD(invoiceImport.getInvoiceTime()));
+                invoice.setInvoiceTime(DateUtil.string3DateYMD(invoiceImport.getInvoiceTime()));
                 // 金额
                 invoice.setAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getAmount()));
                 // 税率 空
@@ -260,9 +262,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 // 收款负责人/申请人
                 invoice.setApplicant(invoiceImport.getApplicant());
                 // 收款
-                RelocationIncome income = getRelocationIncome(invoice, contractMap, arrList);
+
                 invoiceList.add(invoice);
-                incomeList.add(income);
             }
             i++;
         }
@@ -271,7 +272,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         msg.addAll(error);
         if (error.size() == 0) {
             // 批量插入发票、收款信息
-            incomeMapper.insertBatch(incomeList);
+            List<RelocationIncome> income = getRelocationIncome(invoiceList, contractMap);
+            incomeMapper.insertBatch(income);
             invoiceMapper.insertBatch(invoiceList);
         }
 
@@ -333,7 +335,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private RelocationInvoice translation(InvoiceResVO invoiceVo) {
         String remake = invoiceVo.getRemake();
         remake = remake.replace("；", ";");
-        List<String> arrList = Arrays.asList(remake.split(";"));
+        List<String> arrList = Arrays.asList(remake.split("；"));
         if (arrList.size() != 4) {
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_REMAKE_ERROR);
         }
@@ -348,42 +350,50 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoice;
     }
 
-    private RelocationIncome getRelocationIncome(RelocationInvoice invoice,
-                                                 Map<String, ContractInfoVO> contractMap, List<String> arrList) {
+    private List<RelocationIncome> getRelocationIncome(List<RelocationInvoice> invoiceList,
+                                                       Map<String, ContractInfoVO> contractMap) {
+        List<RelocationIncome> incomeList = new ArrayList<>();
+        for (RelocationInvoice invoice : invoiceList) {
+            RelocationIncome income = new RelocationIncome();
+            String remake = invoice.getRemake();
+            // 按照英文分隔符划分
+            remake = remake.replace("；", ";");
+            List<String> arrList = Arrays.asList(remake.split(";"));
+            // 发票合同信息获取
+            income.setContractNum(contractMap.get(arrList.get(0)).getContractNum());
+            income.setContractName(contractMap.get(arrList.get(0)).getContractName());
+            income.setStartTime(contractMap.get(arrList.get(0)).getPlanStartTime());
+            income.setContractDeadline(contractMap.get(arrList.get(0)).getPlanEndTime());
+            income.setContractAmount(contractMap.get(arrList.get(0)).getTotal());
+            income.setConstructionName(arrList.get(3));
+            //类别 默认迁改
+            income.setCategory(1);
+            income.setUnitId(invoice.getUnitId());
+            income.setSupplier(invoice.getBuyerName());
+            income.setInvoiceTime(invoice.getInvoiceTime());
+            income.setInvoiceNum(invoice.getInvoiceNumber());
+            income.setInvoiceType(invoice.getInvoiceType());
+            income.setAmount(invoice.getAmount());
+            income.setTax(invoice.getTaxAmount());
+            // 款项类型
+            Map<String, Integer> payMap = getPaymentType();
+            income.setPaymentType(payMap.get(arrList.get(2)));
+            // 价格合计
+            income.setTaxIncludeAmount(invoice.getTaxIncludeAmount());
+            // 回款状态默认新增时默认未回款
+            income.setIsReceived(IsReceived.NOT_RECEIVED.key());
+            // 应收
+            income.setReceivable(invoice.getAmount());
+            // 已收
+            income.setReceived(BigDecimal.ZERO);
+            // 未收
+            income.setUnreceived(invoice.getAmount());
+            // 收款人
+            income.setProjectId(invoice.getProjectId());
+            incomeList.add(income);
 
-        RelocationIncome income = new RelocationIncome();
-        // 发票合同信息获取
-        income.setContractNum(contractMap.get(arrList.get(0)).getContractNum());
-        income.setContractName(contractMap.get(arrList.get(0)).getContractName());
-        income.setStartTime(contractMap.get(arrList.get(0)).getPlanStartTime());
-        income.setContractDeadline(contractMap.get(arrList.get(0)).getPlanEndTime());
-        income.setContractAmount(contractMap.get(arrList.get(0)).getTotal());
-        income.setConstructionName(arrList.get(3));
-        //类别 默认迁改
-        income.setCategory(1);
-        income.setUnitId(invoice.getUnitId());
-        income.setSupplier(invoice.getBuyerName());
-        income.setInvoiceTime(invoice.getInvoiceTime());
-        income.setInvoiceNum(invoice.getInvoiceNumber());
-        income.setInvoiceType(invoice.getInvoiceType());
-        income.setAmount(invoice.getAmount());
-        income.setTax(invoice.getTaxAmount());
-        // 款项类型
-        Map<String, Integer> payMap = getPaymentType();
-        income.setPaymentType(payMap.get(arrList.get(2)));
-        // 价格合计
-        income.setTaxIncludeAmount(invoice.getTaxIncludeAmount());
-        // 回款状态默认新增时默认未回款
-        income.setIsReceived(IsReceived.NOT_RECEIVED.key());
-        // 应收
-        income.setReceivable(invoice.getAmount());
-        // 已收
-        income.setReceived(BigDecimal.ZERO);
-        // 未收
-        income.setUnreceived(invoice.getAmount());
-        // 收款人
-        income.setProjectId(invoice.getProjectId());
-        return income;
+        }
+        return incomeList;
     }
 
     private Map<Integer, String> getPaymentStatus() {

@@ -119,9 +119,7 @@ public class FinanceServiceImpl implements FinanceService {
 
         // 获取按合同划分预算统计
         List<String> list = projectMapper.selectContractNumList();
-        if (isEmpty(list)) {
-
-
+        if (list.size() != 0) {
             List<ProjectSelectVO> totalList = projectMapper.selectSumConstructionBudget(list);
             Map<String, BigDecimal> contractBudgetMap = totalList.stream()
                     .collect(Collectors.toMap(ProjectSelectVO::getNum, ProjectSelectVO::getConstructionBudget));
