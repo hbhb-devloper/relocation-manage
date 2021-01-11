@@ -368,7 +368,7 @@ select rp.id                 as projectId,
        rp.compensation_sate       as compensationSate
 from relocation_income ri
          left join relocation_project rp on ri.contract_num = rp.contract_num
-where ri.received != 0 and rp.project_num is not null;
+where ri.received != 0 and rp.project_num is not null
 ```
 selectProjectStartWarnCount
 ===
