@@ -76,6 +76,9 @@ public class FinanceServiceImpl implements FinanceService {
                 || "财务部".equals(unitInfo.getUnitName())) {
             cond.setUnitId(null);
         }
+        if (UnitEnum.isHangzhou(cond.getUnitId())) {
+            cond.setUnitId(null);
+        }
         cond.setUnitIds(unitIds);
         PageRequest<FinanceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond, request);
