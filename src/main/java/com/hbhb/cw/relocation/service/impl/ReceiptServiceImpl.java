@@ -221,7 +221,9 @@ public class ReceiptServiceImpl implements ReceiptService {
         receiptMapper.updateById(receipt);
 
         // 修改收款信息
-        List<String> arrList = Arrays.asList(receipt.getRemake().split("；"));
+        String remake = receipt.getRemake();
+        remake = remake.replace("；", ";");
+        List<String> arrList = Arrays.asList(remake.split(";"));
         RelocationIncome income = setRelocationIncome(receipt, contractMap, arrList);
         RelocationIncome single = incomeMapper.createLambdaQuery()
                 .andEq(RelocationIncome::getInvoiceNum, receiptInfo.getReceiptNum())
