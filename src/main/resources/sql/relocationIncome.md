@@ -29,10 +29,7 @@ select
     from relocation_income ri
   
     -- @where(){
-      -- @if(cond.unitId == 429){
-        and ri.unit_id in (#{cond.unitIds})
-      -- @}
-      -- @if(isNotEmpty(cond.unitId) && cond.unitId != 11 && cond.unitId != 429){
+      -- @if(isNotEmpty(cond.unitId)){
         and ri.unit_id = #{cond.unitId}
       -- @}
       -- @if(isNotEmpty(cond.contractDeadlineFrom)){

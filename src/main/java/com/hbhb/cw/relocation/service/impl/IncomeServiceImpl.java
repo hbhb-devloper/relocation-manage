@@ -7,6 +7,7 @@ import com.hbhb.cw.relocation.enums.InvoiceErrorCode;
 import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.enums.PaymentType;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
+import com.hbhb.cw.relocation.enums.UnitAbbr;
 import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeDetailMapper;
@@ -28,7 +29,6 @@ import com.hbhb.cw.relocation.web.vo.IncomeResVO;
 import com.hbhb.cw.relocation.web.vo.ProjectSelectVO;
 import com.hbhb.cw.systemcenter.enums.DictCode;
 import com.hbhb.cw.systemcenter.enums.TypeCode;
-import com.hbhb.cw.systemcenter.enums.UnitEnum;
 import com.hbhb.cw.systemcenter.model.Unit;
 import com.hbhb.cw.systemcenter.vo.DictVO;
 import com.hbhb.cw.systemcenter.vo.UserInfo;
@@ -80,21 +80,16 @@ public class IncomeServiceImpl implements IncomeService {
     @Override
     public PageResult<IncomeResVO> getIncomeList(Integer pageNum, Integer pageSize, IncomeReqVO cond, Integer userId) {
 
-        List<Integer> unitIds = new ArrayList<>();
-        if (UnitEnum.isBenbu(cond.getUnitId())) {
-            unitIds = unitApiExp.getSubUnit(cond.getUnitId());
-        }
-        Map<Integer, String> unitMap = unitApiExp.getUnitMapById();
-        cond.setUnitIds(unitIds);
 
+        Map<Integer, String> unitMap = unitApiExp.getUnitMapById();
         UserInfo user = userApi.getUserInfoById(userId);
+
         if (userApi.isAdmin(userId) && cond.getUnitId() == null) {
             cond.setUnitId(user.getUnitId());
         }
-
         Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
-        if ("网络部".equals(unitInfo.getUnitName())
-                || "财务部".equals(unitInfo.getUnitName())) {
+        if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
+                || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {
             cond.setUnitId(null);
         }
         PageRequest<IncomeResVO> request = DefaultPageRequest.of(pageNum, pageSize);
@@ -318,8 +313,8 @@ public class IncomeServiceImpl implements IncomeService {
         }
 
         Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
-        if ("网络部".equals(unitInfo.getUnitName())
-                || "财务部".equals(unitInfo.getUnitName())) {
+        if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
+                || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {
             cond.setUnitId(null);
         }
         List<IncomeExportVO> relocationIncomeExport = incomeMapper.selectExportList(cond);

@@ -34,9 +34,6 @@ selectListByCondition
          left join relocation_income rii
          on ri.invoice_number = rii.invoice_num
         -- @where(){
-            -- @if(cond.unitId == 429){
-                and ri.district in (#{cond.unitIds})
-            -- @}
             -- @if(isNotEmpty(cond.unitId)){
                 and ri.unit_id = #{cond.unitId}
             -- @}

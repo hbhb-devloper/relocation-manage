@@ -1,6 +1,7 @@
 package com.hbhb.cw.relocation.service.impl;
 
 import com.hbhb.core.bean.BeanConverter;
+import com.hbhb.cw.relocation.enums.UnitAbbr;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
 import com.hbhb.cw.relocation.rpc.UserApiExp;
@@ -42,8 +43,9 @@ public class StatementServiceImpl implements StatementService {
         }
         UserInfo user = userApi.getUserInfoById(userId);
         Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
-        if ("网络部".equals(unitInfo.getUnitName()) || "财务部".equals(unitInfo.getUnitName())) {
-            unitId = (null);
+        if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
+                || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {
+            unitId = null;
         }
         PageRequest<ProjectResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<StatementResVO> statementResVO = projectMapper.selectProjectStatementByUnitId(unitId, request);

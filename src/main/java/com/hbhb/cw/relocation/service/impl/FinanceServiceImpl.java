@@ -3,6 +3,7 @@ package com.hbhb.cw.relocation.service.impl;
 
 import com.hbhb.core.utils.DateUtil;
 import com.hbhb.cw.relocation.enums.State;
+import com.hbhb.cw.relocation.enums.UnitAbbr;
 import com.hbhb.cw.relocation.mapper.FinanceMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
 import com.hbhb.cw.relocation.rpc.UnitApiExp;
@@ -63,23 +64,16 @@ public class FinanceServiceImpl implements FinanceService {
         if (StringUtils.isEmpty(cond.getYear())) {
             cond.setYear(currentYear);
         }
-
         // 设置默认查询单位
-        setUnitId(cond, userId);
-        List<Integer> unitIds = new ArrayList<>();
-        if (UnitEnum.isBenbu(cond.getUnitId())) {
-            unitIds = unitApi.getSubUnit(cond.getUnitId());
-        }
         UserInfo user = userApi.getUserInfoById(userId);
         Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
-        if ("网络部".equals(unitInfo.getUnitName())
-                || "财务部".equals(unitInfo.getUnitName())) {
-            cond.setUnitId(null);
-        }
         if (UnitEnum.isHangzhou(cond.getUnitId())) {
             cond.setUnitId(null);
         }
-        cond.setUnitIds(unitIds);
+        if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
+                || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {
+            cond.setUnitId(null);
+        }
         PageRequest<FinanceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond, request);
         getFinanceList(financeResVos.getList(), cond.getYear());
@@ -88,29 +82,22 @@ public class FinanceServiceImpl implements FinanceService {
 
     @Override
     public List<FinanceResVO> selectExportListByCondition(FinanceReqVO cond, Integer userId) {
-        setUnitId(cond, userId);
+
         String currentYear = DateUtil.getCurrentYear();
         if (StringUtils.isEmpty(cond.getYear())) {
             cond.setYear(currentYear);
         }
+
         UserInfo user = userApi.getUserInfoById(userId);
         Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
-        if ("网络部".equals(unitInfo.getUnitName())
-                || "财务部".equals(unitInfo.getUnitName())) {
+        if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
+                || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {
             cond.setUnitId(null);
         }
         List<FinanceResVO> financeResVos = financeMapper.getFinanceList(cond);
         getFinanceList(financeResVos, cond.getYear());
         return financeResVos;
     }
-
-    private void setUnitId(FinanceReqVO cond, Integer userId) {
-        UserInfo user = userApi.getUserInfoById(userId);
-        if (cond.getUnitId() == null && userApi.isAdmin(userId)) {
-            cond.setUnitId(user.getUnitId());
-        }
-    }
-
 
     private Map<String, String> getIsAllReceived() {
         Map<String, String> receivedMap = new HashMap<>(100);

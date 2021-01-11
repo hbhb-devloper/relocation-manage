@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @author xiaokang
@@ -36,7 +35,5 @@ public class InvoiceReqVO implements Serializable {
     @Schema(description = "金额（最大）")
     private BigDecimal amountTo;
 
-    @Schema(description = "单位id集合")
-    private List<Integer> unitIds;
 
 }

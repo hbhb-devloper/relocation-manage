@@ -6,6 +6,7 @@ import com.hbhb.cw.relocation.enums.InvoiceType;
 import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.enums.PaymentType;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
+import com.hbhb.cw.relocation.enums.UnitAbbr;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
 import com.hbhb.cw.relocation.mapper.ProjectMapper;
@@ -79,7 +80,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (!UnitEnum.isHangzhou(user.getUnitId())) {
             cond.setUnitId(user.getUnitId());
         }
-        if ("网络部".equals(unitInfo.getUnitName()) || "财务部".equals(unitInfo.getUnitName())) {
+        if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
+                || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {
             cond.setUnitId(null);
         }
         PageRequest<ReceiptResVO> request = DefaultPageRequest.of(pageNum, pageSize);

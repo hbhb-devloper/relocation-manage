@@ -28,9 +28,6 @@ select
 -- @}
        from relocation_project rp
         -- @where(){
-          -- @if(cond.unitIds == 429){
-            and rp.unit_id in (#{join(cond.unitIds)})
-          -- @}
           -- @if(isNotEmpty(cond.unitId)){
                 and rp.unit_id = #{cond.unitId}
           -- @}

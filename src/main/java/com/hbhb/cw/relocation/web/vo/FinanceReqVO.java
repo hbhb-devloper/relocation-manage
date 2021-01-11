@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * @author hyk
@@ -44,8 +43,5 @@ public class FinanceReqVO implements Serializable {
 
     @Schema(description = "预付款是否已到账")
     private Integer receiptStatus;
-
-    @Schema(description = "单位id集合")
-    private List<Integer> unitIds;
 
 }

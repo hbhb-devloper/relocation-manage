@@ -9,6 +9,7 @@ import com.hbhb.cw.relocation.enums.IsReceived;
 import com.hbhb.cw.relocation.enums.PaymentType;
 import com.hbhb.cw.relocation.enums.RelocationErrorCode;
 import com.hbhb.cw.relocation.enums.State;
+import com.hbhb.cw.relocation.enums.UnitAbbr;
 import com.hbhb.cw.relocation.exception.InvoiceException;
 import com.hbhb.cw.relocation.exception.RelocationException;
 import com.hbhb.cw.relocation.mapper.IncomeMapper;
@@ -80,21 +81,16 @@ public class InvoiceServiceImpl implements InvoiceService {
     public PageResult<InvoiceResVO> getInvoiceList(Integer pageNum, Integer pageSize,
                                                    InvoiceReqVO cond, Integer userId) {
 
-        List<Integer> unitIds = new ArrayList<>();
-
-        if (UnitEnum.isBenbu(cond.getUnitId())) {
-            unitIds = unitApi.getSubUnit(cond.getUnitId());
-        }
         if (UnitEnum.isHangzhou(cond.getUnitId())) {
             cond.setUnitId(null);
         }
         UserInfo user = userApi.getUserInfoById(userId);
         Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
-        if ("网络部".equals(unitInfo.getUnitName())
-                || "财务部".equals(unitInfo.getUnitName())) {
+        if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
+                || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {
             cond.setUnitId(null);
         }
-        cond.setUnitIds(unitIds);
+
         PageRequest<InvoiceResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         PageResult<InvoiceResVO> invoiceResVo = invoiceMapper.selectListByCondition(cond, request);
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
@@ -119,7 +115,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             item.setIsReceived(statusMap.get(parseInt(item.getIsReceived())));
             // 发票状态
             item.setState(State.ONE.value().equals(item.getState()) ?
-                    InvoiceState.BLUE_STATE.value() : InvoiceState.RED_STATE.value());
+                    InvoiceState.RED_STATE.value() : InvoiceState.BLUE_STATE.value());
         });
         return invoiceResVo;
     }
@@ -286,12 +282,15 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         // 判断用户单位
         UserInfo user = userApi.getUserInfoById(userId);
+        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
+
         if (userApi.isAdmin(userId) && cond.getUnitId() == null) {
             cond.setUnitId(user.getUnitId());
         }
-        Unit unitInfo = unitApi.getUnitInfo(user.getUnitId());
-        if ("网络部".equals(unitInfo.getUnitName())
-                || "财务部".equals(unitInfo.getUnitName())) {
+
+
+        if (UnitAbbr.CWB.value().equals(unitInfo.getUnitName())
+                || UnitAbbr.WLB.value().equals(unitInfo.getUnitName())) {
             cond.setUnitId(null);
         }
 
