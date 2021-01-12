@@ -335,7 +335,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private RelocationInvoice translation(InvoiceResVO invoiceVo) {
         String remake = invoiceVo.getRemake();
         remake = remake.replace("；", ";");
-        List<String> arrList = Arrays.asList(remake.split("；"));
+        List<String> arrList = Arrays.asList(remake.split(";"));
         if (arrList.size() != 4) {
             throw new InvoiceException(InvoiceErrorCode.RELOCATION_INVOICE_REMAKE_ERROR);
         }
