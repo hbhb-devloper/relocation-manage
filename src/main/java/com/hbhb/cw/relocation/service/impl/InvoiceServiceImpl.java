@@ -53,6 +53,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * @author xiaokang
@@ -105,7 +106,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             // 转换发票类型
             item.setInvoiceType(typeMap.get(item.getInvoiceType()));
             // 是否为自定义开票
-            item.setIsImport(State.ONE.value().equals(item.getState()) ?
+            item.setIsImport(State.ONE.value().equals(item.getIsImport()) ?
                     State.YES.value() : State.NO.value());
             // 转换单位
             item.setUnit(unitMap.get(item.getUnitId()));
@@ -249,7 +250,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 // 金额
                 invoice.setAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getAmount()));
                 // 税率 空
-                invoice.setTaxRate(BigDecimal.ZERO);
+                invoice.setTaxRate(isEmpty(invoiceImport.getTaxRate())
+                        ? BigDecimal.ZERO : BigDecimalUtil.getBigDecimal(invoiceImport.getTaxRate()));
                 //发票状态
                 invoice.setState(invoiceImport.getState().equals(InvoiceState.RED_STATE.value())
                         ? InvoiceState.RED_STATE.key() : InvoiceState.BLUE_STATE.key());
@@ -259,10 +261,12 @@ public class InvoiceServiceImpl implements InvoiceService {
                 invoice.setTaxIncludeAmount(BigDecimalUtil.getBigDecimal(invoiceImport.getTaxIncludeAmount()));
                 // 备注
                 invoice.setRemake(invoiceImport.getRemake());
+                //是否为自定义菜单开票
+                invoice.setIsImport(State.NO.value().equals(invoiceImport.getIsImport())
+                        ? Integer.parseInt(State.ZERO.value()) : Integer.parseInt(State.ONE.value()));
                 // 收款负责人/申请人
                 invoice.setApplicant(invoiceImport.getApplicant());
                 // 收款
-
                 invoiceList.add(invoice);
             }
             i++;
