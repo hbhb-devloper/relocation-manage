@@ -130,5 +130,17 @@ public class ProjectController implements RelocationProjectApi {
         }
     }
 
+    @Operation(summary = "按条件导出基础信息")
+    @PostMapping("/export/list")
+    public void export(HttpServletRequest request, HttpServletResponse response,
+                       @Parameter(description = "接收参数实体") ProjectReqVO cond,
+                       @Parameter(hidden = true) @UserId Integer userId) {
+        PageResult<ProjectResVO> page = projectService.getRelocationProjectList(cond,
+                1, Integer.MAX_VALUE, userId);
+        String fileName = ExcelUtil.encodingFileName(request, "迁改基础信息导入模板");
+        ExcelUtil.export2WebWithTemplate(response, fileName, "基础信息导入模板",
+                fileApi.getTemplatePath() + File.separator + "迁改基础信息导入模板.xlsx", page.getList());
+    }
+
 }
 
