@@ -1,5 +1,6 @@
 package com.hbhb.cw.relocation.web.vo;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,8 +20,10 @@ import java.io.Serializable;
 public class ProjectResVO implements Serializable {
     private static final long serialVersionUID = -5036826689710501502L;
 
+    @ExcelIgnore
     private Long id;
 
+    @ExcelIgnore
     @Schema(description = "区域(单位id)")
     private Integer unitId;
 
@@ -132,9 +135,11 @@ public class ProjectResVO implements Serializable {
     @Schema(description = "合同类型")
     private String contractType;
 
+    @ExcelIgnore
     @Schema(description = "文件id")
     private String fileId;
 
+    @ExcelIgnore
     @Schema(description = "是否包含附件")
     private String isFile;
 
