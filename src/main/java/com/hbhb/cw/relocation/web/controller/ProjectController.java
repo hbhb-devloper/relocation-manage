@@ -30,7 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author xiaokang
@@ -137,9 +139,14 @@ public class ProjectController implements RelocationProjectApi {
                        @Parameter(hidden = true) @UserId Integer userId) {
         PageResult<ProjectResVO> page = projectService.getRelocationProjectList(cond,
                 1, Integer.MAX_VALUE, userId);
-        String fileName = ExcelUtil.encodingFileName(request, "迁改基础信息导入模板");
-        ExcelUtil.export2WebWithTemplate(response, fileName, "基础信息导入模板",
-                fileApi.getTemplatePath() + File.separator + "迁改基础信息导入模板.xlsx", page.getList());
+        Map<Boolean, String> hasCompensation = new HashMap<>(5);
+        hasCompensation.put(true, "有");
+        hasCompensation.put(false, "无");
+        List<ProjectResVO> list = page.getList();
+        list.forEach(item -> item.setHasCompensations(hasCompensation.get(item.getHasCompensation())));
+        String fileName = ExcelUtil.encodingFileName(request, "迁改基础信息导出模板");
+        ExcelUtil.export2WebWithTemplate(response, fileName, "基础信息导出模板",
+                fileApi.getTemplatePath() + File.separator + "迁改基础信息导出模板.xlsx", list);
     }
 
 }

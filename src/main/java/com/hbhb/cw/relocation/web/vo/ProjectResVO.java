@@ -90,8 +90,12 @@ public class ProjectResVO implements Serializable {
     @Schema(description = "对方联系电话")
     private String oppositeContactsNum;
 
+    @ExcelIgnore
     @Schema(description = "有无赔补(0-没有、1-有)")
     private Boolean hasCompensation;
+
+    @Schema(description = "有无赔补(0-没有、1-有)")
+    private String hasCompensations;
 
     @Schema(description = "被动补偿类型")
     private String compensationType;
