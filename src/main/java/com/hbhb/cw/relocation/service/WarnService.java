@@ -15,12 +15,12 @@ public interface WarnService {
     /**
      * 根据条件查询预警信息
      */
-    List<WarnResVO> getWarn(WarnReqVO reqVO, Integer userId);
+    PageResult<WarnResVO> getWarn(WarnReqVO reqVO, Integer userId, Integer pageNum, Integer pageSize);
 
     /**
      * 根据条件导出预警信息
      */
-    List<WarnExportVO> export(WarnReqVO reqVO);
+    List<WarnExportVO> export(WarnReqVO reqVO, Integer userId);
 
     /**
      * 同步预警信息

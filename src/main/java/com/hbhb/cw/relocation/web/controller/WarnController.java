@@ -51,24 +51,35 @@ public class WarnController implements RelocationWarnApi {
 
     @Operation(summary = "开票未回款预警提示列表")
     @GetMapping("/start-list")
-    public List<WarnResVO> getStartWarn(@Parameter(description = "预警查询条件") WarnReqVO warnReqVO,
-                                        @Parameter(hidden = true) @UserId Integer userId) {
+    public PageResult<WarnResVO> getStartWarn(
+            @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
+            @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
+            @Parameter(description = "预警查询条件") WarnReqVO warnReqVO,
+            @Parameter(hidden = true) @UserId Integer userId) {
+        pageNum = pageNum == null ? 1 : pageNum;
+        pageSize = pageSize == null ? 30 : pageSize;
         warnReqVO.setType(WarnType.START_WARN.value());
-        return warnService.getWarn(warnReqVO, userId);
+        return warnService.getWarn(warnReqVO, userId, pageNum, pageSize);
     }
 
     @Operation(summary = "合同到期未回款预警列表")
     @GetMapping("/final-list")
-    public List<WarnResVO> getFinalWarn(@Parameter(description = "预警查询条件") WarnReqVO warnReqVO,
-                                        @Parameter(hidden = true) @UserId Integer userId) {
+    public PageResult<WarnResVO> getFinalWarn(
+            @Parameter(description = "页码，默认为1") @RequestParam(required = false) Integer pageNum,
+            @Parameter(description = "每页数量，默认为10") @RequestParam(required = false) Integer pageSize,
+            @Parameter(description = "预警查询条件") WarnReqVO warnReqVO,
+            @Parameter(hidden = true) @UserId Integer userId) {
+        pageNum = pageNum == null ? 1 : pageNum;
+        pageSize = pageSize == null ? 30 : pageSize;
         warnReqVO.setType(WarnType.FINAL_WARN.value());
-        return warnService.getWarn(warnReqVO, userId);
+        return warnService.getWarn(warnReqVO, userId, pageNum, pageSize);
     }
 
     @Operation(summary = "导出预警提示信息")
     @PostMapping("/export")
-    public void export(HttpServletRequest request, HttpServletResponse response, @RequestBody WarnReqVO reqVO) {
-        List<WarnExportVO> export = warnService.export(reqVO);
+    public void export(HttpServletRequest request, HttpServletResponse response, @RequestBody WarnReqVO reqVO,
+                       @Parameter(hidden = true) @UserId Integer userId) {
+        List<WarnExportVO> export = warnService.export(reqVO, userId);
         String fileName = ExcelUtil.encodingFileName(request, "预警信息");
         ExcelUtil.export2Web(response, fileName, fileName, WarnExportVO.class, export);
     }

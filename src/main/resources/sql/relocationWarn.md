@@ -2,6 +2,7 @@ selectProjectWarnByCond
 ===
    ```sql
         select 
+-- @pageTag(){
         rw.id                 as id,
         project_num        as projectNum,
         rw.unit_id         as unitId,
@@ -13,6 +14,7 @@ selectProjectWarnByCond
         final_payment      as finalPayment,
         contract_duration  as contractDuration,
         type               as type    
+-- @}
         from relocation_warn rw
     -- @where(){
             state = 1

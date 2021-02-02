@@ -74,7 +74,7 @@ public class WarnServiceImpl implements WarnService {
 
 
     @Override
-    public List<WarnResVO> getWarn(WarnReqVO reqVO, Integer userId) {
+    public PageResult<WarnResVO> getWarn(WarnReqVO reqVO, Integer userId, Integer pageNum, Integer pageSize) {
         UserInfo user = userApi.getUserInfoById(userId);
         if (userApi.isAdmin(userId)) {
             reqVO.setUnitId(null);
@@ -82,10 +82,11 @@ public class WarnServiceImpl implements WarnService {
             reqVO.setUnitId(user.getUnitId());
         }
         Map<Integer, String> unitMap = unitApi.getUnitMapById();
+        PageRequest<WarnResVO> request = DefaultPageRequest.of(pageNum, pageSize);
         // 组装单位，状态
-        List<WarnResVO> warnResVo = warnMapper.selectProjectWarnByCond(reqVO);
+        PageResult<WarnResVO> warnResVo = warnMapper.selectProjectWarnByCond(request, reqVO);
         Map<Integer, String> isReceived = getIsReceived();
-        warnResVo.forEach(item -> {
+        warnResVo.getList().forEach(item -> {
             item.setIsReceived(isReceived.get(parseInt(item.getIsReceived())));
             item.setUnitName(unitMap.get(item.getUnitId()));
         });
@@ -93,15 +94,9 @@ public class WarnServiceImpl implements WarnService {
     }
 
     @Override
-    public List<WarnExportVO> export(WarnReqVO cond) {
-        List<WarnResVO> list = warnMapper.selectProjectWarnByCond(cond);
-        Map<Integer, String> unitMap = unitApi.getUnitMapById();
-        Map<Integer, String> isReceived = getIsReceived();
-        list.forEach(item -> {
-            item.setUnitName(unitMap.get(item.getUnitId()));
-            item.setIsReceived(isReceived.get(parseInt(item.getIsReceived())));
-        });
-        return BeanConverter.copyBeanList(list, WarnExportVO.class);
+    public List<WarnExportVO> export(WarnReqVO cond, Integer userId) {
+        PageResult<WarnResVO> list = this.getWarn(cond, userId, 1, Integer.MAX_VALUE);
+        return BeanConverter.copyBeanList(list.getList(), WarnExportVO.class);
     }
 
     @Override
@@ -160,31 +155,33 @@ public class WarnServiceImpl implements WarnService {
         Map<Integer, Integer> warnStartMap = warnStartList.stream().collect(Collectors.toMap(WarnCountVO::getUnitId, WarnCountVO::getCount));
         // 2.按照统计数据向每个单位负责人推送邮件信息
         List<Integer> userIdList = flowApi.getUserIdByRoleName("迁改预警负责人");
-        List<UserInfo> userList = userApi.getUserInfoBatch(userIdList);
-        Set<Integer> keys = warnStartMap.keySet();
-        for (Integer unitId : keys) {
-            // 该单位对应的条数
-            Integer count = warnStartMap.get(unitId);
-            String context = count + "条开票未回款";
-            // 向每个单位负责人推送邮件
-            for (UserInfo userVO : userList) {
-                if (unitId.equals(userVO.getUnitId())) {
-                    mailService.postMail(userVO.getEmail(), userVO.getNickName(), context);
+        if (userIdList.size() != 0) {
+            List<UserInfo> userList = userApi.getUserInfoBatch(userIdList);
+            Set<Integer> keys = warnStartMap.keySet();
+            for (Integer unitId : keys) {
+                // 该单位对应的条数
+                Integer count = warnStartMap.get(unitId);
+                String context = count + "条开票未回款";
+                // 向每个单位负责人推送邮件
+                for (UserInfo userVO : userList) {
+                    if (unitId.equals(userVO.getUnitId())) {
+                        mailService.postMail(userVO.getEmail(), userVO.getNickName(), context);
+                    }
                 }
             }
-        }
-        // 3.按照单位进行统计合同到期未回款预警
-        List<WarnCountVO> warnFinalList = projectMapper.selectProjectFinalWarnCount();
-        Map<Integer, Integer> warnMap = warnFinalList.stream().collect(Collectors.toMap(WarnCountVO::getUnitId, WarnCountVO::getCount));
-        Set<Integer> key = warnStartMap.keySet();
-        for (Integer unitId : key) {
-            // 该单位对应的条数
-            Integer count = warnMap.get(unitId);
-            String context = count + "条合同到期未回款";
-            // 向每个单位负责人推送邮件
-            for (UserInfo userVO : userList) {
-                if (unitId.equals(userVO.getUnitId())) {
-                    mailService.postMail(userVO.getEmail(), userVO.getNickName(), context);
+            // 3.按照单位进行统计合同到期未回款预警
+            List<WarnCountVO> warnFinalList = projectMapper.selectProjectFinalWarnCount();
+            Map<Integer, Integer> warnMap = warnFinalList.stream().collect(Collectors.toMap(WarnCountVO::getUnitId, WarnCountVO::getCount));
+            Set<Integer> key = warnStartMap.keySet();
+            for (Integer unitId : key) {
+                // 该单位对应的条数
+                Integer count = warnMap.get(unitId);
+                String context = count + "条合同到期未回款";
+                // 向每个单位负责人推送邮件
+                for (UserInfo userVO : userList) {
+                    if (unitId.equals(userVO.getUnitId())) {
+                        mailService.postMail(userVO.getEmail(), userVO.getNickName(), context);
+                    }
                 }
             }
         }

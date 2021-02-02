@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface WarnMapper extends BaseMapper<RelocationWarn> {
 
-    List<WarnResVO> selectProjectWarnByCond(WarnReqVO cond);
+    PageResult<WarnResVO> selectProjectWarnByCond(PageRequest<WarnResVO> request, WarnReqVO cond);
 
     List<String> selectProjectNum();
 
