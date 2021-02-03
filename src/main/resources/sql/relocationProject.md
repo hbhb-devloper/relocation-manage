@@ -384,8 +384,7 @@ from relocation_income ri
 where ri.unreceived != 0
   and rp.contract_duration != 0
   and rp.project_num is not null
-group by ri.unit_id
-;
+group by rp.unit_id
 ```
 selectProjectFinalWarn
 ===
