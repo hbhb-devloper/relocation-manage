@@ -372,18 +372,20 @@ select rp.id                 as projectId,
        rp.compensation_sate       as compensationSate
 from relocation_income ri
          left join relocation_project rp on ri.contract_num = rp.contract_num
-where ri.received != 0 and rp.project_num is not null
+where ri.unreceived != 0 and rp.project_num is not null
 ```
 selectProjectStartWarnCount
 ===
 ```sql
-    select rp.unit_id   as unitId,
-           count(rp.id) as count
-    from relocation_income ri
-             left join relocation_project rp on ri.contract_num = rp.contract_num
-    where ri.received != 0
-       and rp.contract_duration != 0 
-      and rp.project_num is not null;
+select rp.unit_id   as unitId,
+       count(rp.id) as count
+from relocation_income ri
+         left join relocation_project rp on ri.contract_num = rp.contract_num
+where ri.unreceived != 0
+  and rp.contract_duration != 0
+  and rp.project_num is not null
+group by ri.unit_id
+;
 ```
 selectProjectFinalWarn
 ===
