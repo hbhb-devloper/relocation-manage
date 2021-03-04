@@ -95,14 +95,17 @@ public class ProjectImportVO implements Serializable {
     @ExcelProperty(value = "赔补金额（元）", index = 25)
     private String compensationAmount;
 
-    @ExcelProperty(value = "预付款应付金额（元）", index = 26)
+    @ExcelProperty(value = "赔补总额（元）", index = 26)
+    private String totalCompensationAmount;
+
+    @ExcelProperty(value = "预付款应付金额（元）", index = 27)
     private String anticipatePayable;
 
-    @ExcelProperty(value = "预付款到账金额（元）", index = 27)
+    @ExcelProperty(value = "预付款到账金额（元）", index = 28)
     private String anticipatePayment;
 
     @ExcelProperty(value = "决算款到账金额（元）\n" +
-            "（注：决算款不包含预付款）", index = 28)
+            "（注：决算款不包含预付款）", index = 29)
     private String finalPayment;
 
     @ExcelProperty(value = "赔补状态（合同签订中/预付款未开票/\n" +
@@ -110,22 +113,22 @@ public class ProjectImportVO implements Serializable {
             "预付款已到账，施工中/\n" +
             "决算编制审计中/\n" +
             "决算款已开票未到账/\n" +
-            "全额回款）注：必须从以上选项中", index = 29)
+            "全额回款）注：必须从以上选项中", index = 30)
     private String compensationSate;
 
     @ExcelProperty(value = "未全额回款合同\n" +
-            "合同签订时长（年）", index = 30)
+            "合同签订时长（年）", index = 31)
     private String contractDuration;
 
-    @ExcelProperty(value = "赔补特殊情况备注（赔补性质变更、决算款有调整或小于协议金额等特殊情况说明）", index = 31)
+    @ExcelProperty(value = "赔补特殊情况备注（赔补性质变更、决算款有调整或小于协议金额等特殊情况说明）", index = 32)
     private String compensationRemake;
 
-    @ExcelProperty(value = "月报", index = 32)
+    @ExcelProperty(value = "月报", index = 33)
     private String projectMonth;
 
-    @ExcelProperty(value = "年份", index = 33)
+    @ExcelProperty(value = "年份", index = 34)
     private String projectYear;
 
-    @ExcelProperty(value = "合同类型", index = 34)
+    @ExcelProperty(value = "合同类型", index = 35)
     private String contractType;
 }

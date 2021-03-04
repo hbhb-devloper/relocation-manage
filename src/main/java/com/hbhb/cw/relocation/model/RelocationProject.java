@@ -120,6 +120,10 @@ public class RelocationProject implements Serializable {
      */
     private BigDecimal compensationAmount;
     /**
+     * 赔补总额
+     */
+    private BigDecimal totalCompensationAmount;
+    /**
      * 补偿状态
      */
     private Integer compensationSate;
