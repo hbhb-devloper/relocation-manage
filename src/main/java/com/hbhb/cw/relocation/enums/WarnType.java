@@ -5,14 +5,21 @@ package com.hbhb.cw.relocation.enums;
  */
 
 public enum WarnType {
+
     /**
-     * 状态0
+     * 已关闭
      */
-    START_WARN(0),
+    CLOSED(0),
+
     /**
-     * 状态1
+     * 未处理
      */
-    FINAL_WARN(1),
+    TO_PROCESS(1),
+
+    /**
+     * 处理中
+     */
+    PROCESSING(2),
     ;
     private final Integer value;
 
